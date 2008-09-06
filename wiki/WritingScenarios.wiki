@@ -1,5 +1,7 @@
 #summary How to write XSpec scenarios
 
+=Introduction=
+
 The description of the behaviour of a stylesheet lives within an XSpec document, which should adhere to the [http://code.google.com/p/xspec/source/browse/trunk/xspec.rnc XSpec RELAX NG schema]. All elements are in the `http://www.jenitennison.com/xslt/xspec` namespace.
 
 The document element is a `<description>` element, whose `stylesheet` attribute holds a relative URI pointing to the stylesheet that the XSpec document describes. You can also specify:
