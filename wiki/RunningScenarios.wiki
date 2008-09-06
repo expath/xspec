@@ -1,0 +1,13 @@
+#summary How to test whether your stylesheet meets its description
+
+Currently, to run the tests, the [WritingScenarios XSpec description document] is transformed into an XSLT stylesheet which imports the stylesheet being tested. Running _this_ stylesheet results in an XML document that holds the results, which is then transformed into an HTML report. The two stylesheets involved in this process are:
+
+  * [http://code.google.com/p/xspec/source/browse/trunk/generate-xspec-tests.xsl generate-xspec-tests.xsl], to transform the XSpec document into XSLT
+  * [http://code.google.com/p/xspec/source/browse/trunk/format-xspec-report.xsl format-xspec-report.xsl], to transform the XML report into HTML
+
+Two scripts are provided that will perform this pipeline for you:
+
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.bat xspec.bat] for Windows
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh] for Mac OS X (might work on other *nix-type systems, but untested)
+
+If you develop more scripts (eg ant or XProc pipelines), please share them.
