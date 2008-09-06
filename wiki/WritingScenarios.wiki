@@ -23,7 +23,7 @@ Scenarios fall into three main types:
  * *function scenarios* describe the results of calling a particular function with particular arguments
  * *named scenarios* describe the results of calling a particular named template with particular parameters
 
-== Matching Scenarios ==
+= Matching Scenarios =
 
 Matching scenarios hold a `<context>` element that describes a node to apply templates to. The context can be supplied in two main ways:
 
@@ -52,7 +52,7 @@ The second method is related to the concept of a [http://en.wikipedia.org/wiki/M
 
 The `<context>` element can also have a `mode` attribute that supplies the mode to apply templates in.
 
-== Function Scenarios ==
+= Function Scenarios =
 
 Function scenarios hold a `<call>` element with a `function` attribute whose content is a qualified name that is the same as the qualified name of the function you want to call. The `<call>` element should hold a number of `<param>` elements, one for each of the arguments to the function.
 
@@ -80,7 +80,7 @@ will result in the call `eg:capital-case('an example string', false())` as will:
 </scenario>
 }}}
 
-== Named Scenarios ==
+= Named Scenarios =
 
 Named template scenarios are similar to function scenarios except that the `<call>` element takes a `template` attribute rather than a `function` attribute, and the `<param>` elements within it must have a `name` attribute that supplies the name of the parameter. These parameters can also have a `tunnel` attribute to indicate a tunnel parameter. For example:
 
