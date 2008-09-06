@@ -8,6 +8,6 @@ Currently, to run the tests, the [WritingScenarios XSpec description document] i
 Two scripts are provided that will perform this pipeline for you:
 
   * [http://code.google.com/p/xspec/source/browse/trunk/xspec.bat xspec.bat] for Windows
-  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh] for Mac OS X (might work on other *nix-type systems, but untested)
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh] for Mac OS X (might work on linux, but untested)
 
 If you develop more scripts (eg ant or XProc pipelines), please share them.
