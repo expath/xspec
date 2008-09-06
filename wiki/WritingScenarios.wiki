@@ -100,7 +100,7 @@ Named template scenarios are similar to function scenarios except that the `<cal
 
 In fact, you can use `<param>` in the same way within the `<context>` element in matching scenarios.
 
-== Expectations ==
+= Expectations =
 
 Each scenario can have one or more "expectations": things that should be true of the result of the function or template invocation described by the scenario. Each expectation is specified with an `<expect>` element. The `label` attribute on the `<expect>` element gives a human-readable description of the expectation.
 
