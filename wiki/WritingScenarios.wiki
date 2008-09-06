@@ -19,9 +19,9 @@ The `<description>` element contains a number of `<scenario>` elements, each of 
 
 Scenarios fall into three main types:
 
- * *matching scenarios* describe the result of applying templates to a node in a particular mode (and with particular parameters)
- * *function scenarios* describe the results of calling a particular function with particular arguments
- * *named scenarios* describe the results of calling a particular named template with particular parameters
+ * *[#Matching_Scenarios matching scenarios]* describe the result of applying templates to a node in a particular mode (and with particular parameters)
+ * *[#Function_Scenarios function scenarios]* describe the results of calling a particular function with particular arguments
+ * *[#Named_Scenarios named scenarios]* describe the results of calling a particular named template with particular parameters
 
 = Matching Scenarios =
 
