@@ -1,4 +1,5 @@
 #summary How to write XSpec scenarios
+#labels Phase-Deploy
 
 =Introduction=
 
@@ -195,3 +196,115 @@ You can also combine the `test` attribute with the content of the `<expect>` ele
   </expect>
 </scenario>
 }}}
+
+= Nesting Scenarios =
+
+You can nest scenarios inside each other. The nested scenarios inherit the context or call from its ancestor scenarios. All the scenarios in a particular tree have to be of the same type (matching, function or named). Usually only the lowest level of the scenarios will contain any expectations. Here's an example:
+
+{{{
+<scenario label="when creating a table">
+  <call template="createTable" />
+  <scenario label="holding three values">
+    <call>
+      <param name="nodes">
+        <value>A</value>
+        <value>B</value>
+        <value>C</value>
+      </param>
+    </call>
+    <scenario label="in two columns">
+      <call>
+        <param name="cols" select="2" />
+      </call>
+      <expect label="the resulting table should have two columns"
+        test="count(/table/colspec/col) = 2" />
+      <expect label="the first row should contain the first two values"
+        test="/table/tbody/tr[1]">
+        <tr>
+          <td>A</td><td>B</td>
+        </tr>
+      </expect>
+    </scenario>
+    ... other scenarios around creating tables with three values (with different numbers of columns) ...
+  </scenario>
+  ... other scenarios around creating tables ...
+</scenario>
+}}}
+
+When you create scenarios like this, the labels of the nested scenarios are concatenated to create the label for the scenario. In the above example, the third scenario has the label "when creating a table holding three values in two columns".
+
+= Focusing Your Efforts =
+
+XSpec descriptions can get quite large, which can mean that running the tests takes some time. There are three ways of dealing with this.
+
+First, you can import other XSpec description documents into your main one using `<import>`. The `href` attribute holds the location of the imported document. All the scenarios from the referenced document are imported into this one, and will be run when you execute it. For example:
+
+{{{
+<import href="other_xspec.xml" />
+}}}
+
+It helps if the imported XSpec description documents can stand alone; this enables you to perform a subset of the tests. To work effectively, you'll want the imported XSpec description documents to cover the same stylesheet as the main one, or a stylesheet module that's included or imported into that stylesheet.
+
+Second, you can mark any scenario or expectation as "pending" by wrapping them within a `<pending>` element or adding a `pending` attribute to the `<scenario>` element. When the tests are run, any pending scenarios or expectations aren't tested (though they still appear, greyed out, in the test report). The `<pending>` element can have a `label` attribute to describe why the particular description is pending; for example it might hold "TODO". If you use the `pending` attribute, its value should give the reason the tests are pending. For example:
+
+{{{
+<pending label="no support for block elements yet">
+  <scenario label="when processing a para element">
+    <context>
+      <para>...</para>
+    </context>
+    <expect label="it should produce a p element">
+      <p>...</p>
+    </expect>
+  </scenario>
+</pending>
+}}} 
+
+or:
+
+{{{
+<scenario pending="no support for block elements yet" label="when processing a para element">
+  <context>
+    <para>...</para>
+  </context>
+  <expect label="it should produce a p element">
+    <p>...</p>
+  </expect>
+</scenario>
+}}} 
+
+Third, you can mark any scenario as having the current "focus" by adding a `focus` attribute to a `<scenario>` element. Effectively, this marks every _other_ scenario as "pending", with the label given as the value of the `focus` attribute. For example:
+
+{{{
+<scenario focus="getting capitalisation working" label="when capitalising a string">
+  <call function="eg:capital-case">
+    <param select="'an example string'" />
+    <param select="true()" />
+  </call>
+  <expect label="it should capitalise every word in the string" select="'An Example String'" />
+</scenario>
+}}}
+
+  _Using focus is a good way of working through one particular scenario, but once your code is working with that 
+  scenario, you should always test all the others again, just in case you've broken something else._
+
+= Global Parameters =
+
+You can put `<param>` elements at the top level of the XSpec description document (as a child of the `<description>` element). These effectively override any global parameters or variables that you have declared in your stylesheet. They are set in just the same way as setting parameters when testing [#Named_Scenarios named templates] or [#Function_Scenarios functions].
+
+  _With the current XSLT-based implementation, it isn't possible to have different scenarios use different values
+  for global parameters. Hopefully that will come with an XProc-based implementation. Testing is made easier if
+  you declare local parameters on any templates or functions that use global parameters; these can default to
+  the value of the global parameter, but be set explicitly when testing. For example, if `$tableClass` is a global
+  parameter, you might do_
+
+  {{{
+    <xsl:template name="createTable">
+      <xsl:param name="nodes" as="node()+" required="yes" />
+      <xsl:param name="cols" as="xs:integer" required="yes" />
+      <xsl:param name="tableClass" as="xs:string" select="$tableClass" />
+      ...
+    </xsl:template>
+  }}}
+
+  _to enable the full testing of the `createTable` template._
