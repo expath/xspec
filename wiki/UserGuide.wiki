@@ -1,4 +1,5 @@
 #summary A guide for users of XSpec
+#labels Featured,Phase-Deploy
 
 = Introduction =
 
