@@ -9,4 +9,5 @@ If you want to validate your XSpec description documents, you'll need a [http://
 
 = 0.1 =
 
+ * released 2008-09-07
  * *coverage report is not working*
