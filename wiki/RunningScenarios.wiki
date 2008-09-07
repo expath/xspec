@@ -1,4 +1,5 @@
 #summary How to test whether your stylesheet meets its description
+#labels Phase-Deploy
 
 Currently, to run the tests, the [WritingScenarios XSpec description document] is transformed into an XSLT stylesheet which imports the stylesheet being tested. Running _this_ stylesheet results in an XML document that holds the results, which is then transformed into an HTML report. The two stylesheets involved in this process are:
 
@@ -9,5 +10,11 @@ Two scripts are provided that will perform this pipeline for you:
 
   * [http://code.google.com/p/xspec/source/browse/trunk/xspec.bat xspec.bat] for Windows
   * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh] for Mac OS X (might work on linux, but untested)
+
+To run the script, use the command line:
+
+{{{
+> xspec filename
+}}}
 
 If you develop more scripts (eg ant or XProc pipelines), please share them.
