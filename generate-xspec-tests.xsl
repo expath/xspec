@@ -216,7 +216,7 @@
   <xsl:param name="context" as="element(s:context)?" select="()" tunnel="yes" />
   <xsl:param name="call" as="element(s:call)?" select="()" tunnel="yes" />
   <xsl:variable name="new-pending" as="xs:string?" 
-    select="if (@focus) then () else $pending" />
+    select="if (@focus) then () else if (@pending) then @pending else $pending" />
   <xsl:variable name="new-context" as="element(s:context)?">
     <xsl:choose>
       <xsl:when test="s:context">
