@@ -141,7 +141,7 @@
          the generation of XSLT! -->
     <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
     <variable name="s:stylesheet-uri" as="xs:string" select="'{$stylesheet-uri}'" />
-    <output method="xml" indent="yes" />
+  	<output name="report" method="xml" indent="yes" />
     <xsl:apply-templates select="s:param" mode="s:generate-declarations" />
     <!--
     <template match="/">
@@ -155,22 +155,24 @@
         <text><xsl:text> </xsl:text></text>
         <value-of select="system-property('xsl:product-version')" />
       </message>
-      <processing-instruction name="xml-stylesheet">
-        <xsl:text>type="text/xsl" href="</xsl:text>
-        <xsl:value-of select="resolve-uri('format-xspec-report.xsl',
-          static-base-uri())" />
-        <xsl:text>"</xsl:text>
-      </processing-instruction>
-      <!-- This bit of jiggery-pokery with the $stylesheet-uri variable is so
-        that the URI appears in the trace report generated from running the
-        test stylesheet, which can then be picked up by stylesheets that
-        process *that* to generate a coverage report -->
-      <s:report stylesheet="{{$s:stylesheet-uri}}"
-        date="{{current-dateTime()}}">
-        <xsl:apply-templates mode="s:generate-calls">
-          <xsl:with-param name="pending" select="$pending" tunnel="yes" />
-        </xsl:apply-templates>
-      </s:report>
+    	<result-document format="report">
+	      <processing-instruction name="xml-stylesheet">
+	        <xsl:text>type="text/xsl" href="</xsl:text>
+	        <xsl:value-of select="resolve-uri('format-xspec-report.xsl',
+	          static-base-uri())" />
+	        <xsl:text>"</xsl:text>
+	      </processing-instruction>
+	      <!-- This bit of jiggery-pokery with the $stylesheet-uri variable is so
+	        that the URI appears in the trace report generated from running the
+	        test stylesheet, which can then be picked up by stylesheets that
+	        process *that* to generate a coverage report -->
+	      <s:report stylesheet="{{$s:stylesheet-uri}}"
+	        date="{{current-dateTime()}}">
+	        <xsl:apply-templates mode="s:generate-calls">
+	          <xsl:with-param name="pending" select="$pending" tunnel="yes" />
+	        </xsl:apply-templates>
+	      </s:report>
+    	</result-document>
     </template>
     <xsl:apply-templates mode="s:generate-templates">
       <xsl:with-param name="pending" select="$pending" tunnel="yes" />
@@ -289,14 +291,14 @@
     </xsl:message>
   </xsl:if>
   <template name="s:{generate-id()}">
-    <message>
-      <xsl:if test="exists($new-pending)">
-        <xsl:text>PENDING: </xsl:text>
-        <xsl:if test="$pending != ''">(<xsl:value-of select="$pending" />)</xsl:if>
-      </xsl:if>
-      <xsl:if test="parent::s:scenario"><xsl:text>..</xsl:text></xsl:if>
-      <xsl:value-of select="@label" />
-    </message>
+  	<message>
+  		<xsl:if test="exists($new-pending)">
+  			<xsl:text>PENDING: </xsl:text>
+  			<xsl:if test="$pending != ''">(<xsl:value-of select="$pending" />)</xsl:if>
+  		</xsl:if>
+  		<xsl:if test="parent::s:scenario"><xsl:text>..</xsl:text></xsl:if>
+  		<xsl:value-of select="@label" />
+  	</message>
     <s:scenario label="{@label}">
       <xsl:if test="exists($new-pending) and not(.//@focus)">
         <xsl:attribute name="pending" select="$pending" />
@@ -492,7 +494,13 @@
 <!-- Helper code for the tests -->
 
 <xsl:template match="s:context" mode="s:generate-tests">
-  <xsl:apply-templates select="." mode="test:generate-variable-declarations">
+	<xsl:variable name="context" as="element(s:context)">
+		<s:context>
+			<xsl:sequence select="@*" />
+			<xsl:sequence select="node() except s:param" />
+		</s:context>
+	</xsl:variable>
+  <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
     <xsl:with-param name="var" select="'context'" />
   </xsl:apply-templates>
 </xsl:template>  
