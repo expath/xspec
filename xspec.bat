@@ -42,8 +42,8 @@ REM ================================================
 IF NOT EXIST %TEST_DIR% GOTO notestdir
 GOTO endif2
 :notestdir
-echo Creating XSpec Directory at %TEST_DIR% ...
-mkdir %TEST_DIR%
+echo Creating XSpec Directory at "%TEST_DIR%" ...
+mkdir "%TEST_DIR%"
 echo.
 :endif2
 
