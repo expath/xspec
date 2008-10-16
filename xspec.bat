@@ -1,6 +1,6 @@
 @echo off
 
-SET CP=C:\Program Files\Oxygen XML Editor 9.2\lib\saxon9.jar
+SET CP=C:\Program Files\Oxygen XML Editor\lib\saxon9.jar
 
 SET XSPEC=%1
 
@@ -39,7 +39,7 @@ SET HTML="%TEST_DIR%\%TARGET_FILE_NAME%-result.html"
 REM ================================================
 REM Create xspec subdirectory for running the tests
 REM ================================================
-IF NOT EXIST %TEST_DIR% GOTO notestdir
+IF NOT EXIST "%TEST_DIR%" GOTO notestdir
 GOTO endif2
 :notestdir
 echo Creating XSpec Directory at "%TEST_DIR%" ...
