@@ -3,19 +3,19 @@
 
 =Introduction=
 
-The description of the behaviour of a stylesheet lives within an XSpec document, which should adhere to the [http://code.google.com/p/xspec/source/browse/trunk/xspec.rnc XSpec RELAX NG schema]. All elements are in the `http://www.jenitennison.com/xslt/xspec` namespace.
+The description of the behaviour of a stylesheet lives within an XSpec document, which should adhere to the [http://code.google.com/p/xspec/source/browse/trunk/xspec.rnc XSpec RELAX NG schema]. All elements are in the `http://www.jenitennison.com/xslt/xspec` namespace, which is bound to `x` in these examples.
 
-The document element is a `<description>` element, whose `stylesheet` attribute holds a relative URI pointing to the stylesheet that the XSpec document describes. You can also specify:
+The document element is a `<s:description>` element, whose `stylesheet` attribute holds a relative URI pointing to the stylesheet that the XSpec document describes. You can also specify:
 
  * a `version` attribute that gives the version of the stylesheet the XSpec document describes
  * a `xslt-version` attribute that gives the version of XSLT the stylesheet uses; if you don't specify it, this defaults to 2.0
 
-The `<description>` element contains a number of `<scenario>` elements, each of which describes a particular scenario that's being tested. Each `<scenario>` element has a `label` attribute that describes the scenario in human language. For example:
+The `<x:description>` element contains a number of `<x:scenario>` elements, each of which describes a particular scenario that's being tested. Each `<x:scenario>` element has a `label` attribute that describes the scenario in human language. For example:
 
 {{{
-<scenario label="when processing a para element">
+<x:scenario label="when processing a para element">
   ...
-</scenario>
+</x:scenario>
 }}}
 
 Scenarios fall into three main types:
@@ -26,84 +26,84 @@ Scenarios fall into three main types:
 
 = Matching Scenarios =
 
-Matching scenarios hold a `<context>` element that describes a node to apply templates to. The context can be supplied in two main ways:
+Matching scenarios hold a `<x:context>` element that describes a node to apply templates to. The context can be supplied in two main ways:
 
  * you can point to a node in an existing document by giving the document URI in the `href` attribute and, if you want, selecting a particular node by putting a path in the `select` attribute
- * you can embed XML within the `<context>` element; the content becomes the context node, although you can also select a node within that XML using the `select` attribute
+ * you can embed XML within the `<x:context>` element; the content becomes the context node, although you can also select a node within that XML using the `select` attribute
 
 The first method is useful if you already have example XML documents that you want to use as the basis of your testing. For example:
 
 {{{
-<scenario label="when processing a para element">
-  <context href="source/test.xml" select="/doc/body/p[1]" />
+<x:scenario label="when processing a para element">
+  <x:context href="source/test.xml" select="/doc/body/p[1]" />
   ...
-</scenario>
+</x:scenario>
 }}}
 
 The second method is related to the concept of a [http://en.wikipedia.org/wiki/Mock_object mock object]: it is an example of some XML which you have created simply for testing purposes. The XML might not be legal; it only needs to have the attributes or content necessary for the particular behaviour that needs to be tested. For example:
 
 {{{
-<scenario label="when processing a para element">
-  <context>
+<x:scenario label="when processing a para element">
+  <x:context>
     <para>...</para>
-  </context>
+  </x:context>
   ...
-</scenario>
+</x:scenario>
 }}}
 
-The `<context>` element can also have a `mode` attribute that supplies the mode to apply templates in.
+The `<x:context>` element can also have a `mode` attribute that supplies the mode to apply templates in.
 
 = Function Scenarios =
 
-Function scenarios hold a `<call>` element with a `function` attribute whose content is a qualified name that is the same as the qualified name of the function you want to call. The `<call>` element should hold a number of `<param>` elements, one for each of the arguments to the function.
+Function scenarios hold a `<x:call>` element with a `function` attribute whose content is a qualified name that is the same as the qualified name of the function you want to call. The `<x:call>` element should hold a number of `<x:param>` elements, one for each of the arguments to the function.
 
-The `<param>` elements can specify node values in the same way as the `<context>` element gets set (described above), or simply by giving a `select` attribute which holds an XPath that specifies the value. You can specify a `name` or `position` attribute for each of the `<param>` elements; if you don't, the order in which they're specified will determine the order in which they're given in the function call. For example:
+The `<x:param>` elements can specify node values in the same way as the `<x:context>` element gets set (described above), or simply by giving a `select` attribute which holds an XPath that specifies the value. You can specify a `name` or `position` attribute for each of the `<x:param>` elements; if you don't, the order in which they're specified will determine the order in which they're given in the function call. For example:
 
 {{{
-<scenario label="when capitalising a string">
-  <call function="eg:capital-case">
-    <param select="'an example string'" />
-    <param select="true()" />
-  </call>
+<x:scenario label="when capitalising a string">
+  <x:call function="eg:capital-case">
+    <x:param select="'an example string'" />
+    <x:param select="true()" />
+  </x:call>
   ...
-</scenario>
+</x:scenario>
 }}}
 
 will result in the call `eg:capital-case('an example string', false())` as will:
 
 {{{
-<scenario label="when capitalising a string">
-  <call function="eg:capital-case">
-    <param select="true()" position="2" />
-    <param select="'an example string'" position="1" />
-  </call>
+<x:scenario label="when capitalising a string">
+  <x:call function="eg:capital-case">
+    <x:param select="true()" position="2" />
+    <x:param select="'an example string'" position="1" />
+  </x:call>
   ...
-</scenario>
+</x:scenario>
 }}}
 
 = Named Scenarios =
 
-Named template scenarios are similar to function scenarios except that the `<call>` element takes a `template` attribute rather than a `function` attribute, and the `<param>` elements within it must have a `name` attribute that supplies the name of the parameter. These parameters can also have a `tunnel` attribute to indicate a tunnel parameter. For example:
+Named template scenarios are similar to function scenarios except that the `<x:call>` element takes a `template` attribute rather than a `function` attribute, and the `<x:param>` elements within it must have a `name` attribute that supplies the name of the parameter. These parameters can also have a `tunnel` attribute to indicate a tunnel parameter. For example:
 
 {{{
-<scenario label="when creating a table with two columns containing three values">
-  <call template="createTable">
-    <param name="nodes">
+<x:scenario label="when creating a table with two columns containing three values">
+  <x:call template="createTable">
+    <x:param name="nodes">
       <value>A</value>
       <value>B</value>
       <value>C</value>
-    </param>
-    <param name="cols" select="2" />
-  </call>
+    </x:param>
+    <x:param name="cols" select="2" />
+  </x:call>
   ...
-</scenario>
+</x:scenario>
 }}}
 
-In fact, you can use `<param>` in the same way within the `<context>` element in matching scenarios.
+In fact, you can use `<x:param>` in the same way within the `<x:context>` element in matching scenarios.
 
 = Expectations =
 
-Each scenario can have one or more "expectations": things that should be true of the result of the function or template invocation described by the scenario. Each expectation is specified with an `<expect>` element. The `label` attribute on the `<expect>` element gives a human-readable description of the expectation.
+Each scenario can have one or more "expectations": things that should be true of the result of the function or template invocation described by the scenario. Each expectation is specified with an `<x:expect>` element. The `label` attribute on the `<x:expect>` element gives a human-readable description of the expectation.
 
 There are two main kinds of expectations:
 
@@ -112,29 +112,29 @@ There are two main kinds of expectations:
     * an XML snippet
  * an arbitrary XPath test that should be true of the result
 
-To specify an atomic value, use the `select` attribute on the `<expect>` element. For example:
+To specify an atomic value, use the `select` attribute on the `<x:expect>` element. For example:
 
 {{{
-<scenario label="when capitalising a string">
-  <call function="eg:capital-case">
-    <param select="'an example string'" />
-    <param select="true()" />
-  </call>
-  <expect label="it should capitalise every word in the string" select="'An Example String'" />
-</scenario>
+<x:scenario label="when capitalising a string">
+  <x:call function="eg:capital-case">
+    <x:param select="'an example string'" />
+    <x:param select="true()" />
+  </x:call>
+  <x:expect label="it should capitalise every word in the string" select="'An Example String'" />
+</x:scenario>
 }}}
 
-To specify some XML, put it within the `<expect>` element. For example:
+To specify some XML, put it within the `<x:expect>` element. For example:
 
 {{{
-<scenario label="when processing a para element">
-  <context>
+<x:scenario label="when processing a para element">
+  <x:context>
     <para>...</para>
-  </context>
-  <expect label="it should produce a p element">
+  </x:context>
+  <x:expect label="it should produce a p element">
     <p>...</p>
-  </expect>
-</scenario>
+  </x:expect>
+</x:scenario>
 }}} 
 
 One thing to note here is that when comparing the actual result with the expected result, three dots in an element or attribute value within the expected XML means that the values aren't compared. If the actual result is:
@@ -157,44 +157,44 @@ then these match. If the expected result is:
 
 then they don't.
 
-To specify an arbitrary XPath test, use the `test` attribute on `<expect>`. For example:
+To specify an arbitrary XPath test, use the `test` attribute on `<x:expect>`. For example:
 
 {{{
-<scenario label="when creating a table with two columns containing three values">
-  <call template="createTable">
-    <param name="nodes">
+<x:scenario label="when creating a table with two columns containing three values">
+  <x:call template="createTable">
+    <x:param name="nodes">
       <value>A</value>
       <value>B</value>
       <value>C</value>
-    </param>
-    <param name="cols" select="2" />
-  </call>
-  <expect label="the resulting table should have two columns"
+    </x:param>
+    <x:param name="cols" select="2" />
+  </x:call>
+  <x:expect label="the resulting table should have two columns"
     test="count(/table/colspec/col) = 2" />
-</scenario>
+</x:scenario>
 }}}
 
-You can also combine the `test` attribute with the content of the `<expect>` element if you want to just test a portion of the result. For example:
+You can also combine the `test` attribute with the content of the `<x:expect>` element if you want to just test a portion of the result. For example:
 
 {{{
-<scenario label="when creating a table with two columns containing three values">
-  <call template="createTable">
-    <param name="nodes">
+<x:scenario label="when creating a table with two columns containing three values">
+  <x:call template="createTable">
+    <x:param name="nodes">
       <value>A</value>
       <value>B</value>
       <value>C</value>
-    </param>
-    <param name="cols" select="2" />
-  </call>
-  <expect label="the resulting table should have two columns"
+    </x:param>
+    <x:param name="cols" select="2" />
+  </x:call>
+  <x:expect label="the resulting table should have two columns"
     test="count(/table/colspec/col) = 2" />
-  <expect label="the first row should contain the first two values"
+  <x:expect label="the first row should contain the first two values"
     test="/table/tbody/tr[1]">
     <tr>
       <td>A</td><td>B</td>
     </tr>
-  </expect>
-</scenario>
+  </x:expect>
+</x:scenario>
 }}}
 
 = Nesting Scenarios =
@@ -202,33 +202,33 @@ You can also combine the `test` attribute with the content of the `<expect>` ele
 You can nest scenarios inside each other. The nested scenarios inherit the context or call from its ancestor scenarios. All the scenarios in a particular tree have to be of the same type (matching, function or named). Usually only the lowest level of the scenarios will contain any expectations. Here's an example:
 
 {{{
-<scenario label="when creating a table">
-  <call template="createTable" />
-  <scenario label="holding three values">
-    <call>
-      <param name="nodes">
+<x:scenario label="when creating a table">
+  <x:call template="createTable" />
+  <x:scenario label="holding three values">
+    <x:call>
+      <x:param name="nodes">
         <value>A</value>
         <value>B</value>
         <value>C</value>
-      </param>
-    </call>
-    <scenario label="in two columns">
-      <call>
-        <param name="cols" select="2" />
-      </call>
-      <expect label="the resulting table should have two columns"
+      </x:param>
+    </x:call>
+    <x:scenario label="in two columns">
+      <x:call>
+        <x:param name="cols" select="2" />
+      </x:call>
+      <x:expect label="the resulting table should have two columns"
         test="count(/table/colspec/col) = 2" />
-      <expect label="the first row should contain the first two values"
+      <x:expect label="the first row should contain the first two values"
         test="/table/tbody/tr[1]">
         <tr>
           <td>A</td><td>B</td>
         </tr>
-      </expect>
-    </scenario>
+      </x:expect>
+    </x:scenario>
     ... other scenarios around creating tables with three values (with different numbers of columns) ...
-  </scenario>
+  </x:scenario>
   ... other scenarios around creating tables ...
-</scenario>
+</x:scenario>
 }}}
 
 When you create scenarios like this, the labels of the nested scenarios are concatenated to create the label for the scenario. In the above example, the third scenario has the label "when creating a table holding three values in two columns".
@@ -237,52 +237,52 @@ When you create scenarios like this, the labels of the nested scenarios are conc
 
 XSpec descriptions can get quite large, which can mean that running the tests takes some time. There are three ways of dealing with this.
 
-First, you can import other XSpec description documents into your main one using `<import>`. The `href` attribute holds the location of the imported document. All the scenarios from the referenced document are imported into this one, and will be run when you execute it. For example:
+First, you can import other XSpec description documents into your main one using `<x:import>`. The `href` attribute holds the location of the imported document. All the scenarios from the referenced document are imported into this one, and will be run when you execute it. For example:
 
 {{{
-<import href="other_xspec.xml" />
+<x:import href="other_xspec.xml" />
 }}}
 
 It helps if the imported XSpec description documents can stand alone; this enables you to perform a subset of the tests. To work effectively, you'll want the imported XSpec description documents to cover the same stylesheet as the main one, or a stylesheet module that's included or imported into that stylesheet.
 
-Second, you can mark any scenario or expectation as "pending" by wrapping them within a `<pending>` element or adding a `pending` attribute to the `<scenario>` element. When the tests are run, any pending scenarios or expectations aren't tested (though they still appear, greyed out, in the test report). The `<pending>` element can have a `label` attribute to describe why the particular description is pending; for example it might hold "TODO". If you use the `pending` attribute, its value should give the reason the tests are pending. For example:
+Second, you can mark any scenario or expectation as "pending" by wrapping them within a `<x:pending>` element or adding a `pending` attribute to the `<x:scenario>` element. When the tests are run, any pending scenarios or expectations aren't tested (though they still appear, greyed out, in the test report). The `<x:pending>` element can have a `label` attribute to describe why the particular description is pending; for example it might hold "TODO". If you use the `pending` attribute, its value should give the reason the tests are pending. For example:
 
 {{{
-<pending label="no support for block elements yet">
-  <scenario label="when processing a para element">
-    <context>
+<x:pending label="no support for block elements yet">
+  <x:scenario label="when processing a para element">
+    <x:context>
       <para>...</para>
-    </context>
-    <expect label="it should produce a p element">
+    </x:context>
+    <x:expect label="it should produce a p element">
       <p>...</p>
-    </expect>
-  </scenario>
-</pending>
+    </x:expect>
+  </x:scenario>
+</x:pending>
 }}} 
 
 or:
 
 {{{
-<scenario pending="no support for block elements yet" label="when processing a para element">
-  <context>
+<x:scenario pending="no support for block elements yet" label="when processing a para element">
+  <x:context>
     <para>...</para>
-  </context>
-  <expect label="it should produce a p element">
+  </x:context>
+  <x:expect label="it should produce a p element">
     <p>...</p>
-  </expect>
-</scenario>
+  </x:expect>
+</x:scenario>
 }}} 
 
-Third, you can mark any scenario as having the current "focus" by adding a `focus` attribute to a `<scenario>` element. Effectively, this marks every _other_ scenario as "pending", with the label given as the value of the `focus` attribute. For example:
+Third, you can mark any scenario as having the current "focus" by adding a `focus` attribute to a `<x:scenario>` element. Effectively, this marks every _other_ scenario as "pending", with the label given as the value of the `focus` attribute. For example:
 
 {{{
-<scenario focus="getting capitalisation working" label="when capitalising a string">
-  <call function="eg:capital-case">
-    <param select="'an example string'" />
-    <param select="true()" />
-  </call>
-  <expect label="it should capitalise every word in the string" select="'An Example String'" />
-</scenario>
+<x:scenario focus="getting capitalisation working" label="when capitalising a string">
+  <x:call function="eg:capital-case">
+    <x:param select="'an example string'" />
+    <x:param select="true()" />
+  </x:call>
+  <x:expect label="it should capitalise every word in the string" select="'An Example String'" />
+</x:scenario>
 }}}
 
   _Using focus is a good way of working through one particular scenario, but once your code is working with that 
@@ -290,7 +290,7 @@ Third, you can mark any scenario as having the current "focus" by adding a `focu
 
 = Global Parameters =
 
-You can put `<param>` elements at the top level of the XSpec description document (as a child of the `<description>` element). These effectively override any global parameters or variables that you have declared in your stylesheet. They are set in just the same way as setting parameters when testing [#Named_Scenarios named templates] or [#Function_Scenarios functions].
+You can put `<x:param>` elements at the top level of the XSpec description document (as a child of the `<x:description>` element). These effectively override any global parameters or variables that you have declared in your stylesheet. They are set in just the same way as setting parameters when testing [#Named_Scenarios named templates] or [#Function_Scenarios functions].
 
   _With the current XSLT-based implementation, it isn't possible to have different scenarios use different values
   for global parameters. Hopefully that will come with an XProc-based implementation. Testing is made easier if
