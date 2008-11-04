@@ -68,7 +68,10 @@
 <xsl:template match="s:description" mode="s:gather-specs">
   <xsl:apply-templates mode="s:gather-specs">
     <xsl:with-param name="xslt-version" tunnel="yes" 
-      select="if (@xslt-version) then @xslt-version else '2.0'" />
+    	select="if (@xslt-version) then @xslt-version else '2.0'" />
+  	<xsl:with-param name="preserve-space" tunnel="yes"
+  		select="for $qname in tokenize(@preserve-space, '\s+')
+  		        return resolve-QName($qname, .)" />
   </xsl:apply-templates>
 </xsl:template>
 
@@ -83,7 +86,16 @@
 <xsl:template match="s:*/@href" mode="s:gather-specs">
   <xsl:attribute name="href" select="resolve-uri(., base-uri(.))" />
 </xsl:template>
-  
+
+<xsl:template match="text()[not(normalize-space())]" mode="s:gather-specs">
+	<xsl:param name="preserve-space" as="xs:QName*" tunnel="yes" select="()" />
+	<xsl:if test="node-name(parent::*) = $preserve-space">
+		<s:space>
+			<xsl:value-of select="." />
+		</s:space>
+	</xsl:if>
+</xsl:template>
+
 <xsl:template match="node()|@*" mode="s:gather-specs">
   <xsl:copy>
     <xsl:apply-templates select="node()|@*" mode="s:gather-specs" />
@@ -134,8 +146,8 @@
     select="if (.//@focus) then string((.//@focus)[1]) else ()" />
   <stylesheet version="2.0">
     <xsl:apply-templates select="." mode="s:copy-namespaces" />
-    <import href="{resolve-uri('generate-tests-utils.xsl', static-base-uri())}"/>
-    <import href="{$stylesheet-uri}" />
+  	<import href="{$stylesheet-uri}" />
+  	<import href="{resolve-uri('generate-tests-utils.xsl', static-base-uri())}"/>
     <!-- This namespace alias is used for when the testing process needs to test
          the generation of XSLT! -->
     <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
