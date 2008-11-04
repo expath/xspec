@@ -12,8 +12,7 @@
   
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 
-<xsl:strip-space elements="*"/>
-<xsl:preserve-space elements="xsl:text"/>
+<xsl:preserve-space elements="s:space" />
 
 <xsl:output indent="yes" encoding="ISO-8859-1" />  
 
@@ -468,13 +467,23 @@
           </call-template>
         </if>
       </xsl:if>
+      <!--
       <s:expect>
         <xsl:for-each select="@* except @label">
           <xsl:attribute name="{name()}" namespace="{namespace-uri()}"
             select="replace(., '\{', '{{')" />
         </xsl:for-each>
         <xsl:apply-templates select="node()" mode="test:create-xslt-generator" />
+        <xsl:apply-templates select="node()" mode="test:create-xslt-generator" />
       </s:expect>
+      -->
+    	<xsl:if test="empty($pending)">
+    		<call-template name="test:report-value">
+    			<with-param name="value" select="$expected-result" />
+    			<with-param name="wrapper-name" select="'s:expect'" />
+    			<with-param name="wrapper-ns" select="'http://www.jenitennison.com/xslt/xspec'" />
+    		</call-template>
+    	</xsl:if>
     </s:test>
   </template>
 </xsl:template>
@@ -489,6 +498,11 @@
     <xsl:with-param name="type" select="'param'" />
   </xsl:apply-templates>
 </xsl:template>
+
+<xsl:template match="s:space" mode="test:create-xslt-generator">
+  <text><xsl:value-of select="." /></text>
+</xsl:template>  
+  
 
 <!-- *** s:generate-tests *** -->
 <!-- Helper code for the tests -->

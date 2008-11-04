@@ -1,6 +1,6 @@
 @echo off
 
-SET CP=C:\Program Files\Oxygen XML Editor\lib\saxon9.jar
+SET CP=C:\Program Files (x86)\Oxygen XML Editor\lib\saxon9sa.jar
 
 SET XSPEC=%1
 

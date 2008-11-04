@@ -2,18 +2,19 @@
 <xsl:stylesheet version="2.0" 
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:xhtml="http://www.w3.org/1999/xhtml"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 extension-element-prefixes="test"
                 xmlns="http://www.w3.org/1999/XSL/TransformAlias"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias"
-                exclude-result-prefixes="#default t"
+                exclude-result-prefixes="#default t xhtml"
                 xmlns:o="http://www.w3.org/1999/XSL/TransformAliasAlias">
   
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
   
 <xsl:strip-space elements="*"/>
-<xsl:preserve-space elements="xsl:text"/>
+<xsl:preserve-space elements="xsl:text xhtml:p xhtml:span xhtml:em xhtml:strong xhtml:a"/>
   
 <xsl:output indent="yes" encoding="ISO-8859-1" />  
   
