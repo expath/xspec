@@ -13,9 +13,6 @@
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
   
-<xsl:strip-space elements="*"/>
-<xsl:preserve-space elements="xsl:text xhtml:p xhtml:span xhtml:em xhtml:strong xhtml:a"/>
-  
 <xsl:output indent="yes" encoding="ISO-8859-1" />  
   
 <xsl:key name="functions" 
