@@ -89,7 +89,9 @@
 
 <xsl:template match="text()[not(normalize-space())]" mode="s:gather-specs">
 	<xsl:param name="preserve-space" as="xs:QName*" tunnel="yes" select="()" />
-	<xsl:if test="node-name(parent::*) = $preserve-space">
+	<xsl:if test="parent::s:space or
+		            ancestor::*[@xml:space][1]/@xml:space = 'preserve' or
+		            node-name(parent::*) = $preserve-space">
 		<s:space>
 			<xsl:value-of select="." />
 		</s:space>

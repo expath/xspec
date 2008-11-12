@@ -565,9 +565,9 @@
   </xsl:choose>  
 </xsl:function>
  
-<xsl:function name="msxsl:node-set" as="document-node()">
-	<xsl:param name="rtf" as="document-node()" />
-	<xsl:sequence select="$rtf" />
+<xsl:function name="msxsl:node-set" as="item()*">
+  <xsl:param name="rtf" as="item()*" />
+  <xsl:sequence select="$rtf" />
 </xsl:function>
 
 </xsl:stylesheet>
