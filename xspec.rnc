@@ -15,7 +15,7 @@ description = element description {
                 attribute stylesheet { xs:anyURI },
                 attribute version { xs:NMTOKEN }?,
                 attribute xslt-version { xs:NMTOKEN }?,
-                attribute preserve-space { xs:NMTOKENS },
+                attribute preserve-space { xs:NMTOKENS }?,
                 (global-param | import | scenario | pending)+ }
 
 ## An import brings in all the scenarios from the referenced file (which must
