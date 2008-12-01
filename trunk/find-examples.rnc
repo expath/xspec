@@ -1,0 +1,46 @@
+default namespace = "http://www.jenitennison.com/xslt/xspec"
+datatypes xs = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = scan
+
+# <scan> is the document element
+scan = element scan {
+         collection? & find? 
+         & global-id-atts? & local-id-atts? & enum-atts? 
+         & max-examples?
+       }
+
+# <collection> provides the URL of a collection of documents that will be
+# searched. This is passed to the collection() function. A typical value if
+# you're using Saxon might be:
+# ?select=*.xml&amp;recurse=yes&amp;strip-space=yes
+collection = element collection { xs:anyURI }
+
+# <find> provides an XPath that selects the kinds of nodes that should be
+# scanned for. The default (if you don't specify the <find> element) is:
+# //(* | processing-instruction())
+find = element find { xs:string }
+
+# <global-id-atts> is a space-separated list of the names of attributes that
+# are globally unique within a particular document. This helps to produce
+# readable XPath expressions in the generated test suite. The default is:
+# id xml:id
+global-id-atts = element global-id-atts { list { xs:QName } }
+
+# <local-id-atts> is a space-separated list of the names of attributes that
+# are unique within a particular parent element. This helps to produce readable
+# XPath expressions in the generated test suite. The default is empty.
+local-id-atts = element local-id-atts { list { xs:QName} }
+
+# <enum-atts> is a space-separated list of the names of attributes whose values
+# are enumerated. This helps to produce distinct tests for distinct values of
+# those attributes. The default is empty.
+enum-atts = element enum-atts { list { xs:QName } }
+
+# <max-examples> is the maximum number of examples that should be listed.
+# Generally, when examples are listed only the first is actually given in full;
+# the rest are commented out. However, if an element has text content and there
+# are less than max-examples distinct values for that element, all the examples
+# will be listed. If you have textual content that is marked up then you want
+# to set this high; otherwise, set it low. The default is 10.
+max-examples = element max-examples { xs:integer }
