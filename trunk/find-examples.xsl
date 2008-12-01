@@ -120,9 +120,10 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:if test="$prefix = ''">
+  	<xsl:if test="not(matches($prefix, '[\i-[:]][\c-[:]]*'))">
       <xsl:message terminate="yes">
-        ERROR: couldn't identify prefix for namespace "<xsl:value-of select="." />"
+        ERROR: Couldn't identify prefix for namespace "<xsl:value-of select="." />". 
+      	       Declare it with a prefix in the scanning XML document.
       </xsl:message>
     </xsl:if>
     <ns prefix="{$prefix}" xmlns="">
