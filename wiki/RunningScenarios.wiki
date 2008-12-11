@@ -19,4 +19,6 @@ To run the script, use the command line:
 
 James Sulak has written a guide about [http://www.wordsinboxes.com/2008/12/getting-started-with-xspec.html integrating XSpec into Oxygen].
 
-If you develop more scripts (eg ant or XProc pipelines), please share them.
+There is also a [http://code.google.com/p/xspec/source/browse/trunk/xspec.xpl XProc pipeline] for running the tests, again from James Sulak.
+
+If you develop more scripts (eg ant pipelines), please share them.
