@@ -11,7 +11,7 @@
 		<p><b>Primary output:</b> A formatted HTML XSpec report.</p>
 	</p:documentation>
 	
-	<p:serialization port="result" encoding="utf-8" method="html" />
+	<p:serialization port="result" encoding="ISO-8859-1" indent="true"/>
 	
 	<p:xslt name="create-test-stylesheet">
 		<p:input port="stylesheet">
