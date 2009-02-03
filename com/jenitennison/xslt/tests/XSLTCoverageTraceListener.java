@@ -2,8 +2,13 @@ package com.jenitennison.xslt.tests;
 
 import net.sf.saxon.trace.TraceListener;
 import net.sf.saxon.trace.InstructionInfo;
+import net.sf.saxon.trace.Location;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StandardNames;
+import java.lang.String;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.io.PrintStream;
 
 /**
@@ -13,6 +18,11 @@ import java.io.PrintStream;
 public class XSLTCoverageTraceListener implements TraceListener {
 
   private PrintStream out = System.err;
+  private String xspecStylesheet = null;
+  private String utilsStylesheet = null;
+  private HashMap modules = new HashMap();
+  private HashSet constructs = new HashSet();
+  private int moduleCount = 0;
 
   /**
   * Method called at the start of execution, that is, when the run-time transformation starts
@@ -38,7 +48,79 @@ public class XSLTCoverageTraceListener implements TraceListener {
    */
 
   public void enter(InstructionInfo info, XPathContext context) {
-    out.println("<hit line=\"" + info.getLineNumber() + "\" module=\"" + info.getSystemId() + "\" />");
+    int lineNumber = info.getLineNumber();
+    String systemId = info.getSystemId();
+    int constructType = info.getConstructType();
+    if (utilsStylesheet == null &&
+        systemId.indexOf("generate-tests-utils.xsl") != -1) {
+      utilsStylesheet = systemId;
+      out.println("<u u=\"" + systemId + "\" />");
+    } else if (xspecStylesheet == null && 
+               systemId.indexOf("/xspec/") != -1) {
+      xspecStylesheet = systemId;
+      out.println("<x u=\"" + systemId + "\" />");
+    } 
+    if (systemId != xspecStylesheet && systemId != utilsStylesheet) {
+      Integer module;
+      if (modules.containsKey(systemId)) {
+        module = (Integer)modules.get(systemId);
+      } else {
+        module = new Integer(moduleCount);
+        moduleCount += 1;
+        modules.put(systemId, module);
+        out.println("<m id=\"" + module + "\" u=\"" + systemId + "\" />"); 
+      }
+      if (!constructs.contains(constructType)) {
+        String construct;
+        if (constructType < 1024) {
+          construct = StandardNames.getClarkName(constructType);
+        } else {
+          switch (constructType) {
+            case Location.LITERAL_RESULT_ELEMENT:
+              construct = "LITERAL_RESULT_ELEMENT";
+              break;
+            case Location.LITERAL_RESULT_ATTRIBUTE:
+              construct = "LITERAL_RESULT_ATTRIBUTE";
+              break;
+            case Location.EXTENSION_INSTRUCTION:
+              construct = "EXTENSION_INSTRUCTION";
+              break;
+            case Location.TEMPLATE:
+              construct = "TEMPLATE";
+              break;
+            case Location.FUNCTION_CALL:
+              construct = "FUNCTION_CALL";
+              break;
+            case Location.BUILT_IN_TEMPLATE:
+              construct = "BUILT_IN_TEMPLATE";
+              break;
+            case Location.XPATH_IN_XSLT:
+              construct = "XPATH_IN_XSLT";
+              break;
+            case Location.LET_EXPRESSION:
+              construct = "LET_EXPRESSION";
+              break;
+            case Location.TRACE_CALL:
+              construct = "TRACE_CALL";
+              break;
+            case Location.SAXON_EVALUATE:
+              construct = "SAXON_EVALUATE";
+              break;
+            case Location.FUNCTION:
+              construct = "FUNCTION";
+              break;
+            case Location.XPATH_EXPRESSION:
+              construct = "XPATH_EXPRESSION";
+              break;
+            default:
+              construct = "Other";
+          }
+        }
+        constructs.add(constructType);
+        out.println("<c id=\"" + constructType + "\" n=\"" + construct + "\" />"); 
+      }
+      out.println("<h l=\"" + lineNumber + "\" m=\"" + module + "\" c=\"" + constructType + "\" />");
+    }
   }
 
   /**
