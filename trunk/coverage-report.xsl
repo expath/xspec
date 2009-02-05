@@ -114,7 +114,7 @@
 <xsl:variable name="attribute-regex" as="xs:string">
   <xsl:value-of>
     \s+
-    (\S+)      <!-- 1: the name of the attribute -->
+    ([^>\s]+)      <!-- 1: the name of the attribute -->
     \s*
     =
     \s*
@@ -149,7 +149,7 @@
        >)
       |
       (&lt;      <!-- 11: an open tag -->
-        (\S+)    <!-- 12: the name of the element being opened -->
+        ([^>/\s]+)    <!-- 12: the name of the element being opened -->
         (        <!-- 13: the attributes of the element -->
           (      <!-- 14: wrapper for the attribute regex -->
             <xsl:value-of select="$attribute-regex" />  <!-- 15-18 attribute stuff -->
@@ -177,8 +177,22 @@
       <xsl:variable name="construct" as="xs:string" select="regex-group(1)" />
       <xsl:variable name="rest" as="xs:string" select="regex-group(20)" />
       <xsl:variable name="construct-lines" as="xs:string+"
-        select="tokenize($construct, '\n')" />
-      <xsl:variable name="coverage" as="xs:string" select="test:coverage($node, $module)" />
+      select="tokenize($construct, '\n')" />
+      <xsl:variable name="endTag" as="xs:boolean" select="regex-group(9) != ''" />
+      <xsl:variable name="emptyTag" as="xs:boolean" select="regex-group(19) != ''" />
+      <xsl:variable name="startTag" as="xs:boolean" select="not($emptyTag) and regex-group(11) != ''" />
+      <xsl:variable name="matches" as="xs:boolean"
+        select="($node instance of text() and
+                 regex-group(2) != '') or
+                ($node instance of element() and
+                 ($startTag or $endTag or $emptyTag) and
+                 name($node) = (regex-group(10), regex-group(12))) or
+                ($node instance of comment() and
+                 regex-group(3) != '') or
+                ($node instance of processing-instruction() and
+                regex-group(5) != '')" />
+      <xsl:variable name="coverage" as="xs:string" 
+        select="if ($matches) then test:coverage($node, $module) else 'ignored'" />
       <xsl:for-each select="$construct-lines">
         <xsl:if test="position() != 1">
           <xsl:text>&#xA;</xsl:text>
@@ -195,32 +209,27 @@
           <xsl:with-param name="stylesheet-string" select="$rest" />
           <xsl:with-param name="node" as="node()">
             <xsl:choose>
-              <xsl:when test="($node instance of text() and
-                               regex-group(2) != '') or
-                              ($node instance of element() and
-                               (regex-group(9) != '' or
-                                regex-group(19) != '')) or
-                              ($node instance of comment() and
-                               regex-group(3) != '') or
-                              ($node instance of processing-instruction() and
-                               regex-group(5) != '')">
+              <xsl:when test="$matches">
                 <xsl:choose>
-                  <xsl:when test="$node/following-sibling::node()">
-                    <xsl:sequence select="$node/following-sibling::node()[1]" />
+                  <xsl:when test="$startTag">
+                    <xsl:choose>
+                      <xsl:when test="$node/node()">
+                        <xsl:sequence select="$node/node()[1]" />
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:sequence select="$node" />
+                      </xsl:otherwise>
+                    </xsl:choose>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:sequence select="$node/parent::node()" />
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:when>
-              <xsl:when test="$node instance of element() and
-                              regex-group(11) != ''">
-                <xsl:choose>
-                  <xsl:when test="$node/node()">
-                    <xsl:sequence select="$node/node()[1]" />
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:sequence select="$node" />
+                    <xsl:choose>
+                      <xsl:when test="$node/following-sibling::node()">
+                        <xsl:sequence select="$node/following-sibling::node()[1]" />
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:sequence select="$node/parent::node()" />
+                      </xsl:otherwise>
+                    </xsl:choose>
                   </xsl:otherwise>
                 </xsl:choose>
               </xsl:when>
