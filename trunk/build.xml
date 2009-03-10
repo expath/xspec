@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xspec" default="xspec">
+
+  <taskdef name="saxon-xslt" classname="net.sf.saxon.ant.AntTransform" 
+    classpath="/Library/Application Support/saxonb9/saxon9.jar;/Library/Application Support/saxonb9/saxon9-ant.jar" />
+
+  <dirname property="xspec.base.dir" file="${xspec.xml}" />
+  <basename property="xspec.base" file="${xspec.xml}" suffix=".xml" />
+
+  <property name="xspec.dir"
+    value="${xspec.base.dir}/xspec" />
+
+  <property name="xspec.xsl"
+    value="${xspec.dir}/${xspec.base}.xsl" />
+  <property name="xspec.result.xml"
+    value="${xspec.dir}/${xspec.base}-result.xml" />
+  <property name="xspec.result.html"
+    value="${xspec.dir}/${xspec.base}-result.html" />
+  
+  <target name="xspec"
+    description="Runs the XSpec unit tests in ${xspec.xml}">
+    <saxon-xslt in="${xspec.xml}" 
+      out="${xspec.xsl}"
+      style="generate-xspec-tests.xsl" />
+    <saxon-xslt in="${xspec.xml}"
+      out="${xspec.result.xml}"
+      style="${xspec.xsl}"
+      initialTemplate="{http://www.jenitennison.com/xslt/xspec}main" />
+    <saxon-xslt in="${xspec.result.xml}"
+      out="${xspec.result.html}"
+      style="format-xspec-report.xsl" />
+    <loadfile srcfile="${xspec.result.xml}"
+      property="xspec.result" />
+    <fail message="XSpec tests failed. See ${xspec.result.html} for a report">
+      <condition>
+        <contains string="${xspec.result}" substring='successful="false"' />
+      </condition>
+    </fail>
+  </target>
+
+</project>
