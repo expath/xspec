@@ -127,10 +127,10 @@
   </s:scenario>
 </xsl:template>
 
-<xsl:key name="scenarios" match="s:scenario" use="@label" />
+<xsl:key name="scenarios" match="s:scenario" use="s:label(.)" />
 
 <xsl:template match="s:like" mode="s:unshare-scenarios">
-  <xsl:apply-templates select="key('scenarios', @label)/*" mode="s:unshare-scenarios" />
+  <xsl:apply-templates select="key('scenarios', s:label(.))/*" mode="s:unshare-scenarios" />
 </xsl:template>
 
 <xsl:template match="s:pending" mode="s:unshare-scenarios">
@@ -202,7 +202,7 @@
 
 <xsl:template match="s:pending" mode="s:generate-calls">
   <xsl:apply-templates mode="s:generate-calls">
-    <xsl:with-param name="pending" select="if (@label) then string(@label) else ''" tunnel="yes" />
+    <xsl:with-param name="pending" select="s:label(.)" tunnel="yes" />
   </xsl:apply-templates>
 </xsl:template>
 
@@ -211,7 +211,7 @@
 </xsl:template>
 
 <xsl:template match="s:expect" mode="s:generate-calls">
-  <xsl:param name="pending" as="xs:string?" select="()" tunnel="yes" />
+  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
   <call-template name="s:{generate-id()}">
     <xsl:if test="empty($pending) and not(ancestor::s:scenario/@pending)">
       <with-param name="actual-result" select="$actual-result" />
@@ -226,15 +226,15 @@
 
 <xsl:template match="s:pending" mode="s:generate-templates">
   <xsl:apply-templates mode="s:generate-templates">
-    <xsl:with-param name="pending" select="if (@label) then string(@label) else ''" tunnel="yes" />
+    <xsl:with-param name="pending" select="s:label(.)" tunnel="yes" />
   </xsl:apply-templates>
 </xsl:template>
 
 <xsl:template match="s:scenario" mode="s:generate-templates">
-  <xsl:param name="pending" as="xs:string?" select="()" tunnel="yes" />
+  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
   <xsl:param name="context" as="element(s:context)?" select="()" tunnel="yes" />
   <xsl:param name="call" as="element(s:call)?" select="()" tunnel="yes" />
-  <xsl:variable name="new-pending" as="xs:string?" 
+  <xsl:variable name="new-pending" as="node()?" 
     select="if (@focus) then () else if (@pending) then @pending else $pending" />
   <xsl:variable name="new-context" as="element(s:context)?">
     <xsl:choose>
@@ -281,7 +281,7 @@
   <xsl:if test="$new-context/@href and ($new-context/node() except $new-context/s:param)">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
-      <xsl:value-of select="@label" />
+      <xsl:value-of select="s:label(.)" />
       <xsl:text>": can't set the context document using both the href</xsl:text>
       <xsl:text> attribute and the content of &lt;context&gt;</xsl:text>
     </xsl:message>
@@ -289,21 +289,21 @@
   <xsl:if test="$new-call/@template and $new-call/@function">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
-      <xsl:value-of select="@label" />
+      <xsl:value-of select="s:label(.)" />
       <xsl:text>": can't call a function and a template at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
   <xsl:if test="$new-context and $new-call/@function">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
-      <xsl:value-of select="@label" />
+      <xsl:value-of select="s:label(.)" />
       <xsl:text>": can't set a context and call a function at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
   <xsl:if test="s:expect and not($new-context) and not($new-call)">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
-      <xsl:value-of select="@label" />
+      <xsl:value-of select="s:label(.)" />
       <xsl:text>": there are tests in this scenario but no call or context has been given</xsl:text>
     </xsl:message>
   </xsl:if>
@@ -314,12 +314,13 @@
   			<xsl:if test="$pending != ''">(<xsl:value-of select="$pending" />)</xsl:if>
   		</xsl:if>
   		<xsl:if test="parent::s:scenario"><xsl:text>..</xsl:text></xsl:if>
-  		<xsl:value-of select="@label" />
+  		<xsl:value-of select="s:label(.)" />
   	</message>
-    <s:scenario label="{@label}">
+    <s:scenario>
       <xsl:if test="exists($new-pending) and not(.//@focus)">
         <xsl:attribute name="pending" select="$pending" />
       </xsl:if>
+    	<xsl:sequence select="s:label(.)" />
       <xsl:apply-templates select="s:context | s:call" mode="s:report" />
       <xsl:if test="empty($new-pending) and s:expect">
         <variable name="actual-result" as="item()*">
@@ -405,7 +406,7 @@
 </xsl:template>
 
 <xsl:template match="s:expect" mode="s:generate-templates">
-  <xsl:param name="pending" as="xs:string?" select="()" tunnel="yes" />
+  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
   <xsl:param name="context" as="element(s:context)?" required="yes" tunnel="yes" />
   <xsl:param name="call" as="element(s:call)?" required="yes" tunnel="yes" />  
   <template name="s:{generate-id()}">
@@ -415,10 +416,10 @@
     <message>
       <xsl:if test="exists($pending)">
         <xsl:text>PENDING: </xsl:text>
-        <xsl:if test="$pending != ''">(<xsl:value-of select="$pending" />)</xsl:if>
+        <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="$pending" />)</xsl:if>
       </xsl:if>
       <xsl:text>    </xsl:text>
-      <xsl:value-of select="@label" />
+      <xsl:value-of select="s:label(.)" />
     </message>
     <xsl:if test="empty($pending)">
       <xsl:variable name="version" as="xs:double" 
@@ -467,7 +468,6 @@
       </if>
     </xsl:if>
     <s:test>
-      <xsl:attribute name="label" select="replace(@label, '\{', '{{')" />
       <xsl:choose>
         <xsl:when test="exists($pending)">
           <xsl:attribute name="pending" select="$pending" />
@@ -476,7 +476,8 @@
           <xsl:attribute name="successful" select="'{$successful}'" />
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:if test="@test and empty($pending)">
+    	<xsl:sequence select="s:label(.)" />
+    	<xsl:if test="@test and empty($pending)">
         <if test="not($boolean-test)">
           <call-template name="test:report-value">
             <with-param name="value" select="$test-result" />
@@ -485,16 +486,6 @@
           </call-template>
         </if>
       </xsl:if>
-      <!--
-      <s:expect>
-        <xsl:for-each select="@* except @label">
-          <xsl:attribute name="{name()}" namespace="{namespace-uri()}"
-            select="replace(., '\{', '{{')" />
-        </xsl:for-each>
-        <xsl:apply-templates select="node()" mode="test:create-xslt-generator" />
-        <xsl:apply-templates select="node()" mode="test:create-xslt-generator" />
-      </s:expect>
-      -->
     	<xsl:if test="empty($pending)">
     		<call-template name="test:report-value">
     			<with-param name="value" select="$expected-result" />
@@ -557,4 +548,16 @@
   </s:call>
 </xsl:template>
   
+<xsl:function name="s:label" as="node()?">
+	<xsl:param name="labelled" as="element()" />
+	<xsl:choose>
+		<xsl:when test="exists($labelled/s:label)">
+			<xsl:sequence select="$labelled/s:label" />
+		</xsl:when>
+		<xsl:otherwise>
+			<s:label><xsl:value-of select="$labelled/@label" /></s:label>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:function>
+
 </xsl:stylesheet>

@@ -50,8 +50,8 @@ scenario =
 	##
 	## If any scenario has a focus attribute, any scenarios without a focus 
 	## attribute will be classed as pending.
-	element scenario { common-scenario-attributes,
-		label, shared?,
+	element scenario { common-scenario-attributes, shared?,
+		label,
 		( matching-scenario |
 		  function-scenario |
 		  named-scenario ) }
@@ -66,7 +66,8 @@ label =
 	## "the XHTML for a <P1> element". Nested scenario labels will usually start with 
 	## the word "with"; it should make sense if the labels of ancestor scenarios are 
 	## concatenated with this one. For example "with a Type attribute".
-	attribute label { text }
+	attribute label { text } |
+	element label { any-content }
 
 shared = 
 	## There are shared scenarios (shared="yes") and unshared scenarios (shared="no",
