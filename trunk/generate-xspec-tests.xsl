@@ -28,18 +28,22 @@
 </xsl:template>
 
 <xsl:template match="/" mode="s:generate-tests">
-  <xsl:variable name="all-specs" as="element(s:description)+">
-    <s:description>
-      <xsl:apply-templates select="s:description" mode="s:copy-namespaces" />
-      <xsl:copy-of select="s:description/@*" />
-      <xsl:attribute name="stylesheet" select="$stylesheet-uri" />
-      <xsl:apply-templates select="s:gather-specs(s:description)" mode="s:gather-specs" />
-    </s:description>
+  <xsl:variable name="all-specs" as="document-node()">
+  	<xsl:document>
+  		<s:description>
+  			<xsl:apply-templates select="s:description" mode="s:copy-namespaces" />
+  			<xsl:copy-of select="s:description/@*" />
+  			<xsl:attribute name="stylesheet" select="$stylesheet-uri" />
+  			<xsl:apply-templates select="s:gather-specs(s:description)" mode="s:gather-specs" />
+  		</s:description>
+  	</xsl:document>
   </xsl:variable>
-  <xsl:variable name="unshared-scenarios" as="element(s:description)">
-    <xsl:apply-templates select="$all-specs" mode="s:unshare-scenarios" />
+  <xsl:variable name="unshared-scenarios" as="document-node()">
+  	<xsl:document>
+  		<xsl:apply-templates select="$all-specs/*" mode="s:unshare-scenarios" />
+  	</xsl:document>
   </xsl:variable>
-  <xsl:apply-templates select="$unshared-scenarios" mode="s:generate-tests" />
+  <xsl:apply-templates select="$unshared-scenarios/*" mode="s:generate-tests" />
 </xsl:template>
 
 <xsl:template match="s:description" mode="s:copy-namespaces">
