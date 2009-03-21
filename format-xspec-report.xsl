@@ -51,7 +51,7 @@
               <th>
                 <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
                 <a href="#{generate-id()}">
-                  <xsl:value-of select="@label" />
+                  <xsl:apply-templates select="s:label" mode="s:html-report" />
                 </a>
               </th>
               <th>
@@ -67,7 +67,7 @@
         <div id="{generate-id()}">
           <h2>
             <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
-            <xsl:value-of select="@label" />
+            <xsl:apply-templates select="s:label" mode="s:html-report" />
           </h2>
           <table class="xspec" id="{generate-id()}">
             <col width="85%" />
@@ -90,7 +90,7 @@
               <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
                 <th>
                   <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
-                  <xsl:value-of select="@label" />
+                  <xsl:apply-templates select="s:label" mode="s:html-report" />
                 </th>
                 <th>
                   <xsl:call-template name="s:totals">
@@ -104,19 +104,23 @@
                   select="exists(@pending)" />
                 <xsl:variable name="any-failure" as="xs:boolean"
                   select="exists(s:test[@successful = 'false'])" />
-                <xsl:variable name="label" as="xs:string"
-                  select="string-join(ancestor-or-self::s:scenario[position() != last()]/@label, ' ')" />
+                <xsl:variable name="label" as="node()+">
+                	<xsl:for-each select="ancestor-or-self::s:scenario[position() != last()]">
+                		<xsl:apply-templates select="s:label" mode="s:html-report" />
+                		<xsl:if test="position() != last()"><xsl:text> </xsl:text></xsl:if>
+                	</xsl:for-each>
+                </xsl:variable>
                 <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
                   <th>
                     <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
                     <xsl:choose>
                       <xsl:when test="$any-failure">
                         <a href="#{generate-id()}">
-                          <xsl:value-of select="$label" />
+                          <xsl:sequence select="$label" />
                         </a>
                       </xsl:when>
                       <xsl:otherwise>
-                        <xsl:value-of select="$label" />
+                        <xsl:sequence select="$label" />
                       </xsl:otherwise>
                     </xsl:choose>
                   </th>
@@ -141,7 +145,7 @@
   <tr class="pending">
     <td>
       <xsl:if test="@pending != '' and @pending != ../@pending">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
-      <xsl:value-of select="@label" />
+      <xsl:apply-templates select="s:label" mode="s:html-report" />
     </td>
     <td>Pending</td>
   </tr>
@@ -149,7 +153,7 @@
 
 <xsl:template match="s:test[@successful = 'true']" mode="s:html-summary">
   <tr class="successful">
-    <td><xsl:value-of select="@label" /></td>
+  	<td><xsl:apply-templates select="s:label" mode="s:html-report" /></td>
     <td>Success</td>
   </tr>
 </xsl:template>
@@ -157,7 +161,9 @@
 <xsl:template match="s:test[@successful = 'false']" mode="s:html-summary">
   <tr class="failed">                  
     <td>
-      <a href="#{generate-id()}"><xsl:value-of select="@label" /></a>
+      <a href="#{generate-id()}">
+      	<xsl:apply-templates select="s:label" mode="s:html-report" />
+      </a>
     </td>
     <td>Failure</td>
   </tr>
@@ -165,7 +171,12 @@
   
 <xsl:template match="s:scenario" mode="s:html-report">
   <h3 id="{generate-id()}">
-    <xsl:value-of select="ancestor-or-self::s:scenario/@label" separator=" " />
+  	<xsl:for-each select="ancestor-or-self::s:scenario">
+  		<xsl:apply-templates select="s:label" mode="s:html-report" />
+  		<xsl:if test="position() != last()">
+  			<xsl:text> </xsl:text>
+  		</xsl:if>
+  	</xsl:for-each>
   </h3>
   <xsl:apply-templates select="s:test[@successful = 'false']" mode="s:html-report" />
 </xsl:template>  
@@ -174,7 +185,7 @@
   <xsl:variable name="result" as="element(s:result)"
     select="if (s:result) then s:result else ../s:result" />
   <h4 id="{generate-id()}">
-    <xsl:value-of select="@label" />
+    <xsl:apply-templates select="s:label" mode="s:html-report" />
   </h4>
   <table class="xspecResult">
     <thead>
