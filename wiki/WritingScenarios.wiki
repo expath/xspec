@@ -5,7 +5,7 @@
 
 The description of the behaviour of a stylesheet lives within an XSpec document, which should adhere to the [http://code.google.com/p/xspec/source/browse/trunk/xspec.rnc XSpec RELAX NG schema]. All elements are in the `http://www.jenitennison.com/xslt/xspec` namespace, which is bound to `x` in these examples.
 
-The document element is a `<s:description>` element, whose `stylesheet` attribute holds a relative URI pointing to the stylesheet that the XSpec document describes. You can also specify:
+The document element is a `<x:description>` element, whose `stylesheet` attribute holds a relative URI pointing to the stylesheet that the XSpec document describes. You can also specify:
 
  * a `version` attribute that gives the version of the stylesheet the XSpec document describes
  * a `xslt-version` attribute that gives the version of XSLT the stylesheet uses; if you don't specify it, this defaults to 2.0
