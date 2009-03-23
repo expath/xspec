@@ -470,7 +470,18 @@
             <xsl:attribute name="select">/node()</xsl:attribute>
           </xsl:when>
         </xsl:choose>
-        <xsl:apply-templates select="$value" mode="test:report-value" />
+      	<xsl:choose>
+      		<xsl:when test="count($value//node()) > 1000">
+      			<xsl:variable name="href" as="xs:string" select="concat(generate-id($value[1]), '.xml')" />
+      			<xsl:attribute name="href" select="$href" />
+      			<xsl:result-document href="{$href}">
+      				<xsl:apply-templates select="$value" mode="test:report-value" />
+      			</xsl:result-document>
+      		</xsl:when>
+      		<xsl:otherwise>
+      			<xsl:apply-templates select="$value" mode="test:report-value" />
+      		</xsl:otherwise>
+      	</xsl:choose>
       </xsl:when>
       <xsl:otherwise>
         <xsl:attribute name="select">
