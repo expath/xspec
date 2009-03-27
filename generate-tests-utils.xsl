@@ -474,8 +474,8 @@
       		<xsl:when test="count($value//node()) > 1000">
       			<xsl:variable name="href" as="xs:string" select="concat(generate-id($value[1]), '.xml')" />
       			<xsl:attribute name="href" select="$href" />
-      			<xsl:result-document href="{$href}">
-      				<xsl:apply-templates select="$value" mode="test:report-value" />
+      			<xsl:result-document href="{$href}" format="report">
+      				<xsl:sequence select="$value" />
       			</xsl:result-document>
       		</xsl:when>
       		<xsl:otherwise>

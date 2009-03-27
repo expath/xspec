@@ -148,8 +148,8 @@
 <!-- Does the generation of the test stylesheet -->
   
 <xsl:template match="s:description" mode="s:generate-tests">
-  <xsl:variable name="pending" as="xs:string?"
-    select="if (.//@focus) then string((.//@focus)[1]) else ()" />
+  <xsl:variable name="pending" as="node()?"
+  	select=".//@focus" />
   <stylesheet version="2.0">
     <xsl:apply-templates select="." mode="s:copy-namespaces" />
   	<import href="{$stylesheet-uri}" />
@@ -446,9 +446,16 @@
             </choose>
           </variable>
           <variable name="test-result" as="item()*">
-            <for-each select="$test-items">
-              <sequence select="{@test}" version="{$version}" />
-            </for-each>
+          	<choose>
+          		<when test="empty($test-items)">
+          			<sequence select="{@test}" version="{$version}" />
+          		</when>
+          		<otherwise>
+          			<for-each select="$test-items">
+          				<sequence select="{@test}" version="{$version}" />
+          			</for-each>
+          		</otherwise>
+          	</choose>
           </variable>
           <variable name="boolean-test" as="xs:boolean"
             select="$test-result instance of xs:boolean" />
