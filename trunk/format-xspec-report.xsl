@@ -9,6 +9,8 @@
   
 <xsl:import href="format-utils.xsl" />
 
+<xsl:output name="report" method="xml" indent="yes"/>
+
 <xsl:template match="/">
   <xsl:apply-templates select="." mode="s:html-report" />
 </xsl:template>  
