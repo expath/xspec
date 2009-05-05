@@ -311,10 +311,10 @@
   	<message>
   		<xsl:if test="exists($new-pending)">
   			<xsl:text>PENDING: </xsl:text>
-  			<xsl:if test="$pending != ''">(<xsl:value-of select="$pending" />)</xsl:if>
+  			<xsl:if test="$pending != ''">(<xsl:value-of select="normalize-space($pending)" />)</xsl:if>
   		</xsl:if>
   		<xsl:if test="parent::x:scenario"><xsl:text>..</xsl:text></xsl:if>
-  		<xsl:value-of select="x:label(.)" />
+  		<xsl:value-of select="normalize-space(x:label(.))" />
   	</message>
     <x:scenario>
       <xsl:if test="exists($new-pending) and not(.//@focus)">
@@ -416,10 +416,10 @@
     <message>
       <xsl:if test="exists($pending)">
         <xsl:text>PENDING: </xsl:text>
-        <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="$pending" />)</xsl:if>
+        <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="normalize-space($pending)" />)</xsl:if>
       </xsl:if>
       <xsl:text>    </xsl:text>
-      <xsl:value-of select="x:label(.)" />
+      <xsl:value-of select="normalize-space(x:label(.))" />
     </message>
     <xsl:if test="empty($pending)">
       <xsl:variable name="version" as="xs:double" 
