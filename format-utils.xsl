@@ -12,7 +12,8 @@
   select="('http://www.w3.org/XML/1998/namespace',
            'http://www.w3.org/1999/XSL/Transform',
            'http://www.w3.org/2001/XMLSchema',
-           'http://www.jenitennison.com/xslt/unit-test')" />
+           'http://www.jenitennison.com/xslt/unit-test',
+           'http://www.jenitennison.com/xslt/xspec')" />
 
 <xsl:template match="*" mode="test:serialize" priority="20">
   <xsl:param name="level" as="xs:integer" select="0" tunnel="yes" />
