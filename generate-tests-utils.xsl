@@ -130,6 +130,7 @@
 <xsl:function name="test:item-deep-equal" as="xs:boolean">
   <xsl:param name="item1" as="item()" />
   <xsl:param name="item2" as="item()" />
+	<xsl:message>Testing items</xsl:message>
   <xsl:choose>
     <xsl:when test="$item1 instance of node() and
                     $item2 instance of node()">
@@ -287,6 +288,7 @@
     </xsl:when>
     <xsl:when test="$node1 instance of element() and
                     $node2 instance of element()">
+    	<xsl:message>Testing two elements</xsl:message>
       <xsl:choose>
         <xsl:when test="node-name($node1) eq node-name($node2)">
           <xsl:variable name="atts1" as="attribute()*">
@@ -303,8 +305,9 @@
           </xsl:variable>
           <xsl:choose>
             <xsl:when test="test:deep-equal($atts1, $atts2)">
+            	<xsl:message>Attributes match</xsl:message>
               <xsl:choose>
-                <xsl:when test="$node1 = '...' and count($node1/node()) = 1">
+                <xsl:when test="$node1/text() = '...' and count($node1/node()) = 1">
                   <xsl:sequence select="true()" />
                 </xsl:when>
                 <xsl:otherwise>
@@ -351,6 +354,7 @@
                      $node2 instance of attribute()) or
                     ($node1 instance of processing-instruction() and
                      $node2 instance of processing-instruction())">
+    	<xsl:message>Testing attributes</xsl:message>
       <xsl:sequence select="node-name($node1) eq node-name($node2) and
                             ($node1 = '...' or string($node1) eq string($node2))" />      
     </xsl:when>
