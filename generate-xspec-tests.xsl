@@ -543,7 +543,7 @@
 
 <xsl:template match="x:context | x:param" mode="x:report">
   <xsl:element name="x:{local-name()}">
-    <xsl:copy-of select="@*" />
+  	<xsl:apply-templates select="@*" mode="s:report" />
     <xsl:apply-templates mode="test:create-xslt-generator" />
   </xsl:element>
 </xsl:template>
@@ -554,7 +554,16 @@
     <xsl:apply-templates mode="x:report" />
   </x:call>
 </xsl:template>
-  
+
+<xsl:template match="@select" mode="s:report">
+	<xsl:attribute name="select"
+		select="replace(replace(., '\{', '{{'), '\}', '}}')" />
+</xsl:template>
+
+<xsl:template match="@*" mode="s:report">
+	<xsl:sequence select="." />
+</xsl:template>
+
 <xsl:function name="x:label" as="node()?">
 	<xsl:param name="labelled" as="element()" />
 	<xsl:choose>
