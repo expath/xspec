@@ -11,15 +11,38 @@
 
 <xsl:output name="report" method="xml" indent="yes"/>
 
+<xsl:function name="x:pending-callback" as="node()*">
+  <!-- returns formatted output for $pending. -->
+  <xsl:param name="pending" as="xs:string?"/>
+  <xsl:if test="$pending">
+    <xsl:text>(</xsl:text>
+    <strong><xsl:value-of select="$pending"/></strong>
+    <xsl:text>) </xsl:text>
+  </xsl:if>
+</xsl:function>
+
+<xsl:function name="x:separator-callback" as="node()*">
+  <!-- returns formatted output for separator between scenarios. -->
+  <xsl:text> </xsl:text>
+</xsl:function>
+
 <xsl:template match="/">
+  <xsl:message>
+    <xsl:call-template name="x:totals">
+      <xsl:with-param name="tests" select="//x:test" />
+      <xsl:with-param name="labels" select="true()" />
+    </xsl:call-template>
+  </xsl:message>
   <xsl:apply-templates select="." mode="x:html-report" />
 </xsl:template>
 
 <xsl:template match="x:report" mode="x:html-report">
   <html>
     <head>
-      <title>Test Report for <xsl:value-of select="test:format-URI(@stylesheet)" /></title>
-      <link rel="stylesheet" type="text/css" 
+      <title>Test Report for <xsl:value-of select="test:format-URI(@stylesheet)" /> (<xsl:call-template name="x:totals">
+          <xsl:with-param name="tests" select="//x:test" />
+        </xsl:call-template>)</title>
+      <link rel="stylesheet" type="text/css"
             href="{resolve-uri('test-report.css', static-base-uri())}" />
     </head>
     <body>
@@ -51,7 +74,7 @@
               select="exists(.//x:test[@successful = 'false'])" />
             <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
               <th>
-                <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
+                <xsl:copy-of select="x:pending-callback(@pending)"/>
                 <a href="#{generate-id()}">
                   <xsl:apply-templates select="x:label" mode="x:html-report" />
                 </a>
@@ -68,7 +91,7 @@
       <xsl:for-each select="x:scenario[not(@pending)]">
         <div id="{generate-id()}">
           <h2>
-            <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
+            <xsl:copy-of select="x:pending-callback(@pending)"/>
             <xsl:apply-templates select="x:label" mode="x:html-report" />
           </h2>
           <table class="xspec" id="{generate-id()}">
@@ -91,7 +114,7 @@
                 select="exists(x:test[@successful = 'false'])" />
               <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
                 <th>
-                  <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
+                  <xsl:copy-of select="x:pending-callback(@pending)"/>
                   <xsl:apply-templates select="x:label" mode="x:html-report" />
                 </th>
                 <th>
@@ -109,12 +132,14 @@
                 <xsl:variable name="label" as="node()+">
                 	<xsl:for-each select="ancestor-or-self::x:scenario[position() != last()]">
                 		<xsl:apply-templates select="x:label" mode="x:html-report" />
-                		<xsl:if test="position() != last()"><xsl:text> </xsl:text></xsl:if>
+                		<xsl:if test="position() != last()">
+                      <xsl:copy-of select="x:separator-callback()"/>
+                    </xsl:if>
                 	</xsl:for-each>
                 </xsl:variable>
                 <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
                   <th>
-                    <xsl:if test="@pending != ''">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
+                    <xsl:copy-of select="x:pending-callback(@pending)"/>
                     <xsl:choose>
                       <xsl:when test="$any-failure">
                         <a href="#{generate-id()}">
@@ -146,7 +171,7 @@
 <xsl:template match="x:test[exists(@pending)]" mode="x:html-summary">
   <tr class="pending">
     <td>
-      <xsl:if test="@pending != '' and @pending != ../@pending">(<strong><xsl:value-of select="@pending" /></strong>) </xsl:if>
+      <xsl:copy-of select="x:pending-callback(@pending)"/>
       <xsl:apply-templates select="x:label" mode="x:html-report" />
     </td>
     <td>Pending</td>
@@ -176,7 +201,7 @@
   	<xsl:for-each select="ancestor-or-self::x:scenario">
   		<xsl:apply-templates select="x:label" mode="x:html-report" />
   		<xsl:if test="position() != last()">
-  			<xsl:text> </xsl:text>
+        <xsl:copy-of select="x:separator-callback()"/>
   		</xsl:if>
   	</xsl:for-each>
   </h3>
@@ -225,7 +250,7 @@
       </tr>
     </tbody>
   </table>
-</xsl:template>  
+</xsl:template>
 
 <xsl:template match="*" mode="x:value">
   <xsl:param name="comparison" as="element()?" select="()" />
@@ -245,9 +270,9 @@
           <pre>
             <xsl:choose>
               <xsl:when test="exists($comparison)">
-                <xsl:variable name="compare" as="node()*" 
-                  select="if ($comparison/@href) 
-                          then document($comparison/@href)/node() 
+                <xsl:variable name="compare" as="node()*"
+                  select="if ($comparison/@href)
+                          then document($comparison/@href)/node()
                           else $comparison/(node() except text()[not(normalize-space())])" />
                 <xsl:for-each select="node() except text()[not(normalize-space())]">
                   <xsl:variable name="pos" as="xs:integer" select="position()" />
@@ -274,7 +299,7 @@
       <pre><xsl:value-of select="@select" /></pre>
     </xsl:otherwise>
   </xsl:choose>
-</xsl:template>  
+</xsl:template>
 
 <xsl:template name="x:totals">
   <xsl:param name="tests" as="element(x:test)*" required="yes" />
