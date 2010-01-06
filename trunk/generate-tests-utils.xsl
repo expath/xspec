@@ -98,11 +98,31 @@
       <xsl:variable name="seq2" as="text()">
         <xsl:value-of select="$seq2" separator="" />
       </xsl:variable>
-      <xsl:sequence select="test:deep-equal($seq1, $seq2)" />
+      <xsl:sequence select="test:deep-equal($seq1, $seq2, $version)" />
     </xsl:when>
-    <xsl:otherwise>
-      <xsl:sequence select="false()" />
-    </xsl:otherwise>
+    <xsl:when test="$seq1 instance of node()+ and $seq2 instance of node()+ and empty($seq1[. instance of attribute()]) and empty($seq2[. instance of attribute()])">
+    	<xsl:variable name="seq1a" as="document-node()">
+    		<xsl:document>
+    			<xsl:sequence select="$seq1" />
+    		</xsl:document>
+    	</xsl:variable>
+    	<xsl:variable name="seq2a" as="document-node()">
+    		<xsl:document>
+    			<xsl:sequence select="$seq2" />
+    		</xsl:document>
+    	</xsl:variable>
+      <xsl:choose>
+      	<xsl:when test="count($seq1a/node()) != count($seq1) or count($seq2a/node()) != count($seq2)">
+      		<xsl:sequence select="test:deep-equal($seq1a/node(), $seq2a/node(), $version)" />
+      	</xsl:when>
+      	<xsl:otherwise>
+      		<xsl:sequence select="false()" />
+      	</xsl:otherwise>
+      </xsl:choose>
+    </xsl:when>
+  	<xsl:otherwise>
+  		<xsl:sequence select="false()" />
+  	</xsl:otherwise>
   </xsl:choose>
 </xsl:function>
 
