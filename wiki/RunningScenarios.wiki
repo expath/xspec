@@ -8,17 +8,31 @@ Currently, to run the tests, the [WritingScenarios XSpec description document] i
 
 Two scripts are provided that will perform this pipeline for you:
 
-  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.bat xspec.bat] for Windows
-  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh] for Mac OS X (might work on linux, but untested)
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.bat xspec.bat], a Windows batch script.
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.sh xspec.sh], a bash script for Mac OS X (might work on linux, but untested).
 
-To run the script, use the command line:
+Note that you will have to edit each script to match the location of Saxon on your system.
+
+To run the batch/bash scripts, use the command line:
 
 {{{
 > xspec filename
 }}}
 
-James Sulak has written a guide about [http://www.wordsinboxes.com/2008/12/getting-started-with-xspec.html integrating XSpec into Oxygen].
+Two alternative scripts are also provided:
 
-There is also a [http://code.google.com/p/xspec/source/browse/trunk/xspec.xpl XProc pipeline] for running the tests, again from James Sulak.
+  * [http://code.google.com/p/xspec/source/browse/trunk/build.xml build.xml], an Ant build. You will have to edit the script to point to location of Saxon on your system. To run, use the command line:
 
-If you develop more scripts (eg ant pipelines), please share them.
+    {{{
+    > ant -Dxspec.xml=filename
+    }}}
+
+  * [http://code.google.com/p/xspec/source/browse/trunk/xspec.xpl xspec.xpl], an XProc pipeline (note that it doesn't indent the XML output correctly). To run, use the command line:
+
+   {{{
+   > java com.xmlcalabash.drivers.Main -i source=filename xspec.xpl
+   }}}
+
+You can also [http://www.wordsinboxes.com/2008/12/getting-started-with-xspec.html integrate XSpec into Oxygen].
+
+If you develop more scripts, please share them.
