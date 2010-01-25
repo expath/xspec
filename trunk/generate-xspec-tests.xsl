@@ -412,6 +412,7 @@
   <template name="x:{generate-id()}">
     <xsl:if test="empty($pending)">
       <param name="actual-result" as="item()*" required="yes" />
+      <variable name="x:result" select="$actual-result"/>
     </xsl:if>
     <message>
       <xsl:if test="exists($pending)">
