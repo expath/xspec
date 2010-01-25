@@ -39,15 +39,26 @@
 <xsl:template match="x:report" mode="x:html-report">
   <html>
     <head>
-      <title>Test Report for <xsl:value-of select="test:format-URI(@stylesheet)" /> (<xsl:call-template name="x:totals">
-          <xsl:with-param name="tests" select="//x:test" />
-        </xsl:call-template>)</title>
+      <title>
+         <xsl:text>Test Report for </xsl:text>
+         <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
+         <xsl:text> (</xsl:text>
+         <xsl:call-template name="x:totals">
+            <xsl:with-param name="tests" select="//x:test"/>
+         </xsl:call-template>
+         <xsl:text>)</xsl:text>
+      </title>
       <link rel="stylesheet" type="text/css"
             href="{resolve-uri('test-report.css', static-base-uri())}" />
     </head>
     <body>
       <h1>Test Report</h1>
-      <p>Stylesheet:  <a href="{@stylesheet}"><xsl:value-of select="test:format-URI(@stylesheet)" /></a></p>
+      <p>
+         <xsl:value-of select="exists( @query ) then 'Query: ' else 'Stylesheet: '"/>
+         <a href="{ @stylesheet|@query }">
+            <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
+         </a>
+      </p>
       <p>
         <xsl:text>Tested: </xsl:text>
         <xsl:value-of select="format-dateTime(@date, '[D] [MNn] [Y] at [H01]:[m01]')" />
