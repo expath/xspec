@@ -447,16 +447,16 @@
             </choose>
           </variable>
           <variable name="test-result" as="item()*">
-          	<choose>
-          		<when test="empty($test-items)">
-          			<sequence select="{@test}" version="{$version}" />
-          		</when>
-          		<otherwise>
-          			<for-each select="$test-items">
-          				<sequence select="{@test}" version="{$version}" />
-          			</for-each>
-          		</otherwise>
-          	</choose>
+             <choose>
+                <when test="count($test-items) eq 1">
+                   <for-each select="$test-items">
+                      <sequence select="{ @test }" version="{ $version }"/>
+                   </for-each>
+                </when>
+                <otherwise>
+                   <sequence select="{ @test }" version="{ $version }"/>
+                </otherwise>
+             </choose>
           </variable>
           <variable name="boolean-test" as="xs:boolean"
             select="$test-result instance of xs:boolean" />
