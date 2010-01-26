@@ -82,6 +82,13 @@ declare function test:sorted-children($node as node()) as node()*
   except ( $node/text()[not(normalize-space(.))], $node/test:message )
 };
 
+(: Aim to be identical to:
+ :
+ :     <xsl:perform-sort select="$nodes">
+ :        <xsl:sort select="namespace-uri(.)" />
+ :        <xsl:sort select="local-name(.)" />
+ :     </xsl:perform-sort>
+ :)
 declare function test:sort-named-nodes($nodes as node()*) as node()*
 {
   if ( empty($nodes) ) then
@@ -94,9 +101,17 @@ declare function test:sort-named-nodes($nodes as node()*) as node()*
       )
 };
 
+(: Return the "minimum" of $nodes, using the order defined by
+ : test:sort-named-nodes().
+ :)
 declare function test:named-nodes-minimum($nodes as node()+) as xs:integer
 {
-  test:named-nodes-minimum(remove($nodes, 1), node-name($nodes[1]), 1, 2)
+  (: if there is only one node, this is the minimum :)
+  if ( empty($nodes[2]) ) then
+    1
+  (: if not, init the temp minimum on the first one, then walk through the sequence :)
+  else
+    test:named-nodes-minimum($nodes, node-name($nodes[1]), 1, 2)
 };
 
 declare function test:named-nodes-minimum(
@@ -160,7 +175,7 @@ declare function test:report-value(
         else if ( $value instance of item() ) then
           test:report-atomic-value($value)
         else
-          concat('(', string-join($value/test:report-atomic-value(.), ', '), ')')
+          concat('(', string-join(for $v in $value return test:report-atomic-value($v), ', '), ')')
       }
   }
 };
