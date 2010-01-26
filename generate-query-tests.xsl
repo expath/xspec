@@ -21,7 +21,7 @@
    </xsl:variable>
 
    <!-- TODO: The at hint should not be always resolved (e.g. for MarkLogic). -->
-   <xsl:variable name="query-at" as="xs:anyURI?" select="
+   <xsl:param name="query-at" as="xs:anyURI?" select="
        /x:description/@query-at/resolve-uri(., base-uri(..))"/>
 
    <xsl:template match="x:description">
@@ -30,9 +30,6 @@
             <xsl:copy>
                <xsl:apply-templates select="." mode="x:copy-namespaces"/>
                <xsl:copy-of select="@*"/>
-               <xsl:if test="exists($query-at)">
-                  <xsl:attribute name="query-at" select="$query-at"/>
-               </xsl:if>
                <xsl:apply-templates select="x:gather-specs(.)" mode="x:gather-specs"/>
             </xsl:copy>
          </xsl:document>

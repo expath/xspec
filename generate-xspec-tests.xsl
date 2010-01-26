@@ -33,7 +33,6 @@
   		<x:description>
   			<xsl:apply-templates select="x:description" mode="x:copy-namespaces" />
   			<xsl:copy-of select="x:description/@*" />
-  			<xsl:attribute name="stylesheet" select="$stylesheet-uri" />
   			<xsl:apply-templates select="x:gather-specs(x:description)" mode="x:gather-specs" />
   		</x:description>
   	</xsl:document>
