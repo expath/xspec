@@ -289,6 +289,26 @@
   </xsl:apply-templates>
 </xsl:template>
 
+<!--
+    Generate the following:
+
+        <template name="x:...">
+           <param name="actual-result" as="item()*" required="yes"/>   # if not pending
+           <variable name="x:result" select="$actual-result"/>         # if not pending
+           <message>
+              Running (pending?) assertion...
+           </message>
+           # if not pending
+              <variable name="expected-result" ...>   # depend on content, @href and @select
+              # if @test, evaluate it with result as context node then
+              #   if it is not a boolean, compare it to $expected-result
+              # if no @test, compare result to $expected-result
+           # fi
+           <x:test>
+              ...
+           </x:test>
+        </template>
+-->
 <xsl:template match="x:expect" mode="x:generate-templates">
   <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
   <xsl:param name="context" as="element(x:context)?" required="yes" tunnel="yes" />

@@ -230,7 +230,9 @@
       <xsl:text>  let $exp := ( </xsl:text>
       <!-- FIXME: Not correct, the x:expect model is more complex than
            a simple variable... (see how the original stylesheet, for
-           XSLT, handles that...) -->
+           XSLT, handles that...) Factorize with the XSLT version...
+           The value of $exp depends on x:expect's depends on content,
+           @href and @select. -->
       <xsl:value-of select="@select"/>
       <xsl:copy-of select="node()"/>
       <xsl:text> )&#10;</xsl:text>
