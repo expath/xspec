@@ -80,10 +80,12 @@
 
 <xsl:template match="*" mode="test:create-xslt-generator">
   <xsl:copy>
-    <xsl:for-each select="@*">
+    <!-- -fgeorges: Do NOT escape '{' and '}'... -->
+    <xsl:copy-of select="@*"/>
+    <!--xsl:for-each select="@*">
       <xsl:attribute name="{name()}" namespace="{namespace-uri()}"
         select="replace(., '(\{|\})', '$1$1')" />
-    </xsl:for-each>
+    </xsl:for-each-->
     <xsl:apply-templates mode="test:create-xslt-generator" />
   </xsl:copy>
 </xsl:template>  

@@ -20,10 +20,9 @@
           in-scope-prefixes($e)[namespace-uri-for-prefix(., $e) eq $u][1]"/>
    </xsl:variable>
 
-   <xsl:variable name="query-uri" as="xs:anyURI" select="
-       resolve-uri(/x:description/@query, base-uri(/x:description))"/>
-
-   <xsl:variable name="query" as="document-node()" select="doc($query-uri)"/>
+   <!-- TODO: The at hint should not be always resolved (e.g. for MarkLogic). -->
+   <xsl:variable name="query-at" as="xs:anyURI?" select="
+       /x:description/@query-at/resolve-uri(., base-uri(..))"/>
 
    <xsl:template match="x:description">
       <xsl:variable name="all-specs" as="document-node()">
@@ -31,7 +30,9 @@
             <xsl:copy>
                <xsl:apply-templates select="." mode="x:copy-namespaces"/>
                <xsl:copy-of select="@*"/>
-               <xsl:attribute name="query" select="$query-uri"/>
+               <xsl:if test="exists($query-at)">
+                  <xsl:attribute name="query-at" select="$query-at"/>
+               </xsl:if>
                <xsl:apply-templates select="x:gather-specs(.)" mode="x:gather-specs"/>
             </xsl:copy>
          </xsl:document>
@@ -162,6 +163,8 @@
    <xsl:template match="x:description" mode="x:gen">
       <xsl:variable name="pending" as="node()?" select=".//@focus"/>
       <xsl:variable name="this" select="."/>
+      <!-- A prefix has to be defined for the target namespace on x:description. -->
+      <!-- TODO: If not, we should generate one. -->
       <xsl:variable name="prefix" select="
           in-scope-prefixes($this)[
             namespace-uri-for-prefix(., $this) eq xs:anyURI($this/@query)
@@ -170,10 +173,18 @@
       <xsl:value-of select="$prefix"/>
       <xsl:text> = "</xsl:text>
       <xsl:value-of select="@query"/>
+      <xsl:if test="exists($query-at)">
+         <xsl:text>"&#10;  at "</xsl:text>
+         <xsl:value-of select="$query-at"/>
+      </xsl:if>
       <xsl:text>";&#10;</xsl:text>
       <xsl:text>import module namespace test = </xsl:text>
       <xsl:text>"http://www.jenitennison.com/xslt/unit-test"&#10;</xsl:text>
       <xsl:text>  at "</xsl:text>
+      <!-- TODO: Once again, this is dependent on the target
+           processor... (e.g. on MarkLogic or eXist, this XSpec module
+           - or the corresponding, processor-dependent one - should
+           have been installed on the server).  -->
       <xsl:value-of select="resolve-uri('generate-query-utils.xql', static-base-uri())"/>
       <xsl:text>";&#10;</xsl:text>
       <xsl:apply-templates select="." mode="x:decl-ns">
@@ -186,8 +197,11 @@
       <xsl:text>&#10;</xsl:text>
       <xsl:element name="{ $xspec-prefix }:report"
                    namespace="http://www.jenitennison.com/xslt/xspec">
-         <xsl:attribute name="query" select="$this/@query"/>
          <xsl:attribute name="date"  select="current-dateTime()"/>
+         <xsl:attribute name="query" select="$this/@query"/>
+         <xsl:if test="exists($query-at)">
+            <xsl:attribute name="query-at" select="$query-at"/>
+         </xsl:if>
          <xsl:text> {&#10;</xsl:text>
          <xsl:apply-templates mode="x:calls">
             <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
@@ -304,11 +318,12 @@
             <xsl:if test="position() != last()">, </xsl:if>
          </xsl:for-each>
          <xsl:text>)&#10;</xsl:text>
-         <xsl:text>    return (&#10;      </xsl:text>
-         <xsl:element name="{ $xspec-prefix }:result"
+         <xsl:text>    return (&#10;</xsl:text>
+         <!-- FIXME: Generate an empty x:result element?  Why the world? -->
+         <!--xsl:element name="{ $xspec-prefix }:result"
                       namespace="http://www.jenitennison.com/xslt/xspec">
          </xsl:element>
-         <xsl:text>,&#10;</xsl:text>
+         <xsl:text>,&#10;</xsl:text-->
          <xsl:apply-templates mode="x:calls">
             <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
          </xsl:apply-templates>
@@ -348,7 +363,7 @@
       <xsl:text>      </xsl:text>
       <x:test successful="{{ $success }}">
          <xsl:sequence select="x:label(.)"/>
-         <xsl:text>&#10;      { if ( $r instance of xs:boolean ) then () else test:report-value($t:result, 'x:result') }</xsl:text>
+         <xsl:text>&#10;      { if ( $r instance of xs:boolean ) then () else test:report-value($r, 'x:result') }</xsl:text>
          <xsl:text>&#10;      { test:report-value($exp, 'x:expect') }</xsl:text>
       </x:test>
       <xsl:text>&#10;};&#10;</xsl:text>

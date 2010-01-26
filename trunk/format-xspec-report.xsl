@@ -54,7 +54,7 @@
     <body>
       <h1>Test Report</h1>
       <p>
-         <xsl:value-of select="exists( @query ) then 'Query: ' else 'Stylesheet: '"/>
+         <xsl:value-of select="if ( exists(@query) ) then 'Query: ' else 'Stylesheet: '"/>
          <a href="{ @stylesheet|@query }">
             <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
          </a>
