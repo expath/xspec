@@ -100,29 +100,24 @@
         </tbody>
       </table>
       <xsl:for-each select="x:scenario[not(@pending)]">
+        <xsl:variable name="pending" as="xs:boolean"
+          select="exists(@pending)" />
+        <xsl:variable name="any-failure" as="xs:boolean"
+          select="exists(x:test[@successful = 'false'])" />
         <div id="{generate-id()}">
-          <h2>
+          <h2 class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
             <xsl:copy-of select="x:pending-callback(@pending)"/>
             <xsl:apply-templates select="x:label" mode="x:html-report" />
+            <span class="scenario-totals">
+              <xsl:call-template name="x:totals">
+                <xsl:with-param name="tests" select=".//x:test" />
+              </xsl:call-template>
+            </span>
           </h2>
-          <table class="xspec" id="{generate-id()}">
+          <table class="xspec" id="t-{generate-id()}">
             <col width="85%" />
             <col width="15%" />
-            <thead>
-              <tr>
-                <th style="text-align: right; font-weight: normal; ">passed/pending/failed/total</th>
-                <th>
-                  <xsl:call-template name="x:totals">
-                    <xsl:with-param name="tests" select=".//x:test" />
-                  </xsl:call-template>
-                </th>
-              </tr>
-            </thead>
             <tbody>
-              <xsl:variable name="pending" as="xs:boolean"
-                select="exists(@pending)" />
-              <xsl:variable name="any-failure" as="xs:boolean"
-                select="exists(x:test[@successful = 'false'])" />
               <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
                 <th>
                   <xsl:copy-of select="x:pending-callback(@pending)"/>
@@ -130,7 +125,7 @@
                 </th>
                 <th>
                   <xsl:call-template name="x:totals">
-                    <xsl:with-param name="tests" select="x:test" />
+                    <xsl:with-param name="tests" select=".//x:test" />
                   </xsl:call-template>
                 </th>
               </tr>

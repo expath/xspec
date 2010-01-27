@@ -375,16 +375,16 @@ a {
 	}
 
 table { width: 85%;
-        border: collapse; }
+        /* border: collapse; */ }
 
 th { text-align: left; }
 
 .xspec tbody th { font-weight: normal; font-size: 0.8em; border-top: 1px #666 solid; }
 .xspec tbody td { font-size: 0.8em; color: #666; }
 
-tr.successful { background-color: #CFC; }
-tr.pending { background-color: #EEE; color: #666; }
-tr.failed { background-color: #FCC; }
+.successful { background-color: #CFC; }
+.pending { background-color: #EEE; color: #666; }
+.failed { background-color: #FCC; }
 
 .xspecResult { width: 95%; table-layout: fixed; }
 
@@ -397,3 +397,5 @@ tr.failed { background-color: #FCC; }
   overflow: auto; 
   border: 1px #999 dotted;
 }
+
+span.scenario-totals {float: right; width: 22.5%; text-align: left}
