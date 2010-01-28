@@ -1,0 +1,114 @@
+#summary What does produce the compilation?
+#labels Phase-Implementation,Featured
+
+=Introduction=
+
+This page aims to provide an overview of the result of the
+compilation of XSpec test suites to either XSLT or XQuery (the
+two available implementations for now).  It does so by showing
+simple examples and the associated generated stylesheet and
+query.
+
+The generated stylesheets and queries are not shown entirely and
+the generated code is somewhat cleaned to show only relevant
+parts.  In particular, the code generating stuff in the final
+report have been removed, exept in the cases specifically used to
+show how this is done.  Indentation and comments have been added
+too when appropriate.  The root element of the test suites is
+never shown neither.
+
+The goal is just to make the compilation phase clearer, mostly
+for developing purposes.
+
+=Simple scenario=
+
+==Test suite==
+{{{
+<t:scenario label="scenario">
+   <t:call function="f"/>
+   <t:expect label="expectations" test="predicate"/>
+</t:scenario>
+}}}
+
+==Stylesheet==
+{{{
+<xsl:template name="x:d4e2">
+   <x:call function="f"/>
+   <xsl:variable name="actual-result" as="item()*">
+      <xsl:sequence select="f()"/>
+   </xsl:variable>
+   ... generate scenario data in the report ...
+   <xsl:call-template name="x:d4e4">
+      <xsl:with-param name="actual-result" select="$actual-result"/>
+   </xsl:call-template>
+</xsl:template>
+
+<xsl:template name="x:d4e4">
+   <xsl:param name="actual-result" as="item()*" required="yes"/>
+   <xsl:variable name="x:result" select="$actual-result"/>
+   <!-- expected result (none here) -->
+   <xsl:variable name="expected-result" select="()"/>
+   <!-- wrap $t:result into a doc node if node()+ -->
+   <xsl:variable name="test-items" as="item()*">
+      <xsl:choose>
+         <xsl:when test="$actual-result instance of node()+">
+            <xsl:document>
+               <xsl:copy-of select="$actual-result"/>
+            </xsl:document>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="$actual-result"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:variable>
+   <!-- evaluate the predicate with $t:result as context
+        node if $t:result is a single node, if not just
+        evaluate the predicate -->
+   <xsl:variable name="test-result" as="item()*">
+      <xsl:choose>
+         <xsl:when test="count($test-items) eq 1">
+            <xsl:for-each select="$test-items">
+               <xsl:sequence select="predicate" version="2"/>
+            </xsl:for-each>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="predicate" version="2"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:variable>
+   <!-- did the test pass? -->
+   <xsl:variable name="boolean-test" as="xs:boolean"
+                 select="$test-result instance of xs:boolean"/>
+   <xsl:variable name="successful" as="xs:boolean" select="
+       if ( $boolean-test ) then
+         $test-result
+       else
+         test:deep-equal($expected-result, $test-result, 2)"/>
+   ... generate test result in the report ...
+</xsl:template>
+}}}
+
+==Query==
+{{{
+declare function local:d4e2()
+{
+  ... generate scenario data in the report ...
+  let $result := f()
+    return (
+      local:d4e4($result)
+    )
+};
+
+declare function local:d4e4($t:result as item()*)
+{
+  let $exp := (  )              (: expected result (none here) :)
+  let $r := ( predicate )       (: evaluate the predicate :)
+  let $success :=               (: did the test pass?:)
+      if ( $r instance of xs:boolean ) then
+        $r
+      else
+        test:deep-equal($exp, $r)
+    return
+      ... generate test result in the report ...
+};
+}}}
