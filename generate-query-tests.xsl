@@ -201,11 +201,7 @@
          </xsl:for-each>
          <xsl:text>)&#10;</xsl:text>
          <xsl:text>    return (&#10;</xsl:text>
-         <!-- FIXME: Generate an empty x:result element?  Why the world? -->
-         <!--xsl:element name="{ $xspec-prefix }:result"
-                      namespace="http://www.jenitennison.com/xslt/xspec">
-         </xsl:element>
-         <xsl:text>,&#10;</xsl:text-->
+         <xsl:text>      test:report-value($result, 'x:result'),&#10;</xsl:text>
          <xsl:apply-templates mode="x:calls">
             <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
          </xsl:apply-templates>
