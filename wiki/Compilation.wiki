@@ -32,42 +32,43 @@ for developing purposes.
 
 ==Stylesheet==
 {{{
+<!-- generated from the scenario element -->
 <xsl:template name="x:d4e2">
    <x:call function="f"/>
-   <xsl:variable name="actual-result" as="item()*">
+   <xsl:variable name="impl:actual-result" as="item()*">
       <xsl:sequence select="f()"/>
    </xsl:variable>
    ... generate scenario data in the report ...
    <xsl:call-template name="x:d4e4">
-      <xsl:with-param name="actual-result" select="$actual-result"/>
+      <xsl:with-param name="x:result" select="$impl:actual-result"/>
    </xsl:call-template>
 </xsl:template>
 
+<!-- generated from the expect element -->
 <xsl:template name="x:d4e4">
-   <xsl:param name="actual-result" as="item()*" required="yes"/>
-   <xsl:variable name="x:result" select="$actual-result"/>
+   <xsl:param name="x:result" required="yes"/>
    <!-- expected result (none here) -->
-   <xsl:variable name="expected-result" select="()"/>
+   <xsl:variable name="impl:expected" select="()"/>
    <!-- wrap $t:result into a doc node if node()+ -->
-   <xsl:variable name="test-items" as="item()*">
+   <xsl:variable name="impl:test-items" as="item()*">
       <xsl:choose>
-         <xsl:when test="$actual-result instance of node()+">
+         <xsl:when test="$x:result instance of node()+">
             <xsl:document>
-               <xsl:copy-of select="$actual-result"/>
+               <xsl:copy-of select="$x:result"/>
             </xsl:document>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:sequence select="$actual-result"/>
+            <xsl:sequence select="$x:result"/>
          </xsl:otherwise>
       </xsl:choose>
    </xsl:variable>
    <!-- evaluate the predicate with $t:result as context
         node if $t:result is a single node, if not just
         evaluate the predicate -->
-   <xsl:variable name="test-result" as="item()*">
+   <xsl:variable name="impl:test-result" as="item()*">
       <xsl:choose>
-         <xsl:when test="count($test-items) eq 1">
-            <xsl:for-each select="$test-items">
+         <xsl:when test="count($impl:test-items) eq 1">
+            <xsl:for-each select="$impl:test-items">
                <xsl:sequence select="predicate" version="2"/>
             </xsl:for-each>
          </xsl:when>
@@ -77,37 +78,39 @@ for developing purposes.
       </xsl:choose>
    </xsl:variable>
    <!-- did the test pass? -->
-   <xsl:variable name="boolean-test" as="xs:boolean"
-                 select="$test-result instance of xs:boolean"/>
-   <xsl:variable name="successful" as="xs:boolean" select="
-       if ( $boolean-test ) then
-         $test-result
+   <xsl:variable name="impl:boolean-test" as="xs:boolean"
+                 select="$impl:test-result instance of xs:boolean"/>
+   <xsl:variable name="impl:successful" as="xs:boolean" select="
+       if ( $impl:boolean-test ) then
+         $impl:test-result
        else
-         test:deep-equal($expected-result, $test-result, 2)"/>
+         test:deep-equal($impl:expected, $impl:test-result, 2)"/>
    ... generate test result in the report ...
 </xsl:template>
 }}}
 
 ==Query==
 {{{
+(: generated from the scenario element :)
 declare function local:d4e2()
 {
   ... generate scenario data in the report ...
-  let $result := f()
+  let $local:result := f()
     return (
-      local:d4e4($result)
+      local:d4e4($local:result)
     )
 };
 
+(: generated from the expect element :)
 declare function local:d4e4($t:result as item()*)
 {
-  let $exp := (  )              (: expected result (none here) :)
-  let $r := ( predicate )       (: evaluate the predicate :)
-  let $success :=               (: did the test pass?:)
-      if ( $r instance of xs:boolean ) then
-        $r
+  let $local:expected    := (  )             (: expected result (none here) :)
+  let $local:test-result := ( predicate )    (: evaluate the predicate :)
+  let $local:successful  :=                  (: did the test pass?:)
+      if ( $local:test-result instance of xs:boolean ) then
+        $local:test-result
       else
-        test:deep-equal($exp, $r)
+        test:deep-equal($local:expected, $local:test-result)
     return
       ... generate test result in the report ...
 };
