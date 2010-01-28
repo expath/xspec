@@ -119,7 +119,7 @@
       <xsl:param name="pending" as="node()?" select="()" tunnel="yes"/>
       <xsl:text>      local:</xsl:text>
       <xsl:value-of select="generate-id()"/>
-      <xsl:text>($result)</xsl:text>
+      <xsl:text>($local:result)</xsl:text>
       <xsl:if test="position() ne last()">
          <xsl:text>,</xsl:text>
       </xsl:if>
@@ -183,7 +183,7 @@
          <xsl:apply-templates select="x:context|x:call" mode="x:report"/>
          <xsl:text>      &#10;{&#10;</xsl:text>
          <xsl:apply-templates select="$new-call/x:param" mode="x:generate-declarations"/>
-         <xsl:text>  let $result := </xsl:text>
+         <xsl:text>  let $local:result := </xsl:text>
          <xsl:value-of select="$new-call/@function"/>
          <xsl:text>(</xsl:text>
          <xsl:for-each select="$new-call/x:param">
@@ -194,7 +194,7 @@
          </xsl:for-each>
          <xsl:text>)&#10;</xsl:text>
          <xsl:text>    return (&#10;</xsl:text>
-         <xsl:text>      test:report-value($result, 'x:result'),&#10;</xsl:text>
+         <xsl:text>      test:report-value($local:result, 'x:result'),&#10;</xsl:text>
          <xsl:apply-templates mode="x:calls">
             <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
          </xsl:apply-templates>
@@ -216,28 +216,28 @@
       <xsl:text>($</xsl:text>
       <xsl:value-of select="$xspec-prefix"/>
       <xsl:text>:result as item()*)&#10;{&#10;</xsl:text>
-      <xsl:text>  let $exp := ( </xsl:text>
+      <xsl:text>  let $local:expected := ( </xsl:text>
       <!-- FIXME: Not correct, the x:expect model is more complex than
            a simple variable... (see how the original stylesheet, for
            XSLT, handles that...) Factorize with the XSLT version...
-           The value of $exp depends on x:expect's depends on content,
-           @href and @select. -->
+           The value of $local:expected depends on x:expect's depends
+           on content, @href and @select. -->
       <xsl:value-of select="@select"/>
       <xsl:copy-of select="node()"/>
       <xsl:text> )&#10;</xsl:text>
-      <xsl:text>  let $r := ( </xsl:text>
+      <xsl:text>  let $local:test-result := ( </xsl:text>
       <xsl:value-of select="@test"/>
       <xsl:text> )&#10;</xsl:text>
-      <xsl:text>  let $success := if ( $r instance of xs:boolean ) then&#10;</xsl:text>
-      <xsl:text>                    $r&#10;</xsl:text>
-      <xsl:text>                  else&#10;</xsl:text>
-      <xsl:text>                    test:deep-equal($exp, $r)&#10;</xsl:text>
+      <xsl:text>  let $local:successful := if ( $local:test-result instance of xs:boolean ) then&#10;</xsl:text>
+      <xsl:text>                             $local:test-result&#10;</xsl:text>
+      <xsl:text>                           else&#10;</xsl:text>
+      <xsl:text>                             test:deep-equal($local:expected, $local:test-result)&#10;</xsl:text>
       <xsl:text>    return&#10;</xsl:text>
       <xsl:text>      </xsl:text>
-      <x:test successful="{{ $success }}">
+      <x:test successful="{{ $local:successful }}">
          <xsl:sequence select="x:label(.)"/>
-         <xsl:text>&#10;      { if ( $r instance of xs:boolean ) then () else test:report-value($r, 'x:result') }</xsl:text>
-         <xsl:text>&#10;      { test:report-value($exp, 'x:expect') }</xsl:text>
+         <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, 'x:result') }</xsl:text>
+         <xsl:text>&#10;      { test:report-value($local:expected, 'x:expect') }</xsl:text>
       </x:test>
       <xsl:text>&#10;};&#10;</xsl:text>
    </xsl:template>
@@ -268,6 +268,8 @@
       <xsl:text>  let $</xsl:text>
       <xsl:value-of select="( @name, generate-id() )[1]"/>
       <xsl:text> := </xsl:text>
+      <!-- FIXME: Not correct, the x:param model is more complex than
+           a simple variable.  See x:expect comment above... -->
       <xsl:value-of select="@select"/>
       <xsl:copy-of select="node()"/>
       <xsl:text>&#10;</xsl:text>
