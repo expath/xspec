@@ -6,8 +6,9 @@
   xmlns:test="http://www.jenitennison.com/xslt/unit-test"
   exclude-result-prefixes="#default test"
   xmlns:x="http://www.jenitennison.com/xslt/xspec"
-  xmlns:o="http://www.w3.org/1999/XSL/TransformAliasAlias">
-  
+  xmlns:o="http://www.w3.org/1999/XSL/TransformAliasAlias"
+  xmlns:impl="urn:x-xspec:compile:xslt:impl">
+
 <xsl:import href="generate-common-tests.xsl"/>
 <xsl:import href="generate-tests-helper.xsl" />
 
@@ -98,7 +99,7 @@
   <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
   <call-template name="x:{generate-id()}">
     <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
-      <with-param name="actual-result" select="$actual-result" />
+      <with-param name="x:result" select="$impl:actual-result"/>
     </xsl:if>
   </call-template>
 </xsl:template>  
@@ -207,7 +208,7 @@
     	<xsl:sequence select="x:label(.)" />
       <xsl:apply-templates select="x:context | x:call" mode="x:report" />
       <xsl:if test="empty($new-pending) and x:expect">
-        <variable name="actual-result" as="item()*">
+        <variable name="impl:actual-result" as="item()*">
           <xsl:choose>
             <xsl:when test="$new-call/@template">
               <!-- Set up variables containing the parameter values -->
@@ -272,7 +273,7 @@
           </xsl:choose>      
         </variable>
         <call-template name="test:report-value">
-          <with-param name="value" select="$actual-result" />
+          <with-param name="value" select="$impl:actual-result" />
           <with-param name="wrapper-name" select="'x:result'" />
           <with-param name="wrapper-ns" select="'http://www.jenitennison.com/xslt/xspec'" />
         </call-template>
@@ -293,16 +294,15 @@
     Generate the following:
 
         <template name="x:...">
-           <param name="actual-result" as="item()*" required="yes"/>   # if not pending
-           <variable name="x:result" select="$actual-result"/>         # if not pending
+           <param name="x:result" required="yes"/>       # if not pending
            <message>
               Running (pending?) assertion...
            </message>
            # if not pending
-              <variable name="expected-result" ...>   # depend on content, @href and @select
+              <variable name="impl:expected" ...>   # depend on content, @href and @select
               # if @test, evaluate it with result as context node then
-              #   if it is not a boolean, compare it to $expected-result
-              # if no @test, compare result to $expected-result
+              #   if it is not a boolean, compare it to $impl:expected
+              # if no @test, compare result to $impl:expected
            # fi
            <x:test>
               ...
@@ -315,8 +315,7 @@
   <xsl:param name="call" as="element(x:call)?" required="yes" tunnel="yes" />  
   <template name="x:{generate-id()}">
     <xsl:if test="empty($pending)">
-      <param name="actual-result" as="item()*" required="yes" />
-      <variable name="x:result" select="$actual-result"/>
+      <param name="x:result" required="yes"/>
     </xsl:if>
     <message>
       <xsl:if test="exists($pending)">
@@ -330,30 +329,31 @@
       <xsl:variable name="version" as="xs:double" 
         select="(ancestor-or-self::*[@xslt-version]/@xslt-version, 2.0)[1]" />
       <xsl:apply-templates select="." mode="test:generate-variable-declarations">
-        <xsl:with-param name="var" select="'expected-result'" />
+        <xsl:with-param name="var" select="'impl:expected'" />
       </xsl:apply-templates>
       <xsl:choose>
         <xsl:when test="@test">
-          <variable name="test-items" as="item()*">
+          <variable name="impl:test-items" as="item()*">
             <choose>
               <!-- From trying this out, it seems like it's useful for the test
-                to be able to test the nodes that are generated in the
-                $actual-result as if they were *children* of the context node.
-                Have to experiment a bit to see if that really is the case. -->
-              <when test="$actual-result instance of node()+">
+                   to be able to test the nodes that are generated in the
+                   $x:result as if they were *children* of the context node.
+                   Have to experiment a bit to see if that really is the case.                   
+                   TODO: To remove. Use directly $x:result instead.  See issue 14. -->
+              <when test="$x:result instance of node()+">
                 <document>
-                  <copy-of select="$actual-result" />
+                  <copy-of select="$x:result" />
                 </document>
               </when>
               <otherwise>
-                <sequence select="$actual-result" />
+                <sequence select="$x:result" />
               </otherwise>
             </choose>
           </variable>
-          <variable name="test-result" as="item()*">
+          <variable name="impl:test-result" as="item()*">
              <choose>
-                <when test="count($test-items) eq 1">
-                   <for-each select="$test-items">
+                <when test="count($impl:test-items) eq 1">
+                   <for-each select="$impl:test-items">
                       <sequence select="{ @test }" version="{ $version }"/>
                    </for-each>
                 </when>
@@ -362,18 +362,20 @@
                 </otherwise>
              </choose>
           </variable>
-          <variable name="boolean-test" as="xs:boolean"
-            select="$test-result instance of xs:boolean" />
-          <variable name="successful" as="xs:boolean"
-            select="if ($boolean-test) then $test-result
-                    else test:deep-equal($expected-result, $test-result, {$version})" />
+          <!-- TODO: A predicate should always return exactly one boolean, or
+               this is an error.  See issue 5.-->
+          <variable name="impl:boolean-test" as="xs:boolean"
+            select="$impl:test-result instance of xs:boolean" />
+          <variable name="impl:successful" as="xs:boolean"
+            select="if ($impl:boolean-test) then $impl:test-result
+                    else test:deep-equal($impl:expected, $impl:test-result, {$version})" />
         </xsl:when>
         <xsl:otherwise>
-          <variable name="successful" as="xs:boolean" 
-            select="test:deep-equal($expected-result, $actual-result, {$version})" />
+          <variable name="impl:successful" as="xs:boolean" 
+            select="test:deep-equal($impl:expected, $x:result, {$version})" />
         </xsl:otherwise>
       </xsl:choose>
-      <if test="not($successful)">
+      <if test="not($impl:successful)">
         <message>
           <xsl:text>      FAILED</xsl:text>
         </message>
@@ -385,28 +387,28 @@
           <xsl:attribute name="pending" select="$pending" />
         </xsl:when>
         <xsl:otherwise>
-          <xsl:attribute name="successful" select="'{$successful}'" />
+          <xsl:attribute name="successful" select="'{$impl:successful}'" />
         </xsl:otherwise>
       </xsl:choose>
-    	<xsl:sequence select="x:label(.)" />
-    	<xsl:if test="@test and empty($pending)">
-        <if test="not($boolean-test)">
-          <call-template name="test:report-value">
-            <with-param name="value" select="$test-result" />
-            <with-param name="wrapper-name" select="'x:result'" />
-            <with-param name="wrapper-ns" select="'http://www.jenitennison.com/xslt/xspec'" />
-          </call-template>
-        </if>
+      <xsl:sequence select="x:label(.)"/>
+      <xsl:if test="@test and empty($pending)">
+         <if test="not($impl:boolean-test)">
+            <call-template name="test:report-value">
+               <with-param name="value"        select="$impl:test-result"/>
+               <with-param name="wrapper-name" select="'x:result'"/>
+               <with-param name="wrapper-ns"   select="'http://www.jenitennison.com/xslt/xspec'"/>
+            </call-template>
+         </if>
       </xsl:if>
-    	<xsl:if test="empty($pending)">
-    		<call-template name="test:report-value">
-    			<with-param name="value" select="$expected-result" />
-    			<with-param name="wrapper-name" select="'x:expect'" />
-    			<with-param name="wrapper-ns" select="'http://www.jenitennison.com/xslt/xspec'" />
-    		</call-template>
-    	</xsl:if>
+      <xsl:if test="empty($pending)">
+         <call-template name="test:report-value">
+            <with-param name="value"        select="$impl:expected"/>
+            <with-param name="wrapper-name" select="'x:expect'"/>
+            <with-param name="wrapper-ns"   select="'http://www.jenitennison.com/xslt/xspec'"/>
+         </call-template>
+      </xsl:if>
     </x:test>
-  </template>
+ </template>
 </xsl:template>
 
 <xsl:template match="*" mode="x:generate-templates" />
