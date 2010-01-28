@@ -179,15 +179,8 @@
          <x:label>
             <xsl:value-of select="x:label(.)"/>
          </x:label>
-         <!--
-             FIXME: TODO: Adapt, generate from the test suite... !!!
-         -->
-         <x:call function="http:send-request">
-            <x:param>
-               <http-request href="http://localhost:8090/http-client-test/request/method-001"
-                             method="options"/>
-            </x:param>
-         </x:call>
+         <!-- Generate a seq ctor to generate x:context or x:call in the report. -->
+         <xsl:apply-templates select="x:context|x:call" mode="x:report"/>
          <xsl:text>      &#10;{&#10;</xsl:text>
          <xsl:apply-templates select="$new-call/x:param" mode="x:generate-declarations"/>
          <xsl:text>  let $result := </xsl:text>
