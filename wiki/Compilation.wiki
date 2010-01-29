@@ -104,8 +104,13 @@ declare function local:d4e2()
 (: generated from the expect element :)
 declare function local:d4e4($t:result as item()*)
 {
-  let $local:expected    := (  )             (: expected result (none here) :)
-  let $local:test-result := ( predicate )    (: evaluate the predicate :)
+  let $local:expected    :=                  (: expected result (none here) :)
+      (  )
+  let $local:test-result :=                  (: evaluate the predicate :)
+      if ( $t:result instance of node() ) then
+        $t:result/( predicate )
+      else
+        ( predicate )
   let $local:successful  :=                  (: did the test pass?:)
       if ( $local:test-result instance of xs:boolean ) then
         $local:test-result
