@@ -26,6 +26,80 @@
   <xsl:text> </xsl:text>
 </xsl:function>
 
+<xsl:template name="x:html-head-callback" as="node()*"/>
+  
+<xsl:template name="x:format-top-level-scenario">
+  <xsl:variable name="pending" as="xs:boolean"
+    select="exists(@pending)" />
+  <xsl:variable name="any-failure" as="xs:boolean"
+    select="exists(x:test[@successful = 'false'])" />
+  <div id="{generate-id()}">
+    <h2 class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
+      <xsl:copy-of select="x:pending-callback(@pending)"/>
+      <xsl:apply-templates select="x:label" mode="x:html-report" />
+      <span class="scenario-totals">
+        <xsl:call-template name="x:totals">
+          <xsl:with-param name="tests" select=".//x:test" />
+        </xsl:call-template>
+      </span>
+    </h2>
+    <table class="xspec" id="t-{generate-id()}">
+      <col width="85%" />
+      <col width="15%" />
+      <tbody>
+        <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
+          <th>
+            <xsl:copy-of select="x:pending-callback(@pending)"/>
+            <xsl:apply-templates select="x:label" mode="x:html-report" />
+          </th>
+          <th>
+            <xsl:call-template name="x:totals">
+              <xsl:with-param name="tests" select=".//x:test" />
+            </xsl:call-template>
+          </th>
+        </tr>
+        <xsl:apply-templates select="x:test" mode="x:html-summary" />
+        <xsl:for-each select=".//x:scenario[x:test]">
+          <xsl:variable name="pending" as="xs:boolean"
+            select="exists(@pending)" />
+          <xsl:variable name="any-failure" as="xs:boolean"
+            select="exists(x:test[@successful = 'false'])" />
+          <xsl:variable name="label" as="node()+">
+            <xsl:for-each select="ancestor-or-self::x:scenario[position() != last()]">
+              <xsl:apply-templates select="x:label" mode="x:html-report" />
+              <xsl:if test="position() != last()">
+                <xsl:copy-of select="x:separator-callback()"/>
+              </xsl:if>
+            </xsl:for-each>
+          </xsl:variable>
+          <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
+            <th>
+              <xsl:copy-of select="x:pending-callback(@pending)"/>
+              <xsl:choose>
+                <xsl:when test="$any-failure">
+                  <a href="#{generate-id()}">
+                    <xsl:sequence select="$label" />
+                  </a>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:sequence select="$label" />
+                </xsl:otherwise>
+              </xsl:choose>
+            </th>
+            <th>
+              <xsl:call-template name="x:totals">
+                <xsl:with-param name="tests" select="x:test" />
+              </xsl:call-template>
+            </th>
+          </tr>
+          <xsl:apply-templates select="x:test" mode="x:html-summary" />
+        </xsl:for-each>
+      </tbody>
+    </table>
+    <xsl:apply-templates select="descendant-or-self::x:scenario[x:test[@successful = 'false']]" mode="x:html-report" />
+  </div>
+</xsl:template>
+
 <xsl:template match="/">
   <xsl:message>
     <xsl:call-template name="x:totals">
@@ -50,6 +124,7 @@
       </title>
       <link rel="stylesheet" type="text/css"
             href="{resolve-uri('test-report.css', static-base-uri())}" />
+      <xsl:call-template name="x:html-head-callback"/>
     </head>
     <body>
       <h1>Test Report</h1>
@@ -100,75 +175,7 @@
         </tbody>
       </table>
       <xsl:for-each select="x:scenario[not(@pending)]">
-        <xsl:variable name="pending" as="xs:boolean"
-          select="exists(@pending)" />
-        <xsl:variable name="any-failure" as="xs:boolean"
-          select="exists(x:test[@successful = 'false'])" />
-        <div id="{generate-id()}">
-          <h2 class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
-            <xsl:copy-of select="x:pending-callback(@pending)"/>
-            <xsl:apply-templates select="x:label" mode="x:html-report" />
-            <span class="scenario-totals">
-              <xsl:call-template name="x:totals">
-                <xsl:with-param name="tests" select=".//x:test" />
-              </xsl:call-template>
-            </span>
-          </h2>
-          <table class="xspec" id="t-{generate-id()}">
-            <col width="85%" />
-            <col width="15%" />
-            <tbody>
-              <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
-                <th>
-                  <xsl:copy-of select="x:pending-callback(@pending)"/>
-                  <xsl:apply-templates select="x:label" mode="x:html-report" />
-                </th>
-                <th>
-                  <xsl:call-template name="x:totals">
-                    <xsl:with-param name="tests" select=".//x:test" />
-                  </xsl:call-template>
-                </th>
-              </tr>
-              <xsl:apply-templates select="x:test" mode="x:html-summary" />
-              <xsl:for-each select=".//x:scenario[x:test]">
-                <xsl:variable name="pending" as="xs:boolean"
-                  select="exists(@pending)" />
-                <xsl:variable name="any-failure" as="xs:boolean"
-                  select="exists(x:test[@successful = 'false'])" />
-                <xsl:variable name="label" as="node()+">
-                	<xsl:for-each select="ancestor-or-self::x:scenario[position() != last()]">
-                		<xsl:apply-templates select="x:label" mode="x:html-report" />
-                		<xsl:if test="position() != last()">
-                      <xsl:copy-of select="x:separator-callback()"/>
-                    </xsl:if>
-                	</xsl:for-each>
-                </xsl:variable>
-                <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
-                  <th>
-                    <xsl:copy-of select="x:pending-callback(@pending)"/>
-                    <xsl:choose>
-                      <xsl:when test="$any-failure">
-                        <a href="#{generate-id()}">
-                          <xsl:sequence select="$label" />
-                        </a>
-                      </xsl:when>
-                      <xsl:otherwise>
-                        <xsl:sequence select="$label" />
-                      </xsl:otherwise>
-                    </xsl:choose>
-                  </th>
-                  <th>
-                    <xsl:call-template name="x:totals">
-                      <xsl:with-param name="tests" select="x:test" />
-                    </xsl:call-template>
-                  </th>
-                </tr>
-                <xsl:apply-templates select="x:test" mode="x:html-summary" />
-              </xsl:for-each>
-            </tbody>
-          </table>
-          <xsl:apply-templates select="descendant-or-self::x:scenario[x:test[@successful = 'false']]" mode="x:html-report" />
-        </div>
+        <xsl:call-template name="x:format-top-level-scenario"/>
       </xsl:for-each>
     </body>
   </html>
