@@ -194,10 +194,12 @@ declare function local:d4e4($t:result as item()*)
 
 =Variable value=
 
-Here is an example of two variables, one using `@select`, one
-using content.  As with `xsl:variable`, they must use one and
-exactly one of them.  The resulting variables must be once in the
-code generated for the `scenario` element and once in the code
+Here is an example of three variables, one using `@select`, one
+using content, and one using `@href`..  As with `xsl:variable`,
+they must use one and exactly one of them.  The href attribute is
+to load a document from a file (relative to the test suite
+document).  The resulting variables must be once in the code
+generated for the `scenario` element and once in the code
 generated for the `expect` element (well, define more precisely
 the scope of the variables, I think we should be able to put them
 everywhere, and the scope must "natural" when looking at the test
@@ -206,6 +208,7 @@ suite definition).
 ==Test suite==
 {{{
 <t:variable name="select"  select="'value'"/>
+<t:variable name="href"    href="test-data.xml"/>
 <t:variable name="content" as="element()">
    <elem/>
 </t:variable>
@@ -214,6 +217,7 @@ suite definition).
 ==Stylesheet==
 {{{
 <xsl:variable name="select" select="'value'"/>
+<xsl:variable name="href"   select="doc('.../test-data.xml')"/>
 <xsl:variable name="content" as="element()">
    <elem/>
 </xsl:variable>
@@ -222,6 +226,7 @@ suite definition).
 ==Query==
 {{{
 let $select := 'value'
+let $href   := doc('.../test-data.xml')
 let $content as element() := <elem/>
 }}}
 
