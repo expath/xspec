@@ -120,3 +120,70 @@ declare function local:d4e4($t:result as item()*)
       ... generate test result in the report ...
 };
 }}}
+
+=Variables=
+
+This is not implemented yet, but this is an example of what they
+shall look like.
+
+==Test suite==
+{{{
+<t:scenario label="scenario">
+   <t:variable name="var" select="'value'"/>
+   ...
+   <t:expect .../>
+</t:scenario>
+}}}
+
+==Stylesheet==
+{{{
+<!-- generated from the scenario element -->
+<xsl:template name="x:d4e2">
+   <!-- the generated variable -->
+   <xsl:variable name="var" select="'value'"/>
+   <xsl:variable name="impl:actual-result" as="item()*">
+      ... evaluate the test expression ...
+   </xsl:variable>
+   ...
+   <xsl:call-template name="x:d4e4">
+      <xsl:with-param name="x:result" select="$impl:actual-result"/>
+   </xsl:call-template>
+</xsl:template>
+
+<!-- generated from the expect element -->
+<xsl:template name="x:d4e4">
+   <xsl:param name="x:result" required="yes"/>
+   <!-- the generated variable -->
+   <xsl:variable name="var" select="'value'"/>
+   <!-- evaluate the expectation -->
+   <xsl:variable name="impl:expected" ...>
+   <xsl:variable name="impl:test-items" ...>
+   <xsl:variable name="impl:test-result" ...>
+   ...
+</xsl:template>
+}}}
+
+==Query==
+{{{
+(: generated from the scenario element :)
+declare function local:d4e2()
+{
+  ...
+  let $var          := 'value'               (: the generated variable :)
+  let $local:result := ... evaluate the test expression ...
+    return (
+      local:d4e4($local:result)
+    )
+};
+
+(: generated from the expect element :)
+declare function local:d4e4($t:result as item()*)
+{
+  let $var               := 'value'          (: the generated variable :)
+  let $local:expected    := ...              (: expected result :)
+  let $local:test-result := ...              (: evaluate the expectations :)
+  let $local:successful  := ...              (: did the test pass?:)
+    return
+      ... generate test result in the report ...
+};
+}}}
