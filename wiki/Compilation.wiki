@@ -1,6 +1,10 @@
 #summary What does produce the compilation?
 #labels Phase-Implementation,Featured
 
+=Contents=
+
+<wiki:toc max_depth="1" />
+
 =Introduction=
 
 This page aims to provide an overview of the result of the
