@@ -191,3 +191,36 @@ declare function local:d4e4($t:result as item()*)
       ... generate test result in the report ...
 };
 }}}
+
+=Variable value=
+
+Here is an example of two variables, one using `@select`, one
+using content.  As with `xsl:variable`, they must use one and
+exactly one of them.  The resulting variables must be once in the
+code generated for the `scenario` element and once in the code
+generated for the `expect` element (well, define more precisely
+the scope of the variables, I think we should be able to put them
+everywhere, and the scope must "natural" when looking at the test
+suite definition).
+
+==Test suite==
+{{{
+<t:variable name="select"  select="'value'"/>
+<t:variable name="content" as="element()">
+   <elem/>
+</t:variable>
+}}}
+
+==Stylesheet==
+{{{
+<xsl:variable name="select" select="'value'"/>
+<xsl:variable name="content" as="element()">
+   <elem/>
+</xsl:variable>
+}}}
+
+==Query==
+{{{
+let $select := 'value'
+let $content as element() := <elem/>
+}}}
