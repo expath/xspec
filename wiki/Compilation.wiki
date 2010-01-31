@@ -234,6 +234,7 @@ let $content as element() := <elem/>
 
 ==Test suite==
 {{{
+<t:variable name="global" ...>
 <t:scenario label="outer">
    <t:variable name="var-1" ...>
    <t:scenario label="inner">
@@ -249,6 +250,8 @@ let $content as element() := <elem/>
 
 ==Stylesheet==
 {{{
+<xsl:variable name="global" ...>
+
 <!-- generated from the scenario outer -->
 <xsl:template name="x:d4e2">
    <!-- the generated variable -->
@@ -299,6 +302,8 @@ let $content as element() := <elem/>
 
 ==Query==
 {{{
+declare variable $global := ...;
+
 (: generated from the scenario outer :)
 declare function local:d4e2()
 {
