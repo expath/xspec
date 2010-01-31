@@ -232,6 +232,16 @@ let $content as element() := <elem/>
 
 =Variables scope=
 
+This show where variables are generated regarding their scope.
+It is worth noting the first definition of this was to generate
+variables several times if needed, e.g. if they were in scope in
+a scenario and expectations (see the revision r78 of this page
+for an example).  But this would lead in several evaluations of
+the same thing (which could lead in being less efficient, and in
+subtle bugs in case of side-effects).  So instead, variables are
+evaluated once, then passed as parameters (to templates in XSLT
+and functions in XQuery).
+
 ==Test suite==
 {{{
 <t:variable name="global" ...>
@@ -257,45 +267,59 @@ let $content as element() := <elem/>
    <!-- the generated variable -->
    <xsl:variable name="var-1" ...>
    ...
+   <xsl:call-template name="x:d4e3">
+      <!-- pass the variable to inner context -->
+      <xsl:with-param name="var-1" select="$var-1"/>
+   </xsl:call-template>
 </xsl:template>
 
 <!-- generated from the scenario inner -->
 <xsl:template name="x:d4e3">
-   <!-- note the outer variable is repeated here -->
-   <!-- note also $var-3 and $var-4 are not in scope at this point -->
-   <xsl:variable name="var-1" ...>
+   <!-- the variable is passed as param -->
+   <xsl:param name="var-1" required="yes" ...>
+   <!-- the generated variable -->
    <xsl:variable name="var-2" ...>
    <xsl:variable name="impl:actual-result" as="item()*">
       <xsl:sequence select="f()"/>
    </xsl:variable>
    ...
+   <!-- the generated variable -->
+   <xsl:variable name="var-3" ...>
    <xsl:call-template name="x:d4e4">
       <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="var-1"    select="$var-1"/>
+      <xsl:with-param name="var-2"    select="$var-2"/>
+      <xsl:with-param name="var-3"    select="$var-3"/>
    </xsl:call-template>
+   <!-- the generated variable -->
+   <xsl:variable name="var-4" ...>
    <xsl:call-template name="x:d4e5">
       <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="var-1"    select="$var-1"/>
+      <xsl:with-param name="var-2"    select="$var-2"/>
+      <xsl:with-param name="var-3"    select="$var-3"/>
+      <xsl:with-param name="var-4"    select="$var-4"/>
    </xsl:call-template>
 </xsl:template>
 
 <!-- generated from the expect one -->
 <xsl:template name="x:d4e4">
    <xsl:param name="x:result" required="yes"/>
-   <!-- note $var-1 and $var-2 are repeated here -->
-   <!-- note also $var-4 is not in scope at this point -->
-   <xsl:variable name="var-1" ...>
-   <xsl:variable name="var-2" ...>
-   <xsl:variable name="var-3" ...>
+   <!-- the variables are passed as param -->
+   <xsl:param name="var-1" required="yes" ...>
+   <xsl:param name="var-2" required="yes" ...>
+   <xsl:param name="var-3" required="yes" ...>
    ... evaluate the expectations ...
 </xsl:template>
 
 <!-- generated from the expect two -->
 <xsl:template name="x:d4e5">
    <xsl:param name="x:result" required="yes"/>
-   <!-- note $var-1, $var-2 and $var-3 are repeated here -->
-   <xsl:variable name="var-1" ...>
-   <xsl:variable name="var-2" ...>
-   <xsl:variable name="var-3" ...>
-   <xsl:variable name="var-4" ...>
+   <!-- the variables are passed as param -->
+   <xsl:param name="var-1" required="yes" ...>
+   <xsl:param name="var-2" required="yes" ...>
+   <xsl:param name="var-3" required="yes" ...>
+   <xsl:param name="var-4" required="yes" ...>
    ... evaluate the expectations ...
 </xsl:template>
 }}}
@@ -310,42 +334,38 @@ declare function local:d4e2()
   ...
   let $var-1 := ...
   ...
+    return (
+      local:d4e3($var-1)
+    )
 };
 
 (: generated from the scenario inner :)
-declare function local:d4e3()
+declare function local:d4e3($var-1) (: $var-1 can have a "as" clause :)
 {
   ...
-  (: note the outer variable is repeated here :)
-  (: note also $var-3 and $var-4 are not in scope at this point :)
-  let $var-1        := ...
   let $var-2        := ...
   let $local:result := f()
     return (
-      local:d4e4($local:result),
-      local:d4e5($local:result)
+      let $var-3 := ...
+        return (
+          local:d4e4($local:result, $var-1, $var-2, $var-3),
+          let $var-4 := ...
+            return (
+              local:d4e5($local:result, $var-1, $var-2, $var-3, $var-4)
+            )
+        )
     )
 };
 
 (: generated from the expect one :)
-declare function local:d4e4($t:result as item()*)
+declare function local:d4e4($t:result as item()*, $var-1, $var-2, $var-3)
 {
-  (: note $var-1 and $var-2 are repeated here :)
-  (: note also $var-4 is not in scope at this point :)
-  let $var-1 := ...
-  let $var-2 := ...
-  let $var-3 := ...
   ...evaluate the expectations ...
 };
 
 (: generated from the expect two :)
-declare function local:d4e5($t:result as item()*)
+declare function local:d4e5($t:result as item()*, $var-1, $var-2, $var-3, $var-4)
 {
-  (: note $var-1, $var-2 and $var-3 are repeated here :)
-  let $var-1 := ...
-  let $var-2 := ...
-  let $var-3 := ...
-  let $var-4 := ...
   ...evaluate the expectations ...
 };
 }}}
