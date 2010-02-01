@@ -18,8 +18,13 @@ function toggle(scenarioID) {
   //   switch table.style.display between 'none' and 'block'
   //   switch between collapse and expand icons
 
-  if (table.style.display != "table") {
-    table.style.display = "table";
+   if (table.style.display == "none") {
+    // This try/catch is to handle IE 7.  It doesn't support table.style.display = "table"
+    try {
+      table.style.display = "table";
+    } catch(err) {
+      table.style.display = "block";
+    }
     icon.src = "<xsl:value-of select="resolve-uri('graphics/3angle-down.gif', static-base-uri())"/>" ;
     icon.alt = "collapse" ;
     icon.title = "collapse" ;
