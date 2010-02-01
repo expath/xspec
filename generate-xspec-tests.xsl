@@ -42,7 +42,7 @@
          the generation of XSLT! -->
     <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
     <variable name="x:stylesheet-uri" as="xs:string" select="'{$stylesheet-uri}'" />
-  	<output name="report" method="xml" indent="yes" />
+  	<output name="x:report" method="xml" indent="yes" />
     <!-- Compile the test suite params (aka global params). -->
     <xsl:call-template name="x:compile-params"/>
     <!-- The main compiled template. -->
@@ -53,7 +53,7 @@
         <text><xsl:text> </xsl:text></text>
         <value-of select="system-property('xsl:product-version')" />
       </message>
-    	<result-document format="report">
+    	<result-document format="x:report">
 	      <processing-instruction name="xml-stylesheet">
 	        <xsl:text>type="text/xsl" href="</xsl:text>
 	        <xsl:value-of select="resolve-uri('format-xspec-report.xsl',
