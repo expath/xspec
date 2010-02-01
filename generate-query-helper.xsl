@@ -25,50 +25,36 @@
                         'mode=', normalize-space(@mode))"/>
 
    <xsl:template match="*" mode="test:generate-variable-declarations">
-     <xsl:param name="var" as="xs:string" required="yes" />
-     <xsl:param name="type" as="xs:string" select="'variable'" />
-     <xsl:choose>
-       <xsl:when test="node() or @href">
-         <variable name="{$var}-doc" as="document-node()">
-           <xsl:choose>
-             <xsl:when test="@href">
-               <xsl:attribute name="select">
-                 <xsl:text>doc('</xsl:text>
-                 <xsl:value-of select="resolve-uri(@href, base-uri(.))" />
-                 <xsl:text>')</xsl:text>
-               </xsl:attribute>
-             </xsl:when>
-             <xsl:otherwise>
-               <document>
-                 <xsl:apply-templates mode="test:create-xslt-generator" />
-               </document>
-             </xsl:otherwise>
-           </xsl:choose>
-         </variable>
-         <xsl:element name="xsl:{$type}">
-           <xsl:attribute name="name" select="$var" />
-           <xsl:attribute name="select"
-             select="if (@select) 
-                       then concat('$', $var, '-doc/(', @select, ')')
-                     else if (@href)
-                       then concat('$', $var, '-doc')
-                     else concat('$', $var, '-doc/node()')" />
-         </xsl:element>
-       </xsl:when>
-       <xsl:when test="@select">
-         <xsl:element name="xsl:{$type}">
-           <xsl:attribute name="name" select="$var" />
-           <xsl:attribute name="select" select="@select" />
-         </xsl:element>
-       </xsl:when>
-       <xsl:otherwise>
-         <xsl:element name="xsl:{$type}">
-           <xsl:attribute name="name" select="$var" />
-           <xsl:attribute name="select" select="'()'" />
-         </xsl:element>
-       </xsl:otherwise>
-     </xsl:choose>        
-   </xsl:template>  
+      <xsl:param name="var" as="xs:string" required="yes"/>
+      <xsl:text>  let $</xsl:text>
+      <xsl:value-of select="$var"/>
+      <xsl:if test="@as">
+         <xsl:text> as </xsl:text>
+         <xsl:value-of select="@as"/>
+      </xsl:if>
+      <xsl:choose>
+         <xsl:when test="@href">
+            <xsl:text> := doc('</xsl:text>
+            <xsl:value-of select="resolve-uri(@href, base-uri(.))"/>
+            <xsl:text>')</xsl:text>
+            <xsl:if test="@select">/( <xsl:value-of select="@select"/> )</xsl:if>
+         </xsl:when>
+         <xsl:when test="node()">
+            <xsl:text> := ( </xsl:text>
+            <xsl:copy-of select="node()"/>
+            <xsl:text> )</xsl:text>
+            <xsl:if test="@select">/( <xsl:value-of select="@select"/> )</xsl:if>
+         </xsl:when>
+         <xsl:when test="@select">
+            <xsl:text> := </xsl:text>
+            <xsl:value-of select="@select"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text> := ()</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+      <xsl:text>&#10;</xsl:text>
+   </xsl:template>
 
    <xsl:template match="*" mode="test:create-xslt-generator">
      <xsl:copy>
@@ -82,25 +68,24 @@
      </xsl:copy>
    </xsl:template>  
 
-   <xsl:template match="xsl:*" mode="test:create-xslt-generator">
-     <xsl:element name="o:{local-name()}">
-       <xsl:copy-of select="@*" />
-       <xsl:apply-templates mode="test:create-xslt-generator" />
-     </xsl:element>
-   </xsl:template>  
-
    <xsl:template match="text()" mode="test:create-xslt-generator">
-     <text><xsl:value-of select="." /></text>
+      <!--xsl:text>text { </xsl:text-->
+      <xsl:value-of select="."/>
+      <!--xsl:text> }</xsl:text-->
    </xsl:template>  
 
    <xsl:template match="comment()" mode="test:create-xslt-generator">
-     <comment><xsl:value-of select="." /></comment>
+      <xsl:text>comment { </xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text> }</xsl:text>
    </xsl:template>
 
    <xsl:template match="processing-instruction()" mode="test:create-xslt-generator">
-     <processing-instruction name="{name()}">
-       <xsl:value-of select="." />
-     </processing-instruction>
+      <xsl:text>processing-instruction { </xsl:text>
+      <xsl:value-of select="name(.)"/>
+      <xsl:text> } { </xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text> }</xsl:text>
    </xsl:template>
 
    <xsl:function name="test:matching-xslt-elements" as="element()*">
