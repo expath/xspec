@@ -187,7 +187,7 @@ declare function test:report-atomic-value($value as item()) as xs:string
   else if ( $value instance of xs:integer or
             $value instance of xs:decimal or
             $value instance of xs:double ) then
-    $value
+    string($value)
   else if ( $value instance of xs:QName ) then
     concat("QName('",
            namespace-uri-from-QName($value),

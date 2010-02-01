@@ -300,21 +300,6 @@
       </text>
    </xsl:template>  
 
-   <!-- *** x:generate-declarations *** -->
-   <!-- Helper code for the tests -->
-
-   <!--xsl:template match="x:variable" mode="x:compile">
-      <xsl:text>  let $</xsl:text>
-      <!- - FIXME: Why a default value?  Require @name instead! - ->
-      <xsl:value-of select="( @name, generate-id() )[1]"/>
-      <xsl:text> := </xsl:text>
-      <!- - FIXME: Not correct, the x:variable model is more complex
-           than a simple variable.  See x:expect comment above... - ->
-      <xsl:value-of select="@select"/>
-      <xsl:copy-of select="node()"/>
-      <xsl:text>&#10;</xsl:text>
-   </xsl:template-->
-
    <xsl:template match="x:param" mode="x:report">
       <xsl:element name="x:{local-name()}">
          <xsl:apply-templates select="@*" mode="x:report"/>
