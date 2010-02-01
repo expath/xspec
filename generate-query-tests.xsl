@@ -95,8 +95,9 @@
 
    <xsl:template name="x:output-call">
       <xsl:param name="name"   as="xs:string"/>
+      <xsl:param name="last"   as="xs:boolean"/>
       <xsl:param name="params" as="element(param)*"/>
-      <xsl:text>      local:</xsl:text>
+      <xsl:text>      let $x:tmp := local:</xsl:text>
       <xsl:value-of select="$name"/>
       <xsl:text>(</xsl:text>
       <xsl:for-each select="$params">
@@ -105,11 +106,15 @@
             <xsl:text>, </xsl:text>
          </xsl:if>
       </xsl:for-each>
-      <xsl:text>)</xsl:text>
-      <xsl:if test="position() ne last()">
+      <xsl:text>) return (&#10;</xsl:text>
+      <xsl:text>        $x:tmp</xsl:text>
+      <xsl:if test="not($last)">
          <xsl:text>,</xsl:text>
       </xsl:if>
       <xsl:text>&#10;</xsl:text>
+      <!-- Continue compiling calls. -->
+      <xsl:call-template name="x:continue-call-scenarios"/>
+      <xsl:text>      )&#10;</xsl:text>
    </xsl:template>
 
    <!-- *** x:compile *** -->
@@ -222,7 +227,7 @@
               let $local:expected :=
                   ( ... )
             -->
-            <xsl:text>  let $local:expected    :=              (: expected result (none here) :)&#10;</xsl:text>
+            <xsl:text>  let $local:expected    := (: expected result (none here) :)&#10;</xsl:text>
             <!-- FIXME: Not correct, the x:expect model is more complex than
                  a simple variable... (see how the original stylesheet, for
                  XSLT, handles that...) Factorize with the XSLT version...
@@ -239,7 +244,7 @@
                   else
                     ( ... )
             -->
-            <xsl:text>  let $local:test-result :=              (: evaluate the predicate :)&#10;</xsl:text>
+            <xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
             <xsl:text>      if ( $</xsl:text>
             <xsl:value-of select="$xspec-prefix"/>
             <xsl:text>:result instance of node() ) then&#10;</xsl:text>
@@ -259,7 +264,7 @@
                   else
                     test:deep-equal($local:expected, $local:test-result)
             -->
-            <xsl:text>  let $local:successful  :=              (: did the test pass?:)&#10;</xsl:text>
+            <xsl:text>  let $local:successful  := (: did the test pass?:)&#10;</xsl:text>
             <xsl:text>      if ( $local:test-result instance of xs:boolean ) then&#10;</xsl:text>
             <xsl:text>        $local:test-result&#10;</xsl:text>
             <xsl:text>      else&#10;</xsl:text>
@@ -298,17 +303,17 @@
    <!-- *** x:generate-declarations *** -->
    <!-- Helper code for the tests -->
 
-   <xsl:template match="x:variable" mode="x:compile">
+   <!--xsl:template match="x:variable" mode="x:compile">
       <xsl:text>  let $</xsl:text>
-      <!-- FIXME: Why a default value?  Require @name instead! -->
+      <!- - FIXME: Why a default value?  Require @name instead! - ->
       <xsl:value-of select="( @name, generate-id() )[1]"/>
       <xsl:text> := </xsl:text>
-      <!-- FIXME: Not correct, the x:variable model is more complex
-           than a simple variable.  See x:expect comment above... -->
+      <!- - FIXME: Not correct, the x:variable model is more complex
+           than a simple variable.  See x:expect comment above... - ->
       <xsl:value-of select="@select"/>
       <xsl:copy-of select="node()"/>
       <xsl:text>&#10;</xsl:text>
-   </xsl:template>  
+   </xsl:template-->
 
    <xsl:template match="x:param" mode="x:report">
       <xsl:element name="x:{local-name()}">

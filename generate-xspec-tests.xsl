@@ -80,12 +80,15 @@
 
 <xsl:template name="x:output-call">
    <xsl:param name="name"   as="xs:string"/>
+   <xsl:param name="last"   as="xs:boolean"/>
    <xsl:param name="params" as="element(param)*"/>
    <call-template name="x:{ $name }">
       <xsl:for-each select="$params">
          <with-param name="{ @name }" select="{ @select }"/>
       </xsl:for-each>
    </call-template>
+   <!-- Continue compiling calls. -->
+   <xsl:call-template name="x:continue-call-scenarios"/>
 </xsl:template>
 
 <!-- *** x:compile *** -->

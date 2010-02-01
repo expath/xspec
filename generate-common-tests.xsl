@@ -110,9 +110,14 @@
                  concat('$this must be a description or a scenario, but is: ', name(.))
                )"/>
       </xsl:if>
-      <xsl:apply-templates select="$this/(x:scenario|x:expect)" mode="x:generate-calls">
+      <xsl:apply-templates select="($this/(x:scenario|x:expect))[1]" mode="x:generate-calls">
          <xsl:with-param name="pending" select="$this//@focus" tunnel="yes"/>
       </xsl:apply-templates>
+   </xsl:template>
+
+   <xsl:template name="x:continue-call-scenarios">
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
    </xsl:template>
 
    <!--
@@ -131,33 +136,63 @@
        value for children.
    -->
    <xsl:template match="x:pending" mode="x:generate-calls">
-      <xsl:apply-templates mode="x:generate-calls">
+      <xsl:apply-templates select="*[1]" mode="x:generate-calls">
          <xsl:with-param name="pending" select="x:label(.)" tunnel="yes"/>
       </xsl:apply-templates>
+      <!-- Continue walking the siblings. -->
+      <xsl:call-template name="x:continue-call-scenarios"/>
    </xsl:template>
 
    <!--
        A scenario is called by the name { generate-id() }.
+       
+       Call "x:output-call", which must on turn call "x:continue-call-scenarios".
    -->
    <xsl:template match="x:scenario" mode="x:generate-calls">
       <xsl:call-template name="x:output-call">
          <xsl:with-param name="name" select="generate-id()"/>
+         <xsl:with-param name="last" select="empty(following-sibling::x:scenario)"/>
       </xsl:call-template>
    </xsl:template>
 
    <!--
        An expectation is called by the name { generate-id() }.
+       
+       Call "x:output-call", which must on turn call "x:continue-call-scenarios".
    -->
    <xsl:template match="x:expect" mode="x:generate-calls">
-      <xsl:param name="pending" as="node()?" select="()" tunnel="yes"/>
+      <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
+      <xsl:param name="vars"    select="()" tunnel="yes" as="element(var)*"/>
       <xsl:call-template name="x:output-call">
          <xsl:with-param name="name" select="generate-id()"/>
+         <xsl:with-param name="last" select="empty(following-sibling::x:expect)"/>
          <xsl:with-param name="params" as="element(param)*">
             <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
                <param name="x:result" select="$x:result"/>
             </xsl:if>
+            <xsl:for-each select="$vars">
+               <param name="{ @name }" select="${ @name }"/>
+            </xsl:for-each>
          </xsl:with-param>
       </xsl:call-template>
+   </xsl:template>
+
+   <!--
+       x:variable element generates a variable declaration and adds a
+       variable on the stack (the tunnel param $vars).
+   -->
+   <xsl:template match="x:variable" mode="x:generate-calls">
+      <!-- The variable declaration. -->
+      <xsl:apply-templates select="." mode="test:generate-variable-declarations">
+         <xsl:with-param name="var"  select="( @name, generate-id() )[1]" />
+         <xsl:with-param name="type" select="'variable'" />
+      </xsl:apply-templates>
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current">
+         <xsl:with-param name="vars" tunnel="yes" as="element(var)+">
+            <var name="{ @name }"/>
+         </xsl:with-param>
+      </xsl:apply-templates>
    </xsl:template>
 
    <!--
@@ -283,6 +318,7 @@
       <xsl:param name="pending" select="()"    tunnel="yes" as="node()?"/>
       <xsl:param name="context" required="yes" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    required="yes" tunnel="yes" as="element(x:call)?"/>
+      <xsl:param name="vars"    select="()"    tunnel="yes" as="element(var)*"/>
       <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-expect">
          <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
@@ -292,6 +328,9 @@
             <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
                <param name="x:result" required="yes"/>
             </xsl:if>
+            <xsl:for-each select="$vars">
+               <param name="{ @name }" required="yes"/>
+            </xsl:for-each>
          </xsl:with-param>
       </xsl:call-template>
       <!-- Continue walking the siblings. -->
@@ -308,6 +347,19 @@
       </xsl:apply-templates>
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
+   </xsl:template>
+
+   <!--
+       x:variable element adds a variable on the stack (the tunnel
+       param $vars).
+   -->
+   <xsl:template match="x:variable" mode="x:compile">
+      <!-- Continue walking the siblings, adding a new variable on the stack. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current">
+         <xsl:with-param name="vars" tunnel="yes" as="element(var)+">
+            <var name="{ @name }"/>
+         </xsl:with-param>
+      </xsl:apply-templates>
    </xsl:template>
 
    <!--
