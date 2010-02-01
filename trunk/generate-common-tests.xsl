@@ -169,6 +169,17 @@
    </xsl:template>
 
    <!--
+       Mode: compile.
+       
+       Must be "fired" by the named template "x:compile-scenarios".
+       It is a "sibling walking" mode: x:compile-scenarios applies the
+       template in this mode on the first child, then each template
+       rule must apply the template in this same mode on the next
+       sibling.  The reason for this navigation style is to easily
+       represent variable scopes.
+   -->
+
+   <!--
        Drive the compilation of scenarios to either XSLT named
        templates or XQuery functions.
    -->
@@ -182,7 +193,7 @@
                  concat('$this must be a description or a scenario, but is: ', name(.))
                )"/>
       </xsl:if>
-      <xsl:apply-templates select="$this/*" mode="x:compile">
+      <xsl:apply-templates select="$this/*[1]" mode="x:compile">
          <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
       </xsl:apply-templates>
    </xsl:template>
@@ -192,9 +203,11 @@
        value for children.
    -->
    <xsl:template match="x:pending" mode="x:compile">
-      <xsl:apply-templates mode="x:compile">
+      <xsl:apply-templates select="*[1]" mode="x:compile">
          <xsl:with-param name="pending" select="x:label(.)" tunnel="yes"/>
       </xsl:apply-templates>
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
    </xsl:template>
 
    <!--
@@ -204,7 +217,7 @@
       <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
       <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
-      <!-- the new $pending -->
+      <!-- The new $pending. -->
       <xsl:variable name="new-pending" as="node()?" select="
           if ( @focus ) then
             ()
@@ -212,7 +225,7 @@
             @pending
           else
             $pending"/>
-      <!-- the new context -->
+      <!-- The new context. -->
       <xsl:variable name="new-context" as="element(x:context)?">
          <xsl:choose>
             <xsl:when test="x:context">
@@ -235,7 +248,7 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-      <!-- the new context -->
+      <!-- The new context. -->
       <xsl:variable name="new-call" as="element(x:call)?">
          <xsl:choose>
             <xsl:when test="x:call">
@@ -253,12 +266,14 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-      <!-- call the serializing template (for XSLT or XQuery) -->
+      <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-scenario">
          <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
          <xsl:with-param name="context" select="$new-context" tunnel="yes"/>
          <xsl:with-param name="call"    select="$new-call"    tunnel="yes"/>
       </xsl:call-template>
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
    </xsl:template>
 
    <!--
@@ -268,7 +283,7 @@
       <xsl:param name="pending" select="()"    tunnel="yes" as="node()?"/>
       <xsl:param name="context" required="yes" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    required="yes" tunnel="yes" as="element(x:call)?"/>
-      <!-- call the serializing template (for XSLT or XQuery) -->
+      <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-expect">
          <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
          <xsl:with-param name="context" select="$context" tunnel="yes"/>
@@ -279,12 +294,9 @@
             </xsl:if>
          </xsl:with-param>
       </xsl:call-template>
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
    </xsl:template>
-
-   <!--
-       x:description/x:param and x:call elements are ignored in this mode.
-   -->
-   <xsl:template match="x:description/x:param|x:call" mode="x:compile"/>
 
    <!--
        x:param elements generate actual call param's variable.
@@ -294,6 +306,17 @@
          <xsl:with-param name="var"  select="( @name, generate-id() )[1]" />
          <xsl:with-param name="type" select="'variable'" />
       </xsl:apply-templates>
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
+   </xsl:template>
+
+   <!--
+       x:description/x:param and x:call elements are ignored in this mode.
+   -->
+   <xsl:template match="x:description/x:param|x:call" mode="x:compile">
+      <!-- Nothing... -->
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
    </xsl:template>
 
    <!--
@@ -344,5 +367,52 @@
    <xsl:template match="*" mode="x:unshare-scenarios">
       <xsl:copy-of select="."/>
    </xsl:template>
+
+   <!--
+       Debugging tool.  Return a human-readable path of a node.
+   -->
+   <xsl:function name="x:node-path" as="xs:string">
+      <xsl:param name="n" as="node()"/>
+      <xsl:value-of separator="">
+         <xsl:for-each select="$n/ancestor-or-self::*">
+            <xsl:variable name="prec" select="
+                preceding-sibling::*[node-name(.) eq node-name(current())]"/>
+            <xsl:text>/</xsl:text>
+            <xsl:value-of select="name(.)"/>
+            <xsl:if test="exists($prec)">
+               <xsl:text>[</xsl:text>
+               <xsl:value-of select="count($prec) + 1"/>
+               <xsl:text>]</xsl:text>
+            </xsl:if>
+         </xsl:for-each>
+         <xsl:choose>
+            <xsl:when test="$n instance of attribute()">
+               <xsl:text/>/@<xsl:value-of select="name($n)"/>
+            </xsl:when>
+            <xsl:when test="$n instance of text()">
+               <xsl:text>/{text: </xsl:text>
+               <xsl:value-of select="substring($n, 1, 5)"/>
+               <xsl:text>...}</xsl:text>
+            </xsl:when>
+            <xsl:when test="$n instance of comment()">
+               <xsl:text>/{comment}</xsl:text>
+            </xsl:when>
+            <xsl:when test="$n instance of processing-instruction()">
+               <xsl:text>/{pi: </xsl:text>
+               <xsl:value-of select="name($n)"/>
+               <xsl:text>}</xsl:text>
+            </xsl:when>
+            <xsl:when test="$n instance of document-node()">
+               <xsl:text>/</xsl:text>
+            </xsl:when>
+            <xsl:when test="$n instance of element()"/>
+            <xsl:otherwise>
+               <xsl:text>/{ns: </xsl:text>
+               <xsl:value-of select="name($n)"/>
+               <xsl:text>}</xsl:text>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:value-of>
+   </xsl:function>
 
 </xsl:stylesheet>
