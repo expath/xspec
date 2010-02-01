@@ -26,15 +26,14 @@
   select="doc($stylesheet-uri)" />
 
 <xsl:template match="/">
-  <xsl:apply-templates select="." mode="x:generate-tests" />
+   <xsl:call-template name="x:generate-tests"/>
 </xsl:template>
 
 <!-- *** x:generate-tests *** -->
 <!-- Does the generation of the test stylesheet -->
   
 <xsl:template match="x:description" mode="x:generate-tests">
-  <xsl:variable name="pending" as="node()?"
-  	select=".//@focus" />
+  <!-- The compiled stylesheet element. -->
   <stylesheet version="2.0">
     <xsl:apply-templates select="." mode="x:copy-namespaces" />
   	<import href="{$stylesheet-uri}" />
@@ -44,12 +43,9 @@
     <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
     <variable name="x:stylesheet-uri" as="xs:string" select="'{$stylesheet-uri}'" />
   	<output name="report" method="xml" indent="yes" />
-    <xsl:apply-templates select="x:param" mode="x:generate-declarations" />
-    <!--
-    <template match="/">
-      <call-template name="main" />
-    </template>
-    -->
+    <!-- Compile the test suite params (aka global params). -->
+    <xsl:call-template name="x:compile-params"/>
+    <!-- The main compiled template. -->
     <template name="x:main">
       <message>
         <text>Testing with </text>
@@ -68,102 +64,40 @@
 	        that the URI appears in the trace report generated from running the
 	        test stylesheet, which can then be picked up by stylesheets that
 	        process *that* to generate a coverage report -->
-	      <x:report stylesheet="{{$x:stylesheet-uri}}"
-	        date="{{current-dateTime()}}">
-	        <xsl:apply-templates mode="x:generate-calls">
-	          <xsl:with-param name="pending" select="$pending" tunnel="yes" />
-	        </xsl:apply-templates>
+	      <x:report stylesheet="{{$x:stylesheet-uri}}" date="{{current-dateTime()}}">
+                 <!-- Generate calls to the compiled top-level scenarios. -->
+                 <xsl:call-template name="x:call-scenarios"/>
 	      </x:report>
     	</result-document>
     </template>
-    <xsl:apply-templates mode="x:generate-templates">
-      <xsl:with-param name="pending" select="$pending" tunnel="yes" />
-    </xsl:apply-templates>
+    <!-- Compile the top-level scenarios. -->
+    <xsl:call-template name="x:compile-scenarios"/>
   </stylesheet>
 </xsl:template>
 
-<!-- *** x:generate-calls *** -->
-<!-- Generates the calls to the templates that perform the tests themselves --> 
+<!-- *** x:output-call *** -->
+<!-- Generates a call to the template compiled from a scenario or an expect element. --> 
 
-<xsl:template match="x:pending" mode="x:generate-calls">
-  <xsl:apply-templates mode="x:generate-calls">
-    <xsl:with-param name="pending" select="x:label(.)" tunnel="yes" />
-  </xsl:apply-templates>
+<xsl:template name="x:output-call">
+   <xsl:param name="name"   as="xs:string"/>
+   <xsl:param name="params" as="element(param)*"/>
+   <call-template name="x:{ $name }">
+      <xsl:for-each select="$params">
+         <with-param name="{ @name }" select="{ @select }"/>
+      </xsl:for-each>
+   </call-template>
 </xsl:template>
 
-<xsl:template match="x:scenario" mode="x:generate-calls">
-  <call-template name="x:{generate-id()}" />
-</xsl:template>
-
-<xsl:template match="x:expect" mode="x:generate-calls">
-  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
-  <call-template name="x:{generate-id()}">
-    <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
-      <with-param name="x:result" select="$impl:actual-result"/>
-    </xsl:if>
-  </call-template>
-</xsl:template>  
-  
-<xsl:template match="*" mode="x:generate-calls" />
-
-<!-- *** x:generate-templates *** -->
+<!-- *** x:compile *** -->
 <!-- Generates the templates that perform the tests -->
 
-<xsl:template match="x:pending" mode="x:generate-templates">
-  <xsl:apply-templates mode="x:generate-templates">
-    <xsl:with-param name="pending" select="x:label(.)" tunnel="yes" />
-  </xsl:apply-templates>
-</xsl:template>
-
-<xsl:template match="x:scenario" mode="x:generate-templates">
-  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
-  <xsl:param name="context" as="element(x:context)?" select="()" tunnel="yes" />
-  <xsl:param name="call" as="element(x:call)?" select="()" tunnel="yes" />
-  <xsl:variable name="new-pending" as="node()?" 
-    select="if (@focus) then () else if (@pending) then @pending else $pending" />
-  <xsl:variable name="new-context" as="element(x:context)?">
-    <xsl:choose>
-      <xsl:when test="x:context">
-        <xsl:variable name="local-params" as="element(x:param)*" 
-          select="x:context/x:param" />
-        <x:context>
-          <xsl:sequence select="$context/@*" />
-          <xsl:sequence select="x:context/@*" />
-          <xsl:sequence select="$context/x:param[not(@name = $local-params/@name)], $local-params" />
-          <xsl:choose>
-            <xsl:when test="x:context/(node() except x:param)">
-              <xsl:sequence select="x:context/(node() except x:param)" />
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:sequence select="$context/(node() except x:param)" />
-            </xsl:otherwise>
-          </xsl:choose>
-        </x:context>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:sequence select="$context" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
-  <xsl:variable name="new-call" as="element(x:call)?">
-    <xsl:choose>
-      <xsl:when test="x:call">
-        <xsl:variable name="local-params" as="element(x:param)*"
-          select="x:call/x:param" />
-        <x:call>
-          <xsl:sequence select="$call/@*" />
-          <xsl:sequence select="x:call/@*" />
-          <xsl:sequence select="$call/x:param[not(@name = $local-params/@name)], $local-params" />
-        </x:call>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:sequence select="$call" />
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
+<xsl:template name="x:output-scenario">
+  <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
+  <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
+  <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
   <!-- We have to create these error messages at this stage because before now
        we didn't have merged versions of the environment -->
-  <xsl:if test="$new-context/@href and ($new-context/node() except $new-context/x:param)">
+  <xsl:if test="$context/@href and ($context/node() except $context/x:param)">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
       <xsl:value-of select="x:label(.)" />
@@ -171,21 +105,21 @@
       <xsl:text> attribute and the content of &lt;context&gt;</xsl:text>
     </xsl:message>
   </xsl:if>
-  <xsl:if test="$new-call/@template and $new-call/@function">
+  <xsl:if test="$call/@template and $call/@function">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
       <xsl:value-of select="x:label(.)" />
       <xsl:text>": can't call a function and a template at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
-  <xsl:if test="$new-context and $new-call/@function">
+  <xsl:if test="$context and $call/@function">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
       <xsl:value-of select="x:label(.)" />
       <xsl:text>": can't set a context and call a function at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
-  <xsl:if test="x:expect and not($new-context) and not($new-call)">
+  <xsl:if test="x:expect and not($context) and not($call)">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
       <xsl:value-of select="x:label(.)" />
@@ -193,30 +127,36 @@
     </xsl:message>
   </xsl:if>
   <template name="x:{generate-id()}">
-  	<message>
-  		<xsl:if test="exists($new-pending)">
-  			<xsl:text>PENDING: </xsl:text>
-  			<xsl:if test="$pending != ''">(<xsl:value-of select="normalize-space($pending)" />)</xsl:if>
-  		</xsl:if>
-  		<xsl:if test="parent::x:scenario"><xsl:text>..</xsl:text></xsl:if>
-  		<xsl:value-of select="normalize-space(x:label(.))" />
-  	</message>
+     <message>
+        <xsl:if test="exists($pending)">
+           <xsl:text>PENDING: </xsl:text>
+           <xsl:if test="$pending != ''">
+              <xsl:text>(</xsl:text>
+              <xsl:value-of select="normalize-space($pending)"/>
+              <xsl:text>) </xsl:text>
+           </xsl:if>
+        </xsl:if>
+        <xsl:if test="parent::x:scenario">
+           <xsl:text>..</xsl:text>
+        </xsl:if>
+        <xsl:value-of select="normalize-space(x:label(.))"/>
+     </message>
     <x:scenario>
-      <xsl:if test="exists($new-pending) and not(.//@focus)">
+      <xsl:if test="exists($pending) and not(.//@focus)">
         <xsl:attribute name="pending" select="$pending" />
       </xsl:if>
     	<xsl:sequence select="x:label(.)" />
       <xsl:apply-templates select="x:context | x:call" mode="x:report" />
-      <xsl:if test="empty($new-pending) and x:expect">
-        <variable name="impl:actual-result" as="item()*">
+      <xsl:if test="empty($pending) and x:expect">
+        <variable name="x:result" as="item()*">
           <xsl:choose>
-            <xsl:when test="$new-call/@template">
+            <xsl:when test="$call/@template">
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$new-call/x:param" mode="x:generate-tests" />
+              <xsl:apply-templates select="$call/x:param" mode="x:compile" />
               <!-- Create the template call -->
               <xsl:variable name="template-call">
-                <call-template name="{$new-call/@template}">
-                  <xsl:for-each select="$new-call/x:param">
+                <call-template name="{$call/@template}">
+                  <xsl:for-each select="$call/x:param">
                     <with-param name="{@name}" select="${@name}">
                       <xsl:copy-of select="@tunnel, @as" />
                     </with-param>
@@ -224,9 +164,9 @@
                 </call-template>
               </xsl:variable>
               <xsl:choose>
-                <xsl:when test="$new-context">
+                <xsl:when test="$context">
                   <!-- Set up the $context variable -->
-                  <xsl:apply-templates select="$new-context" mode="x:generate-tests" />
+                  <xsl:apply-templates select="$context" mode="x:compile" />
                   <!-- Switch to the context and call the template -->
                   <for-each select="$context">
                     <xsl:copy-of select="$template-call" />
@@ -237,15 +177,15 @@
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:when>
-            <xsl:when test="$new-call/@function">
+            <xsl:when test="$call/@function">
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$new-call/x:param" mode="x:generate-tests" />
+              <xsl:apply-templates select="$call/x:param" mode="x:compile" />
               <!-- Create the function call -->
               <sequence>
                 <xsl:attribute name="select">
-                  <xsl:value-of select="$new-call/@function" />
+                  <xsl:value-of select="$call/@function" />
                   <xsl:text>(</xsl:text>
-                  <xsl:for-each select="$new-call/x:param">
+                  <xsl:for-each select="$call/x:param">
                     <xsl:sort select="xs:integer(@position)" />
                     <xsl:text>$</xsl:text>
                     <xsl:value-of select="if (@name) then @name else generate-id()" />
@@ -257,13 +197,13 @@
             </xsl:when>
             <xsl:otherwise>
               <!-- Set up the $context variable -->
-              <xsl:apply-templates select="$new-context" mode="x:generate-tests" />
+              <xsl:apply-templates select="$context" mode="x:compile"/>
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$new-context/x:param" mode="x:generate-tests" />
+              <xsl:apply-templates select="$context/x:param" mode="x:compile"/>
               <!-- Create the template call -->
               <apply-templates select="$context">
-                <xsl:sequence select="$new-context/@mode" />
-                <xsl:for-each select="$new-context/x:param">
+                <xsl:sequence select="$context/@mode" />
+                <xsl:for-each select="$context/x:param">
                   <with-param name="{@name}" select="${@name}">
                     <xsl:copy-of select="@tunnel, @as" />
                   </with-param>
@@ -273,21 +213,15 @@
           </xsl:choose>      
         </variable>
         <call-template name="test:report-value">
-          <with-param name="value" select="$impl:actual-result" />
+          <with-param name="value" select="$x:result" />
           <with-param name="wrapper-name" select="'x:result'" />
           <with-param name="wrapper-ns" select="'http://www.jenitennison.com/xslt/xspec'" />
         </call-template>
       </xsl:if>
-      <xsl:apply-templates mode="x:generate-calls">
-        <xsl:with-param name="pending" select="$new-pending" tunnel="yes" />
-      </xsl:apply-templates>
+      <xsl:call-template name="x:call-scenarios"/>
     </x:scenario>
   </template>
-  <xsl:apply-templates mode="x:generate-templates">
-    <xsl:with-param name="pending" select="$new-pending" tunnel="yes" />
-    <xsl:with-param name="context" select="$new-context" tunnel="yes" />
-    <xsl:with-param name="call" select="$new-call" tunnel="yes" />
-  </xsl:apply-templates>
+  <xsl:call-template name="x:compile-scenarios"/>
 </xsl:template>
 
 <!--
@@ -309,21 +243,21 @@
            </x:test>
         </template>
 -->
-<xsl:template match="x:expect" mode="x:generate-templates">
-  <xsl:param name="pending" as="node()?" select="()" tunnel="yes" />
-  <xsl:param name="context" as="element(x:context)?" required="yes" tunnel="yes" />
-  <xsl:param name="call" as="element(x:call)?" required="yes" tunnel="yes" />  
+<xsl:template name="x:output-expect">
+  <xsl:param name="pending" select="()"    tunnel="yes" as="node()?"/>
+  <xsl:param name="context" required="yes" tunnel="yes" as="element(x:context)?"/>
+  <xsl:param name="call"    required="yes" tunnel="yes" as="element(x:call)?"/>
+  <xsl:param name="params"  required="yes"              as="element(param)*"/>
   <template name="x:{generate-id()}">
-    <xsl:if test="empty($pending)">
-      <param name="x:result" required="yes"/>
-    </xsl:if>
+     <xsl:for-each select="$params">
+        <param name="{ @name }" required="{ @required }"/>
+     </xsl:for-each>
     <message>
       <xsl:if test="exists($pending)">
         <xsl:text>PENDING: </xsl:text>
-        <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="normalize-space($pending)" />)</xsl:if>
+        <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="normalize-space($pending)"/>) </xsl:if>
       </xsl:if>
-      <xsl:text>    </xsl:text>
-      <xsl:value-of select="normalize-space(x:label(.))" />
+      <xsl:value-of select="normalize-space(x:label(.))"/>
     </message>
     <xsl:if test="empty($pending)">
       <xsl:variable name="version" as="xs:double" 
@@ -411,13 +345,11 @@
  </template>
 </xsl:template>
 
-<xsl:template match="*" mode="x:generate-templates" />
-
 <!-- *** x:generate-declarations *** -->
 <!-- Code to generate parameter declarations -->
 <xsl:template match="x:param" mode="x:generate-declarations">
   <xsl:apply-templates select="." mode="test:generate-variable-declarations">
-    <xsl:with-param name="var" select="@name" />
+    <xsl:with-param name="var"  select="@name" />
     <xsl:with-param name="type" select="'param'" />
   </xsl:apply-templates>
 </xsl:template>
@@ -427,10 +359,10 @@
 </xsl:template>  
   
 
-<!-- *** x:generate-tests *** -->
+<!-- *** x:compile *** -->
 <!-- Helper code for the tests -->
 
-<xsl:template match="x:context" mode="x:generate-tests">
+<xsl:template match="x:context" mode="x:compile">
 	<xsl:variable name="context" as="element(x:context)">
 		<x:context>
 			<xsl:sequence select="@*" />
@@ -439,12 +371,6 @@
 	</xsl:variable>
   <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
     <xsl:with-param name="var" select="'context'" />
-  </xsl:apply-templates>
-</xsl:template>  
-
-<xsl:template match="x:param" mode="x:generate-tests">
-  <xsl:apply-templates select="." mode="test:generate-variable-declarations">
-    <xsl:with-param name="var" select="if (@name) then @name else generate-id()" />
   </xsl:apply-templates>
 </xsl:template>  
 
