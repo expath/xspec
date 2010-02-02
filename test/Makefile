@@ -4,7 +4,8 @@ XQUERY=java -cp $(CP) net.sf.saxon.Query
 
 all: xspec-function-xsl.html xspec-function-xq.html \
      xspec-rule-xsl.html                            \
-     xspec-import-xsl.html   xspec-import-xq.html
+     xspec-import-xsl.html   xspec-import-xq.html   \
+     xspec-pending-xsl.html  xspec-pending-xq.html
 
 clean:
 	rm *.html
