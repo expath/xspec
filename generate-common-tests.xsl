@@ -102,6 +102,7 @@
        corresponding call instruction at some point).
    -->
    <xsl:template name="x:call-scenarios">
+      <xsl:param name="pending" select="this//@focus" tunnel="yes" as="node()?"/>
       <xsl:variable name="this" select="." as="element()"/>
       <xsl:if test="empty($this[self::x:description|self::x:scenario])">
          <xsl:sequence select="
@@ -110,14 +111,28 @@
                  concat('$this must be a description or a scenario, but is: ', name(.))
                )"/>
       </xsl:if>
-      <xsl:apply-templates select="($this/(x:scenario|x:expect))[1]" mode="x:generate-calls">
-         <xsl:with-param name="pending" select="$this//@focus" tunnel="yes"/>
+      <xsl:apply-templates select="$this/*[1]" mode="x:generate-calls">
+         <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
       </xsl:apply-templates>
    </xsl:template>
 
    <xsl:template name="x:continue-call-scenarios">
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
+   </xsl:template>
+
+   <!--
+       Those elements are ignored in this mode.
+
+       TODO: Imports are "resolved" in x:gather-specs().  But this is
+       not done the usual way, instead it returns all x:description
+       elements.  Change this by using the usual recursive template
+       resolving x:import elements in place.  Bur for now, those
+       elements are still here, so we have to ignore them...
+   -->
+   <xsl:template match="x:call|x:context|x:import" mode="x:generate-calls">
+      <!-- Nothing, but must continue the sibling-walking... -->
+      <xsl:call-template name="x:continue-call-scenarios"/>
    </xsl:template>
 
    <!--
@@ -365,7 +380,7 @@
    <!--
        Those elements are ignored in this mode.
        
-       TODO: Imports are "resolved" in x:gather-specs.  But this is
+       TODO: Imports are "resolved" in x:gather-specs().  But this is
        not done the usual way, instead it returns all x:description
        elements.  Change this by using the usual recursive template
        resolving x:import elements in place.  Bur for now, those

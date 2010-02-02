@@ -97,6 +97,9 @@
       <xsl:param name="name"   as="xs:string"/>
       <xsl:param name="last"   as="xs:boolean"/>
       <xsl:param name="params" as="element(param)*"/>
+      <xsl:if test="exists(preceding-sibling::x:*[1][self::x:pending])">
+         <xsl:text>,&#10;</xsl:text>
+      </xsl:if>
       <xsl:text>      let $x:tmp := local:</xsl:text>
       <xsl:value-of select="$name"/>
       <xsl:text>(</xsl:text>
@@ -119,12 +122,6 @@
 
    <!-- *** x:compile *** -->
    <!-- Generates the functions that perform the tests -->
-
-   <xsl:template match="x:pending" mode="x:compile">
-      <xsl:apply-templates mode="x:compile">
-         <xsl:with-param name="pending" select="x:label(.)" tunnel="yes"/>
-      </xsl:apply-templates>
-   </xsl:template>
 
    <!--
        TODO: Take $pending into account...
