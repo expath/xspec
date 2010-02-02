@@ -2,7 +2,9 @@ CP=$$SAXON_HOME/saxon9he.jar:$$SAXON_HOME/saxon9.jar
 XSLT=java -cp $(CP) net.sf.saxon.Transform
 XQUERY=java -cp $(CP) net.sf.saxon.Query
 
-all: xspec-function-xsl.html xspec-function-xq.html xspec-rule-xsl.html
+all: xspec-function-xsl.html xspec-function-xq.html \
+     xspec-rule-xsl.html                            \
+     xspec-import-xsl.html   xspec-import-xq.html
 
 clean:
 	rm *.html
