@@ -9,7 +9,7 @@
 
 <xsl:import href="format-utils.xsl" />
 
-<xsl:output name="report" method="xml" indent="yes"/>
+<xsl:output name="x:report" method="xml" indent="yes"/>
 
 <xsl:function name="x:pending-callback" as="node()*">
   <!-- returns formatted output for $pending. -->
