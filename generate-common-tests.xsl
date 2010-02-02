@@ -363,9 +363,15 @@
    </xsl:template>
 
    <!--
-       x:description/x:param and x:call elements are ignored in this mode.
+       Those elements are ignored in this mode.
+       
+       TODO: Imports are "resolved" in x:gather-specs.  But this is
+       not done the usual way, instead it returns all x:description
+       elements.  Change this by using the usual recursive template
+       resolving x:import elements in place.  Bur for now, those
+       elements are still here, so we have to ignore them...
    -->
-   <xsl:template match="x:description/x:param|x:call|x:context" mode="x:compile">
+   <xsl:template match="x:description/x:param|x:call|x:context|x:import" mode="x:compile">
       <!-- Nothing... -->
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
