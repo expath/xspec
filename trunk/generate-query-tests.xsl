@@ -239,18 +239,18 @@
             <xsl:text> )&#10;</xsl:text>
             <!--
               let $local:test-result :=
-                  if ( $t:result instance of node() ) then
-                    $t:result/( ... )
+                  if ( $t:result instance of node()+ ) then
+                    document { $t:result }/( ... )
                   else
                     ( ... )
             -->
             <xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
             <xsl:text>      if ( $</xsl:text>
             <xsl:value-of select="$xspec-prefix"/>
-            <xsl:text>:result instance of node() ) then&#10;</xsl:text>
-            <xsl:text>        $</xsl:text>
+            <xsl:text>:result instance of node()+ ) then&#10;</xsl:text>
+            <xsl:text>        document { $</xsl:text>
             <xsl:value-of select="$xspec-prefix"/>
-            <xsl:text>:result/( </xsl:text>
+            <xsl:text>:result }/( </xsl:text>
             <xsl:value-of select="@test"/>
             <xsl:text> )&#10;</xsl:text>
             <xsl:text>      else&#10;</xsl:text>
