@@ -169,7 +169,7 @@
               <xsl:choose>
                 <xsl:when test="$context">
                   <!-- Set up the $context variable -->
-                  <xsl:apply-templates select="$context" mode="x:compile" />
+                  <xsl:apply-templates select="$context" mode="x:setup-context"/>
                   <!-- Switch to the context and call the template -->
                   <for-each select="$context">
                     <xsl:copy-of select="$template-call" />
@@ -200,7 +200,7 @@
             </xsl:when>
             <xsl:otherwise>
               <!-- Set up the $context variable -->
-              <xsl:apply-templates select="$context" mode="x:compile"/>
+              <xsl:apply-templates select="$context" mode="x:setup-context"/>
               <!-- Set up variables containing the parameter values -->
               <xsl:apply-templates select="$context/x:param" mode="x:compile"/>
               <!-- Create the template call -->
@@ -365,7 +365,7 @@
 <!-- *** x:compile *** -->
 <!-- Helper code for the tests -->
 
-<xsl:template match="x:context" mode="x:compile">
+<xsl:template match="x:context" mode="x:setup-context">
    <xsl:variable name="context" as="element(x:context)">
       <x:context>
          <xsl:sequence select="@*" />
@@ -375,7 +375,6 @@
    <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
       <xsl:with-param name="var" select="'context'" />
    </xsl:apply-templates>
-   <xsl:call-template name="x:continue-compile-scenarios"/>
 </xsl:template>  
 
 <xsl:template match="x:context | x:param" mode="x:report">
