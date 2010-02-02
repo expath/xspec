@@ -13,4 +13,13 @@
       </t:expect>
    </t:scenario>
 
+   <t:scenario label="must fail">
+      <t:context>
+         <rule/>
+      </t:context>
+      <t:expect label="wrong result">
+         <erroneous/>
+      </t:expect>
+   </t:scenario>
+
 </t:description>
