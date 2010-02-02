@@ -366,15 +366,16 @@
 <!-- Helper code for the tests -->
 
 <xsl:template match="x:context" mode="x:compile">
-	<xsl:variable name="context" as="element(x:context)">
-		<x:context>
-			<xsl:sequence select="@*" />
-			<xsl:sequence select="node() except x:param" />
-		</x:context>
-	</xsl:variable>
-  <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
-    <xsl:with-param name="var" select="'context'" />
-  </xsl:apply-templates>
+   <xsl:variable name="context" as="element(x:context)">
+      <x:context>
+         <xsl:sequence select="@*" />
+         <xsl:sequence select="node() except x:param" />
+      </x:context>
+   </xsl:variable>
+   <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
+      <xsl:with-param name="var" select="'context'" />
+   </xsl:apply-templates>
+   <xsl:call-template name="x:continue-compile-scenarios"/>
 </xsl:template>  
 
 <xsl:template match="x:context | x:param" mode="x:report">
