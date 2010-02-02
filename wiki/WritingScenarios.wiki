@@ -1,6 +1,10 @@
 #summary How to write XSpec scenarios
 #labels Phase-Deploy
 
+=Contents=
+
+<wiki:toc max_depth="1" />
+
 =Introduction=
 
 The description of the behaviour of a stylesheet lives within an XSpec document, which should adhere to the [http://code.google.com/p/xspec/source/browse/trunk/xspec.rnc XSpec RELAX NG schema]. All elements are in the `http://www.jenitennison.com/xslt/xspec` namespace, which is bound to `x` in these examples.
