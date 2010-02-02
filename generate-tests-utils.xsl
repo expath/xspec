@@ -5,6 +5,7 @@
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt"
                 exclude-result-prefixes="xs t msxsl"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
+                xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 extension-element-prefixes="test"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias">
   
@@ -494,7 +495,7 @@
       		<xsl:when test="count($value//node()) > 1000">
       			<xsl:variable name="href" as="xs:string" select="concat(generate-id($value[1]), '.xml')" />
       			<xsl:attribute name="href" select="$href" />
-      			<xsl:result-document href="{$href}" format="report">
+      			<xsl:result-document href="{$href}" format="x:report">
       				<xsl:sequence select="$value" />
       			</xsl:result-document>
       		</xsl:when>
