@@ -233,6 +233,11 @@
       </xsl:apply-templates>
    </xsl:template>
 
+   <xsl:template name="x:continue-compile-scenarios">
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
+   </xsl:template>
+
    <!--
        At x:pending elements, we switch the $pending tunnel param
        value for children.
