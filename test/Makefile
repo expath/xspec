@@ -1,34 +1,36 @@
-# SAXON is my script to launch Saxon[1].  In particular, it can launch
-# both transform and queries.  TODO: This has to be adapted to be
-# independent on the platform and usable by other people.
-# [1]https://expath.org/svn/pkg/trunk/saxon/pkg-saxon/src/shell/saxon
-SAXON=../../../../../bin/saxon
+CP=$$SAXON_HOME/saxon9he.jar:$$SAXON_HOME/saxon9.jar
+XSLT=java -cp $(CP) net.sf.saxon.Transform
+XQUERY=java -cp $(CP) net.sf.saxon.Query
 
 all: xspec-function-xsl.html xspec-function-xq.html xspec-rule-xsl.html
 
+clean:
+	rm *.html
+
 %.xsl: %.xspec
-	"$(SAXON)"                                \
+	$(XSLT)                                   \
 	    -xsl:../generate-xspec-tests.xsl      \
 	    -s:$<                                 \
 	    -o:$@
 
 %.xq: %.xspec
-	"$(SAXON)"                                \
+	$(XSLT)                                   \
 	    -xsl:../generate-query-tests.xsl      \
 	    -s:$<                                 \
 	    -o:$@
 
 %-xsl.xml: %.xsl xspec-tested.xsl
-	"$(SAXON)"                                \
+	$(XSLT)                                   \
 	    -xsl:$<                               \
 	    -o:$@                                 \
 	    -it:"{http://www.jenitennison.com/xslt/xspec}main"
 
 %-xq.xml: %.xq xspec-tested.xql
-	"$(SAXON)" --xq -o:$@ $< '!indent=yes'
+	$(XQUERY)                                 \
+	    -o:$@ $< '!indent=yes'
 
 %.html: %.xml
-	"$(SAXON)"                                \
+	$(XSLT)                                   \
 	    -xsl:../format-xspec-report.xsl       \
 	    -s:$<                                 \
 	    -o:$@
