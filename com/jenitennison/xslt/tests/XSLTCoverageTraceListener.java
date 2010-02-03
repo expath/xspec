@@ -1,3 +1,12 @@
+/****************************************************************************/
+/*  File:       XSLTCoverageTraceListener.java                              */
+/*  Author:     The XSpec team                                              */
+/*  URI:        http://xspec.googlecode.com/                                */
+/*  Tags:                                                                   */
+/*    Copyright (c) 2008, 2010 (see end of file.)                           */
+/* ------------------------------------------------------------------------ */
+
+
 package com.jenitennison.xslt.tests;
 
 import net.sf.saxon.trace.TraceListener;
@@ -165,20 +174,25 @@ public class XSLTCoverageTraceListener implements TraceListener {
 
 }
 
+
 //
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
+// The contents of this file are subject to the Mozilla Public License
+// Version 1.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License
+// at http://www.mozilla.org/MPL/
 //
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
+// See the License for the specific language governing rights and
+// limitations under the License.
 //
 // The Original Code is: all this file.
 //
-// The Initial Developer of the Original Code is Edwin Glaser (edwin@pannenleiter.de)
+// The Initial Developer of the Original Code is Edwin Glaser
+// (edwin@pannenleiter.de)
 //
-// Portions created by Jeni Tennison are Copyright (C) Jeni Tennison. All Rights Reserved.
+// Portions created by Jeni Tennison are Copyright (C) Jeni Tennison.
+// All Rights Reserved.
 //
 // Contributor(s): Heavily modified by Michael Kay
 //                 Methods implemented by Jeni Tennison
