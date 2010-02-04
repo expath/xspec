@@ -1,6 +1,6 @@
 /****************************************************************************/
 /*  File:       XSLTCoverageTraceListener.java                              */
-/*  Author:     The XSpec team                                              */
+/*  Author:     Jeni Tennsion                                               */
 /*  URI:        http://xspec.googlecode.com/                                */
 /*  Tags:                                                                   */
 /*    Copyright (c) 2008, 2010 (see end of file.)                           */
