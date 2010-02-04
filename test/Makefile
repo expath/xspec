@@ -1,9 +1,9 @@
 # ========================================================================== #
 #   File:       test/Makefile                                                #
-#   Author:     The XSpec team                                               #
+#   Author:     Jeni Tennsion                                                #
 #   URI:        http://xspec.googlecode.com/                                 #
 #   Tags:                                                                    #
-#     Copyright (c) 2008, 2010 The XSpec team (see end of file.)             #
+#     Copyright (c) 2008, 2010 Jeni Tennsion (see end of file.)              #
 # -------------------------------------------------------------------------- #
 #   To use this Makefile, $SAXON_HOME must be set to a directory that
 #   contains either saxon9.jar (for B in 9.1 or below) or saxon9he.jar
@@ -78,7 +78,7 @@ clean:
 # -------------------------------------------------------------------------- #
 #   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS COMMENT.                #
 #                                                                            #
-#   Copyright (c) 2008, 2010 The XSpec team                                  #
+#   Copyright (c) 2008, 2010 Jeni Tennsion                                   #
 #                                                                            #
 #   The contents of this file are subject to the MIT License (see the URI    #
 #   http://www.opensource.org/licenses/mit-license.php for details).         #
