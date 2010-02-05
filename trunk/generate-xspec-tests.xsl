@@ -337,16 +337,16 @@
         </xsl:otherwise>
       </xsl:choose>
       <xsl:sequence select="x:label(.)"/>
-      <xsl:if test="@test and empty($pending)">
-         <if test="not($impl:boolean-test)">
-            <call-template name="test:report-value">
-               <with-param name="value"        select="$impl:test-result"/>
-               <with-param name="wrapper-name" select="'x:result'"/>
-               <with-param name="wrapper-ns"   select="'http://www.jenitennison.com/xslt/xspec'"/>
-            </call-template>
-         </if>
-      </xsl:if>
       <xsl:if test="empty($pending)">
+         <xsl:if test="@test">
+            <if test="not($impl:boolean-test)">
+               <call-template name="test:report-value">
+                  <with-param name="value"        select="$impl:test-result"/>
+                  <with-param name="wrapper-name" select="'x:result'"/>
+                  <with-param name="wrapper-ns"   select="'http://www.jenitennison.com/xslt/xspec'"/>
+               </call-template>
+            </if>
+         </xsl:if>
          <call-template name="test:report-value">
             <with-param name="value"        select="$impl:expected"/>
             <with-param name="wrapper-name" select="'x:expect'"/>
