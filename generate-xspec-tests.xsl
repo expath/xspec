@@ -107,6 +107,7 @@
   <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
   <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
   <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
+  <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
   <!-- We have to create these error messages at this stage because before now
        we didn't have merged versions of the environment -->
   <xsl:if test="$context/@href and ($context/node() except $context/x:param)">
@@ -140,7 +141,7 @@
   </xsl:if>
   <template name="x:{generate-id()}">
      <message>
-        <xsl:if test="exists($pending)">
+        <xsl:if test="$pending-p">
            <xsl:text>PENDING: </xsl:text>
            <xsl:if test="$pending != ''">
               <xsl:text>(</xsl:text>
@@ -154,12 +155,12 @@
         <xsl:value-of select="normalize-space(x:label(.))"/>
      </message>
     <x:scenario>
-      <xsl:if test="exists($pending) and not(.//@focus)">
+      <xsl:if test="$pending-p">
         <xsl:attribute name="pending" select="$pending" />
       </xsl:if>
     	<xsl:sequence select="x:label(.)" />
       <xsl:apply-templates select="x:context | x:call" mode="x:report" />
-      <xsl:if test="empty($pending) and x:expect">
+      <xsl:if test="not($pending-p) and x:expect">
         <variable name="x:result" as="item()*">
           <xsl:choose>
             <xsl:when test="$call/@template">
@@ -260,18 +261,19 @@
   <xsl:param name="context" required="yes" tunnel="yes" as="element(x:context)?"/>
   <xsl:param name="call"    required="yes" tunnel="yes" as="element(x:call)?"/>
   <xsl:param name="params"  required="yes"              as="element(param)*"/>
+  <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor::*/@focus)"/>
   <template name="x:{generate-id()}">
      <xsl:for-each select="$params">
         <param name="{ @name }" required="{ @required }"/>
      </xsl:for-each>
     <message>
-      <xsl:if test="exists($pending)">
+      <xsl:if test="$pending-p">
         <xsl:text>PENDING: </xsl:text>
         <xsl:if test="normalize-space($pending) != ''">(<xsl:value-of select="normalize-space($pending)"/>) </xsl:if>
       </xsl:if>
       <xsl:value-of select="normalize-space(x:label(.))"/>
     </message>
-    <xsl:if test="empty($pending)">
+    <xsl:if test="not($pending-p)">
       <xsl:variable name="version" as="xs:double" 
         select="(ancestor-or-self::*[@xslt-version]/@xslt-version, 2.0)[1]" />
       <xsl:apply-templates select="." mode="test:generate-variable-declarations">
@@ -279,6 +281,10 @@
       </xsl:apply-templates>
       <xsl:choose>
         <xsl:when test="@test">
+          <!-- This variable declaration could be moved from here (the
+               template generated from x:expect) to the template
+               generated from x:scenario. It depends only on
+               $x:result, so could be computed only once. -->
           <variable name="impl:test-items" as="item()*">
             <choose>
               <!-- From trying this out, it seems like it's useful for the test
@@ -329,7 +335,7 @@
     </xsl:if>
     <x:test>
       <xsl:choose>
-        <xsl:when test="exists($pending)">
+        <xsl:when test="$pending-p">
           <xsl:attribute name="pending" select="$pending" />
         </xsl:when>
         <xsl:otherwise>
@@ -337,7 +343,7 @@
         </xsl:otherwise>
       </xsl:choose>
       <xsl:sequence select="x:label(.)"/>
-      <xsl:if test="empty($pending)">
+      <xsl:if test="not($pending-p)">
          <xsl:if test="@test">
             <if test="not($impl:boolean-test)">
                <call-template name="test:report-value">

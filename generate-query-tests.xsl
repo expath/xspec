@@ -131,13 +131,11 @@
    <!-- *** x:compile *** -->
    <!-- Generates the functions that perform the tests -->
 
-   <!--
-       TODO: Take $pending into account...
-   -->
    <xsl:template name="x:output-scenario">
       <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
       <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
+      <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
       <!-- x:context and x:call/@template not supported for XQuery -->
       <xsl:if test="exists($context)">
          <xsl:variable name="msg" select="
@@ -163,7 +161,7 @@
       <xsl:value-of select="generate-id()"/>
       <xsl:text>()&#10;{&#10;</xsl:text>
       <x:scenario>
-         <xsl:if test="exists($pending) and not(.//@focus)">
+         <xsl:if test="$pending-p">
             <xsl:attribute name="pending" select="$pending"/>
          </xsl:if>
          <x:label>
@@ -174,7 +172,7 @@
          <xsl:text>      &#10;{&#10;</xsl:text>
          <xsl:apply-templates select="$call/x:param" mode="x:compile"/>
          <xsl:choose>
-            <xsl:when test="empty($pending) or .//@focus">
+            <xsl:when test="not($pending-p)">
                <!--
                  let $t:result := ...(...)
                    return (
@@ -221,6 +219,7 @@
       <xsl:param name="pending" select="()"    tunnel="yes" as="node()?"/>
       <xsl:param name="call"    required="yes" tunnel="yes" as="element(x:call)?"/>
       <xsl:param name="params"  required="yes"              as="element(param)*"/>
+      <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor::*/@focus)"/>
       <!--
         declare function local:...($t:result as item()*)
         {
@@ -236,80 +235,75 @@
          </xsl:if>
       </xsl:for-each>
       <xsl:text>)&#10;{&#10;</xsl:text>
-      <xsl:choose>
-         <xsl:when test="exists($pending)">
-            <xsl:text>  ()</xsl:text>
-         </xsl:when>
-         <xsl:otherwise>
-            <!--
-              let $local:expected :=
-                  ( ... )
-            -->
-            <xsl:text>  let $local:expected    := (: expected result (none here) :)&#10;</xsl:text>
-            <!-- FIXME: Not correct, the x:expect model is more complex than
-                 a simple variable... (see how the original stylesheet, for
-                 XSLT, handles that...) Factorize with the XSLT version...
-                 The value of $local:expected depends on x:expect's depends
-                 on content, @href and @select. -->
-            <xsl:text>      ( </xsl:text>
-            <xsl:value-of select="@select"/>
-            <xsl:copy-of select="node()"/>
-            <xsl:text> )&#10;</xsl:text>
-            <!--
-              let $local:test-result :=
-                  if ( $t:result instance of node()+ ) then
-                    document { $t:result }/( ... )
-                  else
-                    ( ... )
-            -->
-            <xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
-            <xsl:text>      if ( $</xsl:text>
-            <xsl:value-of select="$xspec-prefix"/>
-            <xsl:text>:result instance of node()+ ) then&#10;</xsl:text>
-            <xsl:text>        document { $</xsl:text>
-            <xsl:value-of select="$xspec-prefix"/>
-            <xsl:text>:result }/( </xsl:text>
-            <xsl:value-of select="@test"/>
-            <xsl:text> )&#10;</xsl:text>
-            <xsl:text>      else&#10;</xsl:text>
-            <xsl:text>        ( </xsl:text>
-            <xsl:value-of select="@test"/>
-            <xsl:text> )&#10;</xsl:text>
-            <!--
-              let $local:successful :=
-                  if ( $local:test-result instance of xs:boolean ) then
-                    $local:test-result
-                  else
-                    test:deep-equal($local:expected, $local:test-result)
-            -->
-            <xsl:text>  let $local:successful  := (: did the test pass?:)&#10;</xsl:text>
-            <xsl:text>      if ( $local:test-result instance of xs:boolean ) then&#10;</xsl:text>
-            <xsl:text>        $local:test-result&#10;</xsl:text>
-            <xsl:text>      else&#10;</xsl:text>
-            <xsl:text>        test:deep-equal($local:expected, $local:test-result)&#10;</xsl:text>
-            <xsl:text>    return&#10;      </xsl:text>
-            <!--
-              return the x:test element for the report
-            -->
-            <x:test successful="{{ $local:successful }}">
-               <xsl:choose>
-                  <xsl:when test="exists($pending)">
-                     <xsl:attribute name="pending" select="$pending"/>
-                  </xsl:when>
-                  <xsl:otherwise>
-                     <xsl:attribute name="successful" select="'{ $local:successful }'"/>
-                  </xsl:otherwise>
-               </xsl:choose>
-               <xsl:sequence select="x:label(.)"/>
-               <xsl:if test="empty($pending)">
-                  <xsl:if test="@test">
-                     <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, 'x:result') }</xsl:text>
-                  </xsl:if>
-                  <xsl:text>&#10;      { test:report-value($local:expected, 'x:expect') }</xsl:text>
-               </xsl:if>
-            </x:test>
-         </xsl:otherwise>
-      </xsl:choose>
+      <xsl:if test="not($pending-p)">
+         <!--
+           let $local:expected :=
+               ( ... )
+         -->
+         <xsl:text>  let $local:expected    := (: expected result (none here) :)&#10;</xsl:text>
+         <!-- FIXME: Not correct, the x:expect model is more complex than
+              a simple variable... (see how the original stylesheet, for
+              XSLT, handles that...) Factorize with the XSLT version...
+              The value of $local:expected depends on x:expect's depends
+              on content, @href and @select. -->
+         <xsl:text>      ( </xsl:text>
+         <xsl:value-of select="@select"/>
+         <xsl:copy-of select="node()"/>
+         <xsl:text> )&#10;</xsl:text>
+         <!--
+           let $local:test-result :=
+               if ( $t:result instance of node()+ ) then
+                 document { $t:result }/( ... )
+               else
+                 ( ... )
+         -->
+         <xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
+         <xsl:text>      if ( $</xsl:text>
+         <xsl:value-of select="$xspec-prefix"/>
+         <xsl:text>:result instance of node()+ ) then&#10;</xsl:text>
+         <xsl:text>        document { $</xsl:text>
+         <xsl:value-of select="$xspec-prefix"/>
+         <xsl:text>:result }/( </xsl:text>
+         <xsl:value-of select="@test"/>
+         <xsl:text> )&#10;</xsl:text>
+         <xsl:text>      else&#10;</xsl:text>
+         <xsl:text>        ( </xsl:text>
+         <xsl:value-of select="@test"/>
+         <xsl:text> )&#10;</xsl:text>
+         <!--
+           let $local:successful :=
+               if ( $local:test-result instance of xs:boolean ) then
+                 $local:test-result
+               else
+                 test:deep-equal($local:expected, $local:test-result)
+         -->
+         <xsl:text>  let $local:successful  := (: did the test pass?:)&#10;</xsl:text>
+         <xsl:text>      if ( $local:test-result instance of xs:boolean ) then&#10;</xsl:text>
+         <xsl:text>        $local:test-result&#10;</xsl:text>
+         <xsl:text>      else&#10;</xsl:text>
+         <xsl:text>        test:deep-equal($local:expected, $local:test-result)&#10;</xsl:text>
+         <xsl:text>    return&#10;      </xsl:text>
+      </xsl:if>
+      <!--
+        return the x:test element for the report
+      -->
+      <x:test>
+         <xsl:choose>
+            <xsl:when test="$pending-p">
+               <xsl:attribute name="pending" select="$pending"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:attribute name="successful" select="'{ $local:successful }'"/>
+            </xsl:otherwise>
+         </xsl:choose>
+         <xsl:sequence select="x:label(.)"/>
+         <xsl:if test="not($pending-p)">
+            <xsl:if test="@test">
+               <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, 'x:result') }</xsl:text>
+            </xsl:if>
+            <xsl:text>&#10;      { test:report-value($local:expected, 'x:expect') }</xsl:text>
+         </xsl:if>
+      </x:test>
       <xsl:text>&#10;};&#10;</xsl:text>
    </xsl:template>
 
