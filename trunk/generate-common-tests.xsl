@@ -190,7 +190,7 @@
          <xsl:with-param name="name" select="generate-id()"/>
          <xsl:with-param name="last" select="empty(following-sibling::x:expect)"/>
          <xsl:with-param name="params" as="element(param)*">
-            <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
+            <xsl:if test="empty($pending|ancestor::x:scenario/@pending) or exists(ancestor::*/@focus)">
                <param name="x:result" select="$x:result"/>
             </xsl:if>
             <xsl:for-each select="$vars">
@@ -242,7 +242,7 @@
        templates or XQuery functions.
    -->
    <xsl:template name="x:compile-scenarios">
-      <xsl:param name="pending" as="node()?" select=".//@focus" tunnel="yes"/>
+      <xsl:param name="pending" as="node()?" select="(.//@focus)[1]" tunnel="yes"/>
       <xsl:variable name="this" select="." as="element()"/>
       <xsl:if test="empty($this[self::x:description|self::x:scenario])">
          <xsl:sequence select="
@@ -344,11 +344,12 @@
       <xsl:param name="vars"    select="()"    tunnel="yes" as="element(var)*"/>
       <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-expect">
-         <xsl:with-param name="pending" select="$pending" tunnel="yes"/>
-         <xsl:with-param name="context" select="$context" tunnel="yes"/>
-         <xsl:with-param name="call"    select="$call"    tunnel="yes"/>
+         <xsl:with-param name="pending" tunnel="yes" select="
+             ( $pending, ancestor::x:scenario/@pending )[1]"/>
+         <xsl:with-param name="context" tunnel="yes" select="$context"/>
+         <xsl:with-param name="call"    tunnel="yes" select="$call"/>
          <xsl:with-param name="params" as="element(param)*">
-            <xsl:if test="empty($pending) and not(ancestor::x:scenario/@pending)">
+            <xsl:if test="empty($pending|ancestor::x:scenario/@pending) or exists(ancestor::*/@focus)">
                <param name="x:result" required="yes"/>
             </xsl:if>
             <xsl:for-each select="$vars">
