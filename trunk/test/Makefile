@@ -28,11 +28,15 @@ all: xslt xquery
 xslt: xspec-function-xsl.html                     \
       xspec-rule-xsl.html                         \
       xspec-import-xsl.html                       \
+      xspec-focus-1-xsl.html                      \
+      xspec-focus-2-xsl.html                      \
       xspec-pending-xsl.html
 
 # run XQuery tests
 xquery: xspec-function-xq.html                    \
         xspec-import-xq.html                      \
+	xspec-focus-1-xq.html                     \
+        xspec-focus-2-xq.html                     \
         xspec-pending-xq.html
 
 # clean result files
