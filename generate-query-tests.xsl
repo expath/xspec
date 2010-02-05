@@ -163,6 +163,9 @@
       <xsl:value-of select="generate-id()"/>
       <xsl:text>()&#10;{&#10;</xsl:text>
       <x:scenario>
+         <xsl:if test="exists($pending) and not(.//@focus)">
+            <xsl:attribute name="pending" select="$pending"/>
+         </xsl:if>
          <x:label>
             <xsl:value-of select="x:label(.)"/>
          </x:label>
@@ -170,30 +173,40 @@
          <xsl:apply-templates select="x:context|x:call" mode="x:report"/>
          <xsl:text>      &#10;{&#10;</xsl:text>
          <xsl:apply-templates select="$call/x:param" mode="x:compile"/>
-         <!--
-           let $t:result := ...(...)
-             return (
-               test:report-value($t:result, 'x:result'),
-               ...
-             )
-         -->
-         <xsl:text>  let $t:result := </xsl:text>
-         <xsl:value-of select="$call/@function"/>
-         <xsl:text>(</xsl:text>
-         <xsl:for-each select="$call/x:param">
-            <xsl:sort select="xs:integer(@position)"/>
-            <xsl:text>$</xsl:text>
-            <xsl:value-of select="( @name, generate-id() )[1]"/>
-            <xsl:if test="position() != last()">, </xsl:if>
-         </xsl:for-each>
-         <xsl:text>)&#10;</xsl:text>
-         <xsl:text>    return (&#10;</xsl:text>
-         <xsl:text>      test:report-value($t:result, 'x:result'),&#10;</xsl:text>
+         <xsl:choose>
+            <xsl:when test="empty($pending) or .//@focus">
+               <!--
+                 let $t:result := ...(...)
+                   return (
+                     test:report-value($t:result, 'x:result'),
+               -->
+               <xsl:text>  let $t:result := </xsl:text>
+               <xsl:value-of select="$call/@function"/>
+               <xsl:text>(</xsl:text>
+               <xsl:for-each select="$call/x:param">
+                  <xsl:sort select="xs:integer(@position)"/>
+                  <xsl:text>$</xsl:text>
+                  <xsl:value-of select="( @name, generate-id() )[1]"/>
+                  <xsl:if test="position() != last()">, </xsl:if>
+               </xsl:for-each>
+               <xsl:text>)&#10;</xsl:text>
+               <xsl:text>    return (&#10;</xsl:text>
+               <xsl:text>      test:report-value($t:result, 'x:result'),&#10;</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+               <!--
+                 let $t:dummy := ()
+                   return (
+               -->
+               <xsl:text>  let $t:result := ()&#10;</xsl:text>
+               <xsl:text>    return (&#10;</xsl:text>
+            </xsl:otherwise>
+         </xsl:choose>
          <xsl:call-template name="x:call-scenarios"/>
          <xsl:text>    )&#10;</xsl:text>
-         <xsl:text>      }&#10;</xsl:text>
+         <xsl:text>}&#10;</xsl:text>
       </x:scenario>
-      <xsl:text>};&#10;</xsl:text>
+      <xsl:text>&#10;};&#10;</xsl:text>
       <xsl:call-template name="x:compile-scenarios"/>
    </xsl:template>
 
@@ -279,9 +292,21 @@
               return the x:test element for the report
             -->
             <x:test successful="{{ $local:successful }}">
+               <xsl:choose>
+                  <xsl:when test="exists($pending)">
+                     <xsl:attribute name="pending" select="$pending"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                     <xsl:attribute name="successful" select="'{ $local:successful }'"/>
+                  </xsl:otherwise>
+               </xsl:choose>
                <xsl:sequence select="x:label(.)"/>
-               <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, 'x:result') }</xsl:text>
-               <xsl:text>&#10;      { test:report-value($local:expected, 'x:expect') }</xsl:text>
+               <xsl:if test="empty($pending)">
+                  <xsl:if test="@test">
+                     <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, 'x:result') }</xsl:text>
+                  </xsl:if>
+                  <xsl:text>&#10;      { test:report-value($local:expected, 'x:expect') }</xsl:text>
+               </xsl:if>
             </x:test>
          </xsl:otherwise>
       </xsl:choose>
