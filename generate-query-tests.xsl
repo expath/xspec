@@ -170,14 +170,16 @@
          <!-- Generate a seq ctor to generate x:context or x:call in the report. -->
          <xsl:apply-templates select="x:context|x:call" mode="x:report"/>
          <xsl:text>      &#10;{&#10;</xsl:text>
-         <xsl:apply-templates select="$call/x:param" mode="x:compile"/>
          <xsl:choose>
             <xsl:when test="not($pending-p)">
                <!--
-                 let $t:result := ...(...)
+                 let $xxx-param1 := ...
+                 let $xxx-param2 := ...
+                 let $t:result   := ...($xxx-param1, $xxx-param2)
                    return (
                      test:report-value($t:result, 'x:result'),
                -->
+               <xsl:apply-templates select="$call/x:param" mode="x:compile"/>
                <xsl:text>  let $t:result := </xsl:text>
                <xsl:value-of select="$call/@function"/>
                <xsl:text>(</xsl:text>
@@ -309,13 +311,16 @@
 
    <!-- *** x:generate-declarations *** -->
    <!-- Code to generate parameter declarations -->
-   <xsl:template match="x:param" mode="x:generate-declarations">
-      <xsl:text>declare variable $</xsl:text>
-      <xsl:value-of select="@name"/>
-      <xsl:text> := </xsl:text>
-      <xsl:value-of select="@select"/>
-      <xsl:copy-of select="node()"/>
-      <xsl:text>;&#10;</xsl:text>
+   <!--
+       TODO: For x:param, define external variable (which can have a
+       default value in XQuery 1.1, but not in 1.0, so we will need to
+       generate an error for global x:param with default value...)
+   -->
+   <xsl:template match="x:param|x:variable" mode="x:generate-declarations">
+      <xsl:apply-templates select="." mode="test:generate-variable-declarations">
+         <xsl:with-param name="var"    select="@name" />
+         <xsl:with-param name="global" select="true()"/>
+      </xsl:apply-templates>
    </xsl:template>
 
    <xsl:template match="x:space" mode="test:create-xslt-generator">

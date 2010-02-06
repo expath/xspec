@@ -33,8 +33,16 @@
                         'mode=', normalize-space(@mode))"/>
 
    <xsl:template match="*" mode="test:generate-variable-declarations">
-      <xsl:param name="var" as="xs:string" required="yes"/>
-      <xsl:text>  let $</xsl:text>
+      <xsl:param name="var"    as="xs:string"  required="yes"/>
+      <xsl:param name="global" as="xs:boolean" select="false()"/>
+      <xsl:choose>
+         <xsl:when test="$global">
+            <xsl:text>declare variable $</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>  let $</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
       <xsl:value-of select="$var"/>
       <xsl:if test="@as">
          <xsl:text> as </xsl:text>
@@ -61,6 +69,9 @@
             <xsl:text> := ()</xsl:text>
          </xsl:otherwise>
       </xsl:choose>
+      <xsl:if test="$global">
+         <xsl:text>;</xsl:text>
+      </xsl:if>
       <xsl:text>&#10;</xsl:text>
    </xsl:template>
 
