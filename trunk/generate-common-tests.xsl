@@ -219,11 +219,26 @@
    </xsl:template>
 
    <!--
-       Drive the compilation of test suite params (aka global params).
+       Global x:variable and x:param elements are not handled like
+       local variables and params (which are passed through calls).
+       They are declared globally.
+   -->
+   <xsl:template match="x:description/x:param|x:description/x:variable" mode="x:generate-calls">
+      <!-- Continue walking the siblings. -->
+      <xsl:apply-templates select="following-sibling::*[1]" mode="#current">
+         <xsl:with-param name="vars" tunnel="yes" as="element(var)+">
+            <var name="{ @name }"/>
+         </xsl:with-param>
+      </xsl:apply-templates>
+   </xsl:template>
+
+   <!--
+       Drive the compilation of test suite params (aka global params
+       and variables).
    -->
    <xsl:template name="x:compile-params">
       <xsl:variable name="this" select="." as="element(x:description)"/>
-      <xsl:apply-templates select="$this/x:param" mode="x:generate-declarations"/>
+      <xsl:apply-templates select="$this/(x:param|x:variable)" mode="x:generate-declarations"/>
    </xsl:template>
 
    <!--
@@ -395,7 +410,11 @@
        resolving x:import elements in place.  Bur for now, those
        elements are still here, so we have to ignore them...
    -->
-   <xsl:template match="x:description/x:param|x:call|x:context|x:import" mode="x:compile">
+   <xsl:template match="x:description/x:param
+                        |x:description/x:variable
+                        |x:call
+                        |x:context
+                        |x:import" mode="x:compile">
       <!-- Nothing... -->
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
