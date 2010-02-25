@@ -24,6 +24,8 @@ never shown neither.
 The goal is just to make the compilation phase clearer, mostly
 for developing purposes.
 
+Those examples could be the base for test cases too (as an automated test suite, written in XSpec of course).
+
 =Simple suite=
 
 Show the structure of a compiled test suite, both in XSLT and XQuery.
