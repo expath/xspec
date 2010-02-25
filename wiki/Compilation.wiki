@@ -110,7 +110,7 @@ Show the structure of a compiled test suite, both in XSLT and XQuery.
 </xsl:stylesheet>
 }}}
 
-==XQuery==
+==Query==
 
 {{{
 (: the tested library module :)
