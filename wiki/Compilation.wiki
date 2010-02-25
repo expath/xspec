@@ -157,7 +157,7 @@ scenario (or a function in XQuery), that calls the SUT and puts
 the result in a variable ($impl:actual-result in XSLT and
 $local:result in XQuery).  A separate template (or function in
 XQuery) is generated for each expectation, and those templates (or
-functions) are called for the first one, in sequence, with the
+functions) are called from the first one, in sequence, with the
 result as parameter.
 
 ==Test suite==
