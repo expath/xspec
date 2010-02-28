@@ -154,7 +154,7 @@ declare function local:d4e4($t:result as item()*)
 Show the structure of a compiled scenario, both in XSLT and
 XQuery.  The general idea is to generate a template for the
 scenario (or a function in XQuery), that calls the SUT and puts
-the result in a variable ($impl:actual-result in XSLT and
+the result in a variable ($x:result in XSLT and
 $local:result in XQuery).  A separate template (or function in
 XQuery) is generated for each expectation, and those templates (or
 functions) are called from the first one, in sequence, with the
@@ -173,12 +173,12 @@ result as parameter.
 <!-- generated from the scenario element -->
 <xsl:template name="x:d4e2">
    <x:call function="f"/>
-   <xsl:variable name="impl:actual-result" as="item()*">
+   <xsl:variable name="x:result" as="item()*">
       <xsl:sequence select="f()"/>
    </xsl:variable>
    ... generate scenario data in the report ...
    <xsl:call-template name="x:d4e4">
-      <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="x:result" select="$x:result"/>
    </xsl:call-template>
 </xsl:template>
 
@@ -279,12 +279,12 @@ shall look like.
 <xsl:template name="x:d4e2">
    <!-- the generated variable -->
    <xsl:variable name="var" select="'value'"/>
-   <xsl:variable name="impl:actual-result" as="item()*">
+   <xsl:variable name="x:result" as="item()*">
       ... evaluate the test expression ...
    </xsl:variable>
    ...
    <xsl:call-template name="x:d4e4">
-      <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="x:result" select="$x:result"/>
    </xsl:call-template>
 </xsl:template>
 
@@ -413,14 +413,14 @@ and functions in XQuery).
    <xsl:param name="var-1" required="yes" ...>
    <!-- the generated variable -->
    <xsl:variable name="var-2" ...>
-   <xsl:variable name="impl:actual-result" as="item()*">
+   <xsl:variable name="x:result" as="item()*">
       <xsl:sequence select="f()"/>
    </xsl:variable>
    ...
    <!-- the generated variable -->
    <xsl:variable name="var-3" ...>
    <xsl:call-template name="x:d4e4">
-      <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="x:result" select="$x:result"/>
       <xsl:with-param name="var-1"    select="$var-1"/>
       <xsl:with-param name="var-2"    select="$var-2"/>
       <xsl:with-param name="var-3"    select="$var-3"/>
@@ -428,7 +428,7 @@ and functions in XQuery).
    <!-- the generated variable -->
    <xsl:variable name="var-4" ...>
    <xsl:call-template name="x:d4e5">
-      <xsl:with-param name="x:result" select="$impl:actual-result"/>
+      <xsl:with-param name="x:result" select="$x:result"/>
       <xsl:with-param name="var-1"    select="$var-1"/>
       <xsl:with-param name="var-2"    select="$var-2"/>
       <xsl:with-param name="var-3"    select="$var-3"/>
