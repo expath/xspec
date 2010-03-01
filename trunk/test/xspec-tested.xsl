@@ -20,6 +20,7 @@
    </xsl:function>
 
    <xsl:template match="rule">
+      <xsl:param name="p"/>
       <transformed/>
    </xsl:template>
 
