@@ -138,7 +138,7 @@
        resolving x:import elements in place.  Bur for now, those
        elements are still here, so we have to ignore them...
    -->
-   <xsl:template match="x:call|x:context|x:import" mode="x:generate-calls">
+   <xsl:template match="x:apply|x:call|x:context|x:import" mode="x:generate-calls">
       <!-- Nothing, but must continue the sibling-walking... -->
       <xsl:call-template name="x:continue-call-scenarios"/>
    </xsl:template>
@@ -288,8 +288,9 @@
    -->
    <xsl:template match="x:scenario" mode="x:compile">
       <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
-      <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
+      <xsl:param name="apply"   select="()" tunnel="yes" as="element(x:apply)?"/>
       <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
+      <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
       <!-- The new $pending. -->
       <xsl:variable name="new-pending" as="node()?" select="
           if ( @focus ) then
@@ -298,6 +299,25 @@
             @pending
           else
             $pending"/>
+      <!-- The new apply. -->
+      <xsl:variable name="new-apply" as="element(x:apply)?">
+         <xsl:choose>
+            <xsl:when test="x:apply">
+               <xsl:variable name="local-params" as="element(x:param)*" select="x:apply/x:param"/>
+               <x:apply>
+                  <xsl:sequence select="$apply/@*"/>
+                  <xsl:sequence select="x:apply/@*"/>
+                  <xsl:sequence select="
+                      $apply/x:param[not(@name = $local-params/@name)],
+                      $local-params"/>
+                  <!-- TODO: Test that "x:apply/(node() except x:param)" is empty. -->
+               </x:apply>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:sequence select="$apply"/>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:variable>
       <!-- The new context. -->
       <xsl:variable name="new-context" as="element(x:context)?">
          <xsl:choose>
@@ -321,7 +341,7 @@
             </xsl:otherwise>
          </xsl:choose>
       </xsl:variable>
-      <!-- The new context. -->
+      <!-- The new call. -->
       <xsl:variable name="new-call" as="element(x:call)?">
          <xsl:choose>
             <xsl:when test="x:call">
@@ -332,6 +352,7 @@
                   <xsl:sequence select="
                       $call/x:param[not(@name = $local-params/@name)],
                       $local-params"/>
+                  <!-- TODO: Test that "x:call/(node() except x:param)" is empty. -->
                </x:call>
             </xsl:when>
             <xsl:otherwise>
@@ -342,8 +363,9 @@
       <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-scenario">
          <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
-         <xsl:with-param name="context" select="$new-context" tunnel="yes"/>
+         <xsl:with-param name="apply"   select="$new-apply"   tunnel="yes"/>
          <xsl:with-param name="call"    select="$new-call"    tunnel="yes"/>
+         <xsl:with-param name="context" select="$new-context" tunnel="yes"/>
       </xsl:call-template>
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
@@ -412,6 +434,7 @@
    -->
    <xsl:template match="x:description/x:param
                         |x:description/x:variable
+                        |x:apply
                         |x:call
                         |x:context
                         |x:import" mode="x:compile">
