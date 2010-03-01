@@ -13,7 +13,7 @@
 <t:description xmlns:t="http://www.jenitennison.com/xslt/xspec"
                stylesheet="xspec-tested.xsl">
 
-   <t:scenario label="apply">
+   <t:scenario label="context">
       <t:context>
          <rule/>
       </t:context>
@@ -22,10 +22,35 @@
       </t:expect>
    </t:scenario>
 
-   <t:scenario label="must fail">
+   <t:scenario label="context result is wrong: must fail">
       <t:context>
          <rule/>
       </t:context>
+      <t:expect label="wrong result">
+         <erroneous/>
+      </t:expect>
+   </t:scenario>
+
+   <!-- TODO: Make two different cases for the base t:apply and with param. -->
+   <t:scenario label="apply" pending="not implemented yet">
+      <t:variable name="ctxt" as="element()">
+         <rule/>
+      </t:variable>
+      <t:apply select="$ctxt">
+         <t:param name="p" select="0"/>
+      </t:apply>
+      <t:expect label="the result">
+         <transformed/>
+      </t:expect>
+   </t:scenario>
+
+   <t:scenario label="apply result is wrong: must fail" pending="not implemented yet">
+      <t:variable name="ctxt" as="element()">
+         <rule/>
+      </t:variable>
+      <t:apply select="$ctxt">
+         <t:param name="p" select="0"/>
+      </t:apply>
       <t:expect label="wrong result">
          <erroneous/>
       </t:expect>
