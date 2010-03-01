@@ -105,8 +105,9 @@
 
 <xsl:template name="x:output-scenario">
   <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
-  <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
+  <xsl:param name="apply"   select="()" tunnel="yes" as="element(x:apply)?"/>
   <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
+  <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
   <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
   <!-- We have to create these error messages at this stage because before now
        we didn't have merged versions of the environment -->
@@ -125,6 +126,20 @@
       <xsl:text>": can't call a function and a template at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
+  <xsl:if test="$apply and $context">
+    <xsl:message terminate="yes">
+      <xsl:text>ERROR in scenario "</xsl:text>
+      <xsl:value-of select="x:label(.)" />
+      <xsl:text>": can't use apply and set a context at the same time</xsl:text>
+    </xsl:message>
+  </xsl:if>
+  <xsl:if test="$apply and $call">
+    <xsl:message terminate="yes">
+      <xsl:text>ERROR in scenario "</xsl:text>
+      <xsl:value-of select="x:label(.)" />
+      <xsl:text>": can't use apply and call at the same time</xsl:text>
+    </xsl:message>
+  </xsl:if>
   <xsl:if test="$context and $call/@function">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
@@ -132,11 +147,11 @@
       <xsl:text>": can't set a context and call a function at the same time</xsl:text>
     </xsl:message>
   </xsl:if>
-  <xsl:if test="x:expect and not($context) and not($call)">
+  <xsl:if test="x:expect and not($call) and not($apply) and not($context)">
     <xsl:message terminate="yes">
       <xsl:text>ERROR in scenario "</xsl:text>
       <xsl:value-of select="x:label(.)" />
-      <xsl:text>": there are tests in this scenario but no call or context has been given</xsl:text>
+      <xsl:text>": there are tests in this scenario but no call, or apply or context has been given</xsl:text>
     </xsl:message>
   </xsl:if>
   <template name="x:{generate-id()}">
@@ -159,7 +174,7 @@
         <xsl:attribute name="pending" select="$pending" />
       </xsl:if>
     	<xsl:sequence select="x:label(.)" />
-      <xsl:apply-templates select="x:context | x:call" mode="x:report" />
+      <xsl:apply-templates select="x:apply | x:call | x:context" mode="x:report" />
       <xsl:if test="not($pending-p) and x:expect">
         <variable name="x:result" as="item()*">
           <xsl:choose>
@@ -208,7 +223,24 @@
                 </xsl:attribute>
               </sequence>
             </xsl:when>
-            <xsl:otherwise>
+            <xsl:when test="$apply">
+               <!-- TODO: FIXME: ... -->
+               <xsl:message terminate="yes">
+                  <xsl:text>The instruction t:apply is not supported yet!</xsl:text>
+               </xsl:message>
+               <!-- Set up variables containing the parameter values -->
+               <xsl:apply-templates select="$apply/x:param" mode="x:compile"/>
+               <!-- Create the apply templates instruction -->
+               <apply-templates>
+                  <xsl:copy-of select="$apply/@select | $apply/@mode"/>
+                  <xsl:for-each select="$apply/x:param">
+                     <with-param name="{ @name }" select="${ @name }">
+                        <xsl:copy-of select="@tunnel"/>
+                     </with-param>
+                  </xsl:for-each>
+               </apply-templates>
+            </xsl:when>
+            <xsl:when test="$context">
               <!-- Set up the $context variable -->
               <xsl:apply-templates select="$context" mode="x:setup-context"/>
               <!-- Set up variables containing the parameter values -->
@@ -222,6 +254,10 @@
                   </with-param>
                 </xsl:for-each>
               </apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+               <!-- TODO: Adapt to a new error reporting facility (above usages too). -->
+               <xsl:message terminate="yes">Error: cannot happen.</xsl:message>
             </xsl:otherwise>
           </xsl:choose>      
         </variable>
