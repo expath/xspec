@@ -17,9 +17,62 @@
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 extension-element-prefixes="test"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias">
-  
-<xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>  
-  
+
+<xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
+
+<!-- TODO: ... -->
+<xsl:param name="debug" as="xs:boolean" select="true()"/>
+
+<!-- Generate an human-readable path to a node within its document. -->
+<xsl:function name="x:node-path" as="xs:string">
+   <xsl:param name="n" as="node()"/>
+   <!-- TODO: In case of a root document node, the path begins with '//'... -->
+   <xsl:sequence select="string-join($n/ancestor-or-self::node()/x:node-step(.), '/')"/>
+</xsl:function>
+
+<xsl:function name="x:node-step" as="xs:string">
+   <xsl:param name="n" as="node()"/>
+   <xsl:choose>
+      <xsl:when test="$n instance of document-node()">
+         <xsl:sequence select="'/'"/>
+      </xsl:when>
+      <xsl:when test="$n instance of element()">
+         <xsl:variable name="precedings" select="
+             $n/preceding-sibling::*[name(.) eq name($n)]"/>
+         <xsl:sequence select="concat(name($n), x:node-position($precedings))"/>
+      </xsl:when>
+      <xsl:when test="$n instance of attribute()">
+         <xsl:sequence select="concat('@', name($n))"/>
+      </xsl:when>
+      <xsl:when test="$n instance of text()">
+         <xsl:variable name="precedings" select="
+             $n/preceding-sibling::text()"/>
+         <xsl:sequence select="concat('text()', x:node-position($precedings))"/>
+      </xsl:when>
+      <xsl:when test="$n instance of comment()">
+         <xsl:variable name="precedings" select="
+             $n/preceding-sibling::comment()"/>
+         <xsl:sequence select="concat('comment()', x:node-position($precedings))"/>
+      </xsl:when>
+      <xsl:when test="$n instance of processing-instruction()">
+         <xsl:variable name="precedings" select="
+             $n/preceding-sibling::processing-instruction[name(.) eq name($n)]"/>
+         <xsl:sequence select="concat('pi(', name($n), ')', x:node-position($precedings))"/>
+      </xsl:when>
+      <!-- if not, that's a namespace node -->
+      <xsl:otherwise>
+         <xsl:sequence select="concat('ns({', name($n), '}', $n, ')')"/>
+      </xsl:otherwise>
+   </xsl:choose>
+</xsl:function>
+
+<xsl:function name="x:node-position" as="xs:string?">
+   <xsl:param name="precedings" as="node()*"/>
+   <xsl:if test="exists($precedings)">
+      <xsl:sequence select="concat('[', count($precedings) + 1, ']')"/>
+   </xsl:if>
+</xsl:function>
+
 <test:tests>
   <test:title>test:deep-equal function</test:title>
   <test:test>
@@ -67,73 +120,85 @@
   <xsl:param name="seq2" as="item()*" />
   <xsl:sequence select="test:deep-equal($seq1, $seq2, 2.0)" />
 </xsl:function>
-  
+
 <xsl:function name="test:deep-equal" as="xs:boolean">
-  <xsl:param name="seq1" as="item()*" />
-  <xsl:param name="seq2" as="item()*" />
-  <xsl:param name="version" as="xs:double" />
-  <xsl:choose>
-    <xsl:when test="$version = 1.0">
-      <xsl:choose>
-        <xsl:when test="$seq1 instance of xs:string and
-                        $seq2 instance of text()+">
-          <xsl:sequence select="test:deep-equal($seq1, string-join($seq2, ''))" />
+  <xsl:param name="seq1" as="item()*"/>
+  <xsl:param name="seq2" as="item()*"/>
+  <xsl:param name="version" as="xs:double"/>
+  <!-- Using a $param in @use-when does not work.  TODO: What to do? At run time? -->
+  <!--xsl:if test="$seq1 instance of node()" use-when="$debug">
+     <xsl:message select="'DEEP-EQUAL: SEQ1:', x:node-path($seq1)"/>
+  </xsl:if>
+  <xsl:if test="$seq2 instance of node()" use-when="$debug">
+     <xsl:message select="'DEEP-EQUAL: SEQ2:', x:node-path($seq2)"/>
+  </xsl:if-->
+  <xsl:variable name="result" as="xs:boolean">
+     <xsl:choose>
+        <xsl:when test="$version = 1.0">
+           <xsl:choose>
+              <xsl:when test="$seq1 instance of xs:string and
+                              $seq2 instance of text()+">
+                 <xsl:sequence select="test:deep-equal($seq1, string-join($seq2, ''))"/>
+              </xsl:when>
+              <xsl:when test="$seq1 instance of xs:double and
+                              $seq2 instance of text()+">
+                 <xsl:sequence select="test:deep-equal($seq1, xs:double(string-join($seq2, '')))"/>
+              </xsl:when>
+              <xsl:when test="$seq1 instance of xs:decimal and
+                              $seq2 instance of text()+">
+                 <xsl:sequence select="test:deep-equal($seq1, xs:decimal(string-join($seq2, '')))"/>
+              </xsl:when>
+              <xsl:when test="$seq1 instance of xs:integer and
+                              $seq2 instance of text()+">
+                 <xsl:sequence select="test:deep-equal($seq1, xs:integer(string-join($seq2, '')))"/>
+              </xsl:when>
+              <xsl:otherwise>
+                 <xsl:sequence select="test:deep-equal($seq1, $seq2)"/>
+              </xsl:otherwise>
+           </xsl:choose>
         </xsl:when>
-        <xsl:when test="$seq1 instance of xs:double and
-                        $seq2 instance of text()+">
-          <xsl:sequence select="test:deep-equal($seq1, xs:double(string-join($seq2, '')))" />
+        <xsl:when test="empty($seq1) or empty($seq2)">
+           <xsl:sequence select="empty($seq1) and empty($seq2)"/>
         </xsl:when>
-        <xsl:when test="$seq1 instance of xs:decimal and
-                        $seq2 instance of text()+">
-          <xsl:sequence select="test:deep-equal($seq1, xs:decimal(string-join($seq2, '')))" />
+        <xsl:when test="count($seq1) = count($seq2)">
+           <xsl:sequence select="every $i in (1 to count($seq1)) 
+                                 satisfies test:item-deep-equal($seq1[$i], $seq2[$i])"/>
         </xsl:when>
-        <xsl:when test="$seq1 instance of xs:integer and
+        <xsl:when test="$seq1 instance of text() and
                         $seq2 instance of text()+">
-          <xsl:sequence select="test:deep-equal($seq1, xs:integer(string-join($seq2, '')))" />
+           <xsl:variable name="seq2" as="text()">
+              <xsl:value-of select="$seq2" separator=""/>
+           </xsl:variable>
+           <xsl:sequence select="test:deep-equal($seq1, $seq2, $version)"/>
+        </xsl:when>
+        <xsl:when test="$seq1 instance of node()+ and $seq2 instance of node()+ and empty($seq1[. instance of attribute()]) and empty($seq2[. instance of attribute()])">
+           <xsl:variable name="seq1a" as="document-node()">
+              <xsl:document>
+                 <xsl:sequence select="$seq1"/>
+              </xsl:document>
+           </xsl:variable>
+           <xsl:variable name="seq2a" as="document-node()">
+              <xsl:document>
+                 <xsl:sequence select="$seq2"/>
+              </xsl:document>
+           </xsl:variable>
+           <xsl:choose>
+              <xsl:when test="count($seq1a/node()) != count($seq1) or count($seq2a/node()) != count($seq2)">
+                 <xsl:sequence select="test:deep-equal($seq1a/node(), $seq2a/node(), $version)"/>
+              </xsl:when>
+              <xsl:otherwise>
+                 <xsl:sequence select="false()"/>
+              </xsl:otherwise>
+           </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:sequence select="test:deep-equal($seq1, $seq2)" />
+           <xsl:sequence select="false()"/>
         </xsl:otherwise>
-      </xsl:choose>
-    </xsl:when>
-    <xsl:when test="empty($seq1) or empty($seq2)">
-      <xsl:sequence select="empty($seq1) and empty($seq2)" />
-    </xsl:when>
-    <xsl:when test="count($seq1) = count($seq2)">
-      <xsl:sequence select="every $i in (1 to count($seq1)) 
-                            satisfies test:item-deep-equal($seq1[$i], $seq2[$i])" />
-    </xsl:when>
-    <xsl:when test="$seq1 instance of text() and
-                    $seq2 instance of text()+">
-      <xsl:variable name="seq2" as="text()">
-        <xsl:value-of select="$seq2" separator="" />
-      </xsl:variable>
-      <xsl:sequence select="test:deep-equal($seq1, $seq2, $version)" />
-    </xsl:when>
-    <xsl:when test="$seq1 instance of node()+ and $seq2 instance of node()+ and empty($seq1[. instance of attribute()]) and empty($seq2[. instance of attribute()])">
-    	<xsl:variable name="seq1a" as="document-node()">
-    		<xsl:document>
-    			<xsl:sequence select="$seq1" />
-    		</xsl:document>
-    	</xsl:variable>
-    	<xsl:variable name="seq2a" as="document-node()">
-    		<xsl:document>
-    			<xsl:sequence select="$seq2" />
-    		</xsl:document>
-    	</xsl:variable>
-      <xsl:choose>
-      	<xsl:when test="count($seq1a/node()) != count($seq1) or count($seq2a/node()) != count($seq2)">
-      		<xsl:sequence select="test:deep-equal($seq1a/node(), $seq2a/node(), $version)" />
-      	</xsl:when>
-      	<xsl:otherwise>
-      		<xsl:sequence select="false()" />
-      	</xsl:otherwise>
-      </xsl:choose>
-    </xsl:when>
-  	<xsl:otherwise>
-  		<xsl:sequence select="false()" />
-  	</xsl:otherwise>
-  </xsl:choose>
+     </xsl:choose>
+  </xsl:variable>
+  <!-- Using a $param in @use-when does not work.  TODO: What to do? At run time? -->
+  <!--xsl:message select="'DEEP-EQUAL: RESULT:', $result" use-when="$debug"/-->
+  <xsl:sequence select="$result"/>
 </xsl:function>
 
 <test:tests>
