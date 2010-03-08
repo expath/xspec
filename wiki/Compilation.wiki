@@ -1,4 +1,4 @@
-#summary What does produce the compilation?
+#summary How are the tests compiled?
 #labels Phase-Implementation,Featured
 
 =Contents=
@@ -7,22 +7,11 @@
 
 =Introduction=
 
-This page aims to provide an overview of the result of the
-compilation of XSpec test suites to either XSLT or XQuery (the
-two available implementations for now).  It does so by showing
-simple examples and the associated generated stylesheet and
-query.
+This page is an overview how XSpec test suites are compiled into XSLT and XQuery.  It shows examples of simple test suites along with their XSpec-generated stylesheets and queries.
 
-The generated stylesheets and queries are not shown entirely and
-the generated code is somewhat cleaned to show only relevant
-parts.  In particular, the code generating stuff in the final
-report have been removed, exept in the cases specifically used to
-show how this is done.  Indentation and comments have been added
-too when appropriate.  The root element of the test suites is
-never shown neither.
+The generated stylesheets and queries are not shown in their entirety.  In particular, the code generating parts of the final report has been removed, except in examples specifically intended to show how this is done.  The root elements of test suites are omitted, and indentation and comments have been added where appropriate.
 
-The goal is just to make the compilation phase clearer, mostly
-for developing purposes.
+The goal is make the compilation phase clearer, mostly for development purposes.
 
 Those examples could be the base for test cases too (as an automated test suite, written in XSpec of course).
 
@@ -273,7 +262,7 @@ scenario).
 `apply` represents applying a template rule to a node (this is not
 possible in XQuery), and corresponds naturally to
 `xsl:apply-templates`.  `call` represents a call either to a named
-template or an XPath function.  `context` represents also applying
+template or an XPath function.  `context` also represents applying
 a template rule to a node, but in a different way than `apply`:
 the former represents more a full transform (e.g. the result is
 always one document node) where `apply` is exactly the result of a
@@ -374,7 +363,7 @@ TODO: ...
 =Variables=
 
 This is not implemented yet, but this is an example of what they
-shall look like.
+will look like.
 
 ==Test suite==
 {{{
@@ -441,10 +430,10 @@ declare function local:d4e4($t:result as item()*)
 =Variable value=
 
 Here is an example of three variables, one using `@select`, one
-using content, and one using `@href`..  As with `xsl:variable`,
-they must use one and exactly one of them.  The href attribute is
+using content, and one using `@href`.  As with `xsl:variable`,
+they must use one and exactly one of these attributes.  The href attribute is
 to load a document from a file (relative to the test suite
-document).  The resulting variables must be once in the code
+document).  The resulting variables must appear once in the code
 generated for the `scenario` element and once in the code
 generated for the `expect` element (well, define more precisely
 the scope of the variables, I think we should be able to put them
@@ -478,13 +467,13 @@ let $content as element() := <elem/>
 
 =Variables scope=
 
-This show where variables are generated regarding their scope.
+This shows where variables are generated regarding their scope.
 It is worth noting the first definition of this was to generate
 variables several times if needed, e.g. if they were in scope in
 a scenario and expectations (see the revision r78 of this page
-for an example).  But this would lead in several evaluations of
-the same thing (which could lead in being less efficient, and in
-subtle bugs in case of side-effects).  So instead, variables are
+for an example).  But this would lead to several evaluations of
+the same thing (which could lead to being less efficient, and to
+subtle bugs in case of side-effects). So instead, variables are
 evaluated once, then passed as parameters (to templates in XSLT
 and functions in XQuery).
 
