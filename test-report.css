@@ -406,7 +406,7 @@ th { text-align: left; }
   overflow: auto; 
   border: 1px #999 dotted;
 }
-
+span.scenario-title {width: 77.5%;}
 span.scenario-totals {float: right; width: 22.5%; text-align: left}
 
 
