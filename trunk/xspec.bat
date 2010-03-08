@@ -1,6 +1,6 @@
 @echo off
 
-SET CP=C:\Program Files (x86)\Oxygen XML Editor\lib\saxon9sa.jar
+SET CP=b:\scripts\saxon\saxon9.jar
 
 SET XSPEC=%1
 
@@ -74,7 +74,7 @@ java -cp "%CP%" net.sf.saxon.Transform -o:%RESULT% -s:%XSPEC% -xsl:%TEST_STYLESH
 
 echo.  
 echo Formatting Report...
-java -cp "%CP%" net.sf.saxon.Transform -o:%HTML% -s:%RESULT% -xsl:format-xspec-report.xsl
+java -cp "%CP%" net.sf.saxon.Transform -o:%HTML% -s:%RESULT% -xsl:format-xspec-report-folding.xsl
 
 REM =======================================
 REM Check if coverage parameter was passed
