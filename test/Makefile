@@ -13,8 +13,7 @@
 
 
 # the classpath to invoke Saxon
-#CP=$$SAXON_HOME/saxon9he.jar:$$SAXON_HOME/saxon9.jar
-CP=b:/scripts/saxon/saxon9.jar
+CP=$$SAXON_HOME/saxon9he.jar:$$SAXON_HOME/saxon9.jar
 # invoke Saxon as XSLT processor
 XSLT=java -cp $(CP) net.sf.saxon.Transform
 # invoke Saxon as XQuery processor
