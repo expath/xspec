@@ -1,5 +1,5 @@
 #summary Getting Started with XSpec
-#labels Phase-Deploy
+#labels Phase-Deploy,Featured
 
 =Contents=
 
