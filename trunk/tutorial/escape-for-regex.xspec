@@ -76,7 +76,7 @@
       <!-- check the result -->
       <x:expect label="All phrase elements should remain"
                 test="count(phrases/phrase) = 3"/>
-      <x:expect label="String should be escaped and status attribute should be added">
+      <x:expect label="Strings should be escaped and status attributes should be added">
          <phrases>
             <phrase status="same">Hello!</phrase>
             <phrase status="same">Goodbye!</phrase>
