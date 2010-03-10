@@ -28,9 +28,18 @@ You should get a usage summary:
      if coverage is specified, outputs test coverage report
 }}}
 
-=Running a Test Suite=
+=Your First Test Suite=
 
-Now that we have XSpec installed, we're ready to try it out.  XSpec comes with a sample XSLT stylesheet and test suite and an XQuery file and test suite, both of which are in the `tutorial` directory.  We'll start with the XSLT stylesheet.
+Now that we have XSpec installed, we're ready to try it out.
+XSpec comes with a sample of XSLT stylesheet to test and its
+sample test suite, both of which are in the `tutorial` directory.
+
+If you want to have a look at them online, you can view them
+directly from the repository:
+[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xstl the tested stylesheet] and
+[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xspec the sample test suite].
+
+=Running a Test Suite=
 
 First, Copy the `c:\xspec\tutorial` subdirectory somewhere where you can work in it.  For the purposes of this tutorial, we'll say it's in `c:\home\tutorial\`.  Navigate to that directory and run the command:
 
