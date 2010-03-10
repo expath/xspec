@@ -36,7 +36,7 @@ sample test suite, both of which are in the `tutorial` directory.
 
 If you want to have a look at them online, you can view them
 directly from the repository:
-[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xstl the tested stylesheet] and
+[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xslt the tested stylesheet] and
 [http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xspec the sample test suite].
 
 =Running a Test Suite=
