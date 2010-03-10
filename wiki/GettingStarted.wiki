@@ -78,7 +78,7 @@ For more information about how the XSpec tests are run, see RunningScenarios.
 
 =Working With XSpec Documents=
 
-Open `[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xslt escape-for-regex.xslt]` and `[http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xspec escape-for-regex.xspec]` in your favorite XML editor.  The transform has a single function and a couple of templates that we're testing.  
+Open [http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xslt escape-for-regex.xslt] and [http://code.google.com/p/xspec/source/browse/trunk/tutorial/escape-for-regex.xspec escape-for-regex.xspec] in your favorite XML editor.  The transform has a single function and a couple of templates that we're testing.  
 
 The XSpec document has two top-level scenarios that test the function and the templates respectively.  Scenarios can be nested -- and the first one is, testing two aspects of the function `functx:escape-for-regex()`.  A function is tested by using an `<x:call/>`, passing it a parameter using an `<x:param/>`.  Our expectations about how the functions should behave are captured by `<x:expect/>`s.  A common case is simply testing for equality -- given a certain input, we expect a certain output.  Another common case is testing the result with an XPath expression.  The second nested scenario does just this.  Note that we can have as many expectations as we want within a scenario.
 
