@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description stylesheet="escape-for-regex.xslt" xmlns:x="http://www.jenitennison.com/xslt/xspec"
+    xmlns:functx="http://www.functx.com">
+
+
+    <!-- This scenario demonstrates:
+            (1) how to test a function (named templates can be simliarly tested)
+            (2) that scenarios can be nested
+            (3) a test can have multiple expectations. -->
+    <x:scenario label="Test simple patterns">
+        <x:scenario label="When encountering parentheses">
+            <x:call function="functx:escape-for-regex">
+                <x:param name="arg" select="'(Hello)'"/>
+            </x:call>
+            <x:expect label="escape them." select="'\(Hello\)'"/>
+        </x:scenario>
+        <x:scenario label="When encountering a whitespace character class">
+            <x:call function="functx:escape-for-regex">
+                <x:param name="arg" select="'\sHello'"/>
+            </x:call>
+            <x:expect label="escape the backslash" select="'\\sHello'"/>
+            <x:expect label="result should have one more character than source"
+                test="string-length(.) = 8"/>
+        </x:scenario>
+    </x:scenario>
+
+    <!-- This scenario demonstrates how to test a matching template. -->
+    <x:scenario label="When processing a list of phrases">
+        <x:context>
+            <phrases>
+                <phrase>Hello!</phrase>
+                <phrase>Goodbye!</phrase>
+                <phrase>(So long!)</phrase>
+            </phrases>
+        </x:context>
+        <x:expect label="All phrase elements should remain" test="count(phrases/phrase) = 3"/>
+        <x:expect label="String should be escaped and status attribute should be added">
+            <phrases>
+                <phrase status="same">Hello!</phrase>
+                <phrase status="same">Goodbye!</phrase>
+                <phrase status="changed">\(So long!\)</phrase>
+            </phrases>
+        </x:expect>
+    </x:scenario>
+
+</x:description>
