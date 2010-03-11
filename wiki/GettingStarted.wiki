@@ -113,7 +113,9 @@ One of the tests failed, so let's fix it.  When a test fails in XSpec, the repor
    <phrase status="{if (. = $escaped-text) then 'same' else 'changed'}">
 }}}
 
-Save the transform, and re-run the XSpec test.  All tests should be green. 
+Save the transform, and re-run the XSpec test.  All tests should be green:
+
+   [http://xspec.googlecode.com/svn/images/xsltreport-pass.png http://xspec.googlecode.com/svn/images/xsltreport-pass-small.png] 
 
 =Tips=
 
