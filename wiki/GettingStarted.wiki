@@ -75,7 +75,11 @@ passed: 5 / pending: 0 / failed: 1 / total: 6
 Done.
 }}}
 
-And the HTML report should look like this:  (xxx Add link to HTML report)  If you got an error, check to make sure that the path to the saxon jar is correct.  If you are still having issues, ask for help on the [http://groups.google.com/group/xspec-users XSpec mailing list].
+And the HTML report should look like this:  
+
+   [http://xspec.googlecode.com/svn/images/xsltreport.png http://xspec.googlecode.com/svn/images/xsltreport-small.png]
+
+If you got an error, check to make sure that the path to the saxon jar is correct.  If you are still having issues, ask for help on the [http://groups.google.com/group/xspec-users XSpec mailing list].
 
 As you can see, one of the tests has failed.  We'll come back to that.  For now, note that you invoke the XSpec script against the _test_, not the stylesheet.  The stylesheet filename is specified on the `/x:description/@stylesheet` attribute in the XSpec document.
 
