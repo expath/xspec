@@ -9,14 +9,14 @@ start = description
 
 description = 
 	## A description is a description of a stylesheet application. 
-	## It must either have a stylesheet or query it's associated with.
-	## It may also have a version to aid development over time
+	## It must have a stylesheet and/or a query it's associated with.
+	## It may also have a version to aid development over time.
 	element description { 
 		common-attributes,
-		((attribute stylesheet { xs:anyURI },
-		  attribute xslt-version { xs:NMTOKEN }?) 
-		 | (attribute query { xs:anyURI },
-		    attribute query-at {xs:anyURI}?)),
+		attribute stylesheet { xs:anyURI }?,
+		attribute query { xs:anyURI }?,
+		attribute xslt-version { xs:NMTOKEN }?,
+		attribute query-at { xs:anyURI }?,
 		attribute version { xs:NMTOKEN }?,		
 		attribute preserve-space { xs:NMTOKENS }?,
 		(global-param | import | scenario | pending)+ }
