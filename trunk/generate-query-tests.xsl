@@ -254,7 +254,7 @@
            let $local:expected :=
                ( ... )
          -->
-         <xsl:text>  let $local:expected    := (: expected result (none here) :)&#10;</xsl:text>
+         <xsl:text>  let $local:expected    := (: expected result :)&#10;</xsl:text>
          <!-- FIXME: Not correct, the x:expect model is more complex than
               a simple variable... (see how the original stylesheet, for
               XSLT, handles that...) Factorize with the XSLT version...
@@ -271,7 +271,7 @@
                else
                  ( ... )
          -->
-         <xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
+         <!--xsl:text>  let $local:test-result := (: evaluate the predicate :)&#10;</xsl:text>
          <xsl:text>      if ( $</xsl:text>
          <xsl:value-of select="$xspec-prefix"/>
          <xsl:text>:result instance of node()+ ) then&#10;</xsl:text>
@@ -284,18 +284,40 @@
          <xsl:text>        ( </xsl:text>
          <xsl:value-of select="@test"/>
          <xsl:text> )&#10;</xsl:text>
-         <!--
+         <!- -
            let $local:successful :=
                if ( $local:test-result instance of xs:boolean ) then
                  $local:test-result
                else
                  test:deep-equal($local:expected, $local:test-result)
-         -->
+         - ->
          <xsl:text>  let $local:successful  := (: did the test pass?:)&#10;</xsl:text>
          <xsl:text>      if ( $local:test-result instance of xs:boolean ) then&#10;</xsl:text>
          <xsl:text>        $local:test-result&#10;</xsl:text>
          <xsl:text>      else&#10;</xsl:text>
-         <xsl:text>        test:deep-equal($local:expected, $local:test-result)&#10;</xsl:text>
+         <xsl:text>        test:deep-equal($local:expected, $local:test-result)&#10;</xsl:text-->
+         <!--
+           IF @test ==>
+           let $local:successful :=
+               ( ...)
+           
+           ELSE ==>
+           let $local:successful :=
+               test:deep-equal($local:expected, $x:result)
+         -->
+         <xsl:text>  let $local:successful as xs:boolean := (: did the test pass?:)&#10;</xsl:text>
+         <xsl:choose>
+            <xsl:when test="exists(@test)">
+               <xsl:text>      ( </xsl:text>
+               <xsl:value-of select="@test"/>
+               <xsl:text> )&#10;</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:text>      test:deep-equal($local:expected, $</xsl:text>
+               <xsl:value-of select="$xspec-prefix"/>
+               <xsl:text>:result)&#10;</xsl:text>
+            </xsl:otherwise>
+         </xsl:choose>
          <xsl:text>    return&#10;      </xsl:text>
       </xsl:if>
       <!--
@@ -312,11 +334,11 @@
          </xsl:choose>
          <xsl:sequence select="x:label(.)"/>
          <xsl:if test="not($pending-p)">
-            <xsl:if test="@test">
+            <!--xsl:if test="@test">
                <xsl:text>&#10;      { if ( $local:test-result instance of xs:boolean ) then () else test:report-value($local:test-result, '</xsl:text>
                <xsl:value-of select="$xspec-prefix"/>
                <xsl:text>:result') }</xsl:text>
-            </xsl:if>
+            </xsl:if-->
             <xsl:text>&#10;      { test:report-value($local:expected, '</xsl:text>
             <xsl:value-of select="$xspec-prefix"/>
             <xsl:text>:expect') }</xsl:text>
