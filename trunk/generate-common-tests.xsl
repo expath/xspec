@@ -131,14 +131,18 @@
 
    <!--
        Those elements are ignored in this mode.
-
+       
+       x:label elements can be ignored, they are used by x:label()
+       (which selects either the x:label element or the label
+       attribute).
+       
        TODO: Imports are "resolved" in x:gather-specs().  But this is
        not done the usual way, instead it returns all x:description
        elements.  Change this by using the usual recursive template
        resolving x:import elements in place.  Bur for now, those
        elements are still here, so we have to ignore them...
    -->
-   <xsl:template match="x:apply|x:call|x:context|x:import" mode="x:generate-calls">
+   <xsl:template match="x:apply|x:call|x:context|x:import|x:label" mode="x:generate-calls">
       <!-- Nothing, but must continue the sibling-walking... -->
       <xsl:call-template name="x:continue-call-scenarios"/>
    </xsl:template>
@@ -426,6 +430,10 @@
    <!--
        Those elements are ignored in this mode.
        
+       x:label elements can be ignored, they are used by x:label()
+       (which selects either the x:label element or the label
+       attribute).
+       
        TODO: Imports are "resolved" in x:gather-specs().  But this is
        not done the usual way, instead it returns all x:description
        elements.  Change this by using the usual recursive template
@@ -437,7 +445,8 @@
                         |x:apply
                         |x:call
                         |x:context
-                        |x:import" mode="x:compile">
+                        |x:import
+                        |x:label" mode="x:compile">
       <!-- Nothing... -->
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
