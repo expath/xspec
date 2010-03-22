@@ -12,10 +12,13 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
+                xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 xmlns="http://www.w3.org/1999/xhtml"
                 exclude-result-prefixes="test xs">
 
 <xsl:import href="generate-tests-utils.xsl" />
+
+<xsl:output name="x:report" method="xml" indent="yes"/>
 
 <xsl:variable name="omit-namespaces" as="xs:string+"
   select="('http://www.w3.org/XML/1998/namespace',
