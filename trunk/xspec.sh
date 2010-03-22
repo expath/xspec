@@ -19,7 +19,7 @@ fi
 COVERAGE=$2
 
 TEST_DIR=$(dirname "$XSPEC")/xspec
-TARGET_FILE_NAME=$(basename "$XSPEC" | sed -E 's:\..+$::g')
+TARGET_FILE_NAME=$(basename "$XSPEC" | sed 's:\..+$::g')
 
 TEST_STYLESHEET=$TEST_DIR/$TARGET_FILE_NAME.xsl
 COVERAGE_XML=$TEST_DIR/$TARGET_FILE_NAME-coverage.xml
