@@ -1,5 +1,6 @@
 #! /bin/bash -e
 
+export XSPEC_HOME="."
 export CLASSPATH=".:/Library/Application Support/oxygen9.3/lib/saxon9.jar"
 
 XSPEC=$1
@@ -34,7 +35,7 @@ then
 fi 
 
 echo "Creating Test Stylesheet..."
-java net.sf.saxon.Transform -o:"$TEST_STYLESHEET" -s:"$XSPEC" -xsl:generate-xspec-tests.xsl
+java net.sf.saxon.Transform -o:"$TEST_STYLESHEET" -s:"$XSPEC" -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl"
 echo
 
 echo "Running Tests..."
@@ -49,10 +50,10 @@ fi
 
 echo
 echo "Formatting Report..."
-java net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" -xsl:format-xspec-report.xsl
+java net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" -xsl:"$XSPEC_HOME/format-xspec-report.xsl"
 if test "$COVERAGE" = "coverage" 
 then 
- java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" -xsl:coverage-report.xsl "tests=$XSPEC"
+ java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC"
  open "$COVERAGE_HTML"
 else
  open "$HTML"
