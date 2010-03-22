@@ -31,15 +31,17 @@ xslt: xspec-function-xsl.html                     \
       xspec-focus-1-xsl.html                      \
       xspec-focus-2-xsl.html                      \
       xspec-pending-xsl.html                      \
-      xspec-variable-xsl.html
+      xspec-variable-xsl.html                     \
+      generate-tests-utils-xsl.html
 
 # run XQuery tests
 xquery: xspec-function-xq.html                    \
         xspec-import-xq.html                      \
-	xspec-focus-1-xq.html                     \
+        xspec-focus-1-xq.html                     \
         xspec-focus-2-xq.html                     \
         xspec-pending-xq.html                     \
-        xspec-variable-xq.html
+        xspec-variable-xq.html                    \
+        generate-tests-utils-xq.html
 
 # clean result files
 clean:
