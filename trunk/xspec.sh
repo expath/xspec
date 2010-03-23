@@ -5,6 +5,12 @@ export CLASSPATH=".:/Library/Application Support/oxygen9.3/lib/saxon9.jar"
 
 XSPEC=$1
 
+die() {
+    echo
+    echo "*** $@" >&2
+    exit 1
+}
+
 if [ ! -f "$XSPEC" ]
 then
     echo File not found.
@@ -45,20 +51,24 @@ then
     echo "Collecting test coverage data; suppressing progress report..."
     java net.sf.saxon.Transform -T:$COVERAGE_CLASS \
         -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
-        -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML"
+        -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML" \
+        || die "Error collecting test coverage data"
 else
     java net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
-        -it:{http://www.jenitennison.com/xslt/xspec}main
+        -it:{http://www.jenitennison.com/xslt/xspec}main \
+        || die "Error compiling the test suite"
 fi
 
 echo
 echo "Formatting Report..."
 java net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" \
-    -xsl:"$XSPEC_HOME/format-xspec-report.xsl"
+    -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
+    || die "Error formating the report"
 if test "$COVERAGE" = "coverage" 
 then
     java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
-        -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC"
+        -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
+    || die "Error formating the coverage report"
     open "$COVERAGE_HTML"
 else
     open "$HTML"
