@@ -183,7 +183,7 @@
                    return (
                      test:report-value($t:result, 'x:result'),
                -->
-               <xsl:apply-templates select="$call/x:param" mode="x:compile"/>
+               <xsl:apply-templates select="$call/x:param[1]" mode="x:compile"/>
                <xsl:text>  let $</xsl:text>
                <xsl:value-of select="$xspec-prefix"/>
                <xsl:text>:result := </xsl:text>

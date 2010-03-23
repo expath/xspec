@@ -180,7 +180,7 @@
           <xsl:choose>
             <xsl:when test="$call/@template">
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$call/x:param" mode="x:compile" />
+              <xsl:apply-templates select="$call/x:param[1]" mode="x:compile" />
               <!-- Create the template call -->
               <xsl:variable name="template-call">
                 <call-template name="{$call/@template}">
@@ -207,7 +207,7 @@
             </xsl:when>
             <xsl:when test="$call/@function">
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$call/x:param" mode="x:compile" />
+              <xsl:apply-templates select="$call/x:param[1]" mode="x:compile" />
               <!-- Create the function call -->
               <sequence>
                 <xsl:attribute name="select">
@@ -229,7 +229,7 @@
                   <xsl:text>The instruction t:apply is not supported yet!</xsl:text>
                </xsl:message>
                <!-- Set up variables containing the parameter values -->
-               <xsl:apply-templates select="$apply/x:param" mode="x:compile"/>
+               <xsl:apply-templates select="$apply/x:param[1]" mode="x:compile"/>
                <!-- Create the apply templates instruction -->
                <apply-templates>
                   <xsl:copy-of select="$apply/@select | $apply/@mode"/>
@@ -244,7 +244,7 @@
               <!-- Set up the $context variable -->
               <xsl:apply-templates select="$context" mode="x:setup-context"/>
               <!-- Set up variables containing the parameter values -->
-              <xsl:apply-templates select="$context/x:param" mode="x:compile"/>
+              <xsl:apply-templates select="$context/x:param[1]" mode="x:compile"/>
               <!-- Create the template call -->
               <apply-templates select="$context">
                 <xsl:sequence select="$context/@mode" />
