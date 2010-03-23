@@ -1,4 +1,4 @@
-#! /bin/bash -e
+#! /bin/bash
 
 export XSPEC_HOME="."
 export CLASSPATH=".:/Library/Application Support/oxygen9.3/lib/saxon9.jar"
