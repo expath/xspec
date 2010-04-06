@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xspec-oxygen" default="build" basedir=".">
+
+	<property file="build.properties"/>
+
+	<property name="oxygen.dir" value="C:/Program Files/Oxygen XML Editor 11"/>
+	<property name="oxygen.frameworks.dir" value="${oxygen.dir}/frameworks"/>
+
+	<property name="framework.dir" value="build/xspec"/>
+	<property name="framework.schema.dir" value="${framework.dir}/schema"/>
+	<property name="framework.css.dir" value="${framework.dir}/css"/>
+
+	<target name="init">
+		<mkdir dir="${framework.schema.dir}"/>
+	</target>
+
+	<target name="build" depends="init">
+		<copy file="xspec.framework" todir="${framework.dir}"/>
+		<copy file="../../xspec.rnc" todir="${framework.schema.dir}"/>
+	</target>
+
+	<target name="install" depends="build">
+		<mkdir dir="${oxygen.frameworks.dir}/xspec/schema"/>
+		<copy todir="${oxygen.frameworks.dir}">
+			<fileset dir="build"/>
+		</copy>
+	</target>
+
+</project>
