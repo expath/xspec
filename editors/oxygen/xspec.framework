@@ -104,7 +104,9 @@
             </authorExtension>
           </field>
           <field name="templatesLocations">
-            <String-array></String-array>
+            <String-array>
+              <String xml:space="preserve">${frameworksDir}/xspec/templates</String>
+            </String-array>
           </field>
           <field name="xmlCatalogs">
             <String-array></String-array>
