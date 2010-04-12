@@ -33,7 +33,7 @@
        not respected, and the variable declaration is compiled after
        the call/appling!
    -->
-   <t:scenario label="call local var" pending="variable before x:call">
+   <t:scenario label="call local var">
       <t:variable name="param" select="$test-3/@num"/>
       <t:call function="my:square">
          <t:param select="$param"/>

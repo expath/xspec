@@ -104,10 +104,11 @@
 <!-- Generates the templates that perform the tests -->
 
 <xsl:template name="x:output-scenario">
-  <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
-  <xsl:param name="apply"   select="()" tunnel="yes" as="element(x:apply)?"/>
-  <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
-  <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
+  <xsl:param name="pending"   select="()" tunnel="yes" as="node()?"/>
+  <xsl:param name="apply"     select="()" tunnel="yes" as="element(x:apply)?"/>
+  <xsl:param name="call"      select="()" tunnel="yes" as="element(x:call)?"/>
+  <xsl:param name="context"   select="()" tunnel="yes" as="element(x:context)?"/>
+  <xsl:param name="variables" as="element(x:variable)*"/>
   <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
   <!-- We have to create these error messages at this stage because before now
        we didn't have merged versions of the environment -->
@@ -173,8 +174,9 @@
       <xsl:if test="$pending-p">
         <xsl:attribute name="pending" select="$pending" />
       </xsl:if>
-    	<xsl:sequence select="x:label(.)" />
+      <xsl:sequence select="x:label(.)" />
       <xsl:apply-templates select="x:apply | x:call | x:context" mode="x:report" />
+      <xsl:apply-templates select="$variables" mode="x:generate-declarations"/>
       <xsl:if test="not($pending-p) and x:expect">
         <variable name="x:result" as="item()*">
           <xsl:choose>

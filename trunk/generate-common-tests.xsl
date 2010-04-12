@@ -366,10 +366,12 @@
       </xsl:variable>
       <!-- Call the serializing template (for XSLT or XQuery). -->
       <xsl:call-template name="x:output-scenario">
-         <xsl:with-param name="pending" select="$new-pending" tunnel="yes"/>
-         <xsl:with-param name="apply"   select="$new-apply"   tunnel="yes"/>
-         <xsl:with-param name="call"    select="$new-call"    tunnel="yes"/>
-         <xsl:with-param name="context" select="$new-context" tunnel="yes"/>
+         <xsl:with-param name="pending"   select="$new-pending" tunnel="yes"/>
+         <xsl:with-param name="apply"     select="$new-apply"   tunnel="yes"/>
+         <xsl:with-param name="call"      select="$new-call"    tunnel="yes"/>
+         <xsl:with-param name="context"   select="$new-context" tunnel="yes"/>
+         <!-- the variable declarations preceding the x:call (if any). -->
+         <xsl:with-param name="variables" select="x:call/preceding-sibling::x:variable"/>
       </xsl:call-template>
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
