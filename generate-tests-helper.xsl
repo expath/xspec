@@ -88,45 +88,50 @@
   
 
 <xsl:template match="*" mode="test:create-xslt-generator">
-  <xsl:copy>
-    <!-- -fgeorges: Do NOT escape '{' and '}'... -->
-    <xsl:copy-of select="@*"/>
-    <!--xsl:for-each select="@*">
-      <xsl:attribute name="{name()}" namespace="{namespace-uri()}"
-        select="replace(., '(\{|\})', '$1$1')" />
-    </xsl:for-each-->
-    <xsl:apply-templates mode="test:create-xslt-generator" />
-  </xsl:copy>
+   <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="test:create-xslt-generator"/>
+   </xsl:copy>
 </xsl:template>  
+
+<xsl:template match="@*" mode="test:create-xslt-generator">
+   <xsl:copy-of select="."/>
+</xsl:template>
   
 <xsl:template match="xsl:*" mode="test:create-xslt-generator">
-  <xsl:element name="o:{local-name()}">
-    <xsl:copy-of select="@*" />
-    <xsl:apply-templates mode="test:create-xslt-generator" />
+  <xsl:element name="o:{ local-name() }">
+    <xsl:apply-templates select="@*|node()" mode="test:create-xslt-generator"/>
   </xsl:element>
 </xsl:template>  
-  
-<xsl:template match="text()" mode="test:create-xslt-generator">
-  <text><xsl:value-of select="." /></text>
-</xsl:template>  
-  
-<xsl:template match="comment()" mode="test:create-xslt-generator">
-  <comment><xsl:value-of select="." /></comment>
+
+<xsl:template match="@xsl:*" mode="test:create-xslt-generator">
+   <xsl:attribute name="o:{ local-name() }" select="."/>
 </xsl:template>
-  
+
+<xsl:template match="text()" mode="test:create-xslt-generator">
+  <text>
+     <xsl:value-of select="."/>
+  </text>
+</xsl:template>  
+
+<xsl:template match="comment()" mode="test:create-xslt-generator">
+  <comment>
+     <xsl:value-of select="."/>
+  </comment>
+</xsl:template>
+
 <xsl:template match="processing-instruction()" mode="test:create-xslt-generator">
   <processing-instruction name="{name()}">
-    <xsl:value-of select="." />
+    <xsl:value-of select="."/>
   </processing-instruction>
 </xsl:template>
-  
+
 <xsl:function name="test:matching-xslt-elements" as="element()*">
-  <xsl:param name="element-kind" as="xs:string" />
-  <xsl:param name="element-id" as="item()" />
-  <xsl:param name="stylesheet" as="document-node()" />
-  <xsl:sequence select="key($element-kind, $element-id, $stylesheet)" />
+  <xsl:param name="element-kind" as="xs:string"/>
+  <xsl:param name="element-id" as="item()"/>
+  <xsl:param name="stylesheet" as="document-node()"/>
+  <xsl:sequence select="key($element-kind, $element-id, $stylesheet)"/>
 </xsl:function>  
-  
+
 </xsl:stylesheet>
 
 
