@@ -140,7 +140,6 @@
       <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
       <xsl:param name="variables" as="element(x:variable)*"/>
-      
       <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
       <!-- x:context and x:call/@template not supported for XQuery -->
       <xsl:if test="exists($context)">
@@ -175,10 +174,14 @@
          </x:label>
          <!-- Generate a seq ctor to generate x:context or x:call in the report. -->
          <xsl:apply-templates select="x:context|x:call" mode="x:report"/>
-         <xsl:apply-templates select="$variables" mode="x:generate-declarations"/>
          <xsl:text>      &#10;{&#10;</xsl:text>
          <xsl:choose>
             <xsl:when test="not($pending-p)">
+               <xsl:for-each select="$variables">
+                  <xsl:apply-templates select="." mode="test:generate-variable-declarations">
+                     <xsl:with-param name="var" select="@name"/>
+                  </xsl:apply-templates>
+               </xsl:for-each>
                <!--
                  let $xxx-param1 := ...
                  let $xxx-param2 := ...
