@@ -3,7 +3,7 @@
 	xmlns:c="http://www.w3.org/ns/xproc-step"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:t="http://www.jenitennison.com/xslt/xspec"
-	name="xspec" type="t:xspec">
+	name="xspec" type="t:xspec" version="1.0">
 	
 	<p:documentation>
 		<p>This pipeline executes an XSpec test.</p>
