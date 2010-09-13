@@ -123,4 +123,6 @@ There are many ways to integrate XSpec into your workflow.  Here are a few tips:
 
   * Add the XSpec executable directory to your system path.
   * By default, XSpec stores its result documents in the subdirectory "xspec" of the folder where the particular stylesheet that you are testing resides.  You may want to change the variable TEST_DIR to the system temporary folder: `SET TEST_DIR=%TEMP%\xspec`.  This works well when you are integrating the XSpec with Oxygen and don't want to clutter up your project folders with XSpec results.
-  * [http://www.wordsinboxes.com/2008/12/getting-started-with-xspec.html Integrate XSpec into oXygen XML editor].
+  * [http://www.wordsinboxes.com/2008/12/getting-started-with-xspec.html Integrate XSpec into Oxygen XML editor].
+  * [http://code.google.com/p/xspec/source/browse/trunk/editors/oxygen/README Install the Oxygen framework for XSpec].
+  * [http://code.google.com/p/xspec/source/browse/trunk/editors/emacs/README Customize Emacs to use the XSpec schema with XSpec files].
