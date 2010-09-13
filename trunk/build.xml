@@ -9,9 +9,29 @@
 
 
 <project name="xspec" default="xspec">
+	<description>XSpec is a Behavior Driven Development (BDD) framework for XSLT and XQuery.
 
+Usage:
+
+ant -Dxspec.xml=filename
+
+where:
+
+  filename          XSpec tests XML file
+
+
+</description>
+
+	<!-- File of properties determining or describing local
+	     configuration. -->
+	<property name="xspec.properties" location="xspec.properties"/>
+	<property file="${xspec.properties}"/>
+
+	<property name="saxon.home" location="/Library/Application Support/saxonb9" />
+	<property name="saxon.jar" location="${saxon.home}/saxon9.jar" />
+	<property name="saxon-ant.jar" location="${saxon.home}/saxon9-ant.jar" />
   <taskdef name="saxon-xslt" classname="net.sf.saxon.ant.AntTransform" 
-    classpath="/Library/Application Support/saxonb9/saxon9.jar;/Library/Application Support/saxonb9/saxon9-ant.jar" />
+    classpath="${saxon.jar};${saxon-ant.jar}" />
 
   <dirname property="xspec.base.dir" file="${xspec.xml}" />
   <basename property="xspec.base" file="${xspec.xml}" suffix=".xml" />
