@@ -1,28 +1,82 @@
 #! /bin/bash
 
-# See issues 33 & 29 for several comments about shell scripts:
-# http://code.google.com/p/xspec/issues/detail?id=33
-# http://code.google.com/p/xspec/issues/detail?id=29
-
-export XSPEC_HOME="."
-export CLASSPATH=".:/Library/Application Support/oxygen9.3/lib/saxon9.jar"
+##############################################################################
+##
+## This script is used to compile a test suite to XSLT, run it, format
+## the report and open it in a browser.
+##
+## It relies on the environment variable $SAXON_HOME to be set to the
+## dir Saxon has been installed to (i.e. the containing the Saxon JAR
+## file), or on $SAXON_CP to be set to a full classpath containing
+## Saxon (and maybe more).  The later has precedence over the former.
+##
+## It also uses the environment variable XSPEC_HOME.  It must be set
+## to the XSpec install directory.  By default, it uses this script's
+## parent dir.
+##
+##############################################################################
+##
+## TODO: See issues 33 & 29 for several comments about shell scripts:
+## http://code.google.com/p/xspec/issues/detail?id=33
+## http://code.google.com/p/xspec/issues/detail?id=29
+##
+##############################################################################
 
 ##
 ## some variables ############################################################
 ##
 
-INSTALL_DIR=`dirname $0`
-# safety checks
-if test \! -d "${INSTALL_DIR}"; then
-    echo "INTERNAL ERROR: The install directory is not a directory?!?"
-    echo "  -> ${INSTALL_DIR}"
+# the classpath delimiter (aka ':', except ';' on Cygwin)
+if uname | grep -i cygwin >/dev/null 2>&1; then
+    CP_DELIM=";"
+else
+    CP_DELIM=":"
+fi
+
+# set XSPEC_HOME if it has not been set by the user (set it to the
+# parent dir of this script)
+if test -z "$XSPEC_HOME"; then
+    XSPEC_HOME=`dirname $0`
+    # safety checks
+    if test \! -f "${XSPEC_HOME}/xspec.bat"; then
+        echo "ERROR: XSPEC_HOME seems to be corrupted: ${XSPEC_HOME}"
+        exit 1;
+    fi
+fi
+
+if test \! -d "${XSPEC_HOME}"; then
+    echo "ERROR: XSPEC_HOME is not a directory: ${XSPEC_HOME}"
     exit 1;
 fi
-if test \! -f "${INSTALL_DIR}/xspec.bat"; then
-    echo "INTERNAL ERROR: The install directory seems to be corrupted?!?"
-    echo "  -> ${INSTALL_DIR}"
-    exit 1;
+
+# set SAXON_CP (either it has been by the user, or set it from SAXON_HOME)
+
+if test -z "$SAXON_CP"; then
+    # Set this variable in your environment or here, if you don't set SAXON_CP
+    # SAXON_HOME=/path/to/saxon/dir
+    if test -z "$SAXON_HOME"; then
+        die "SAXON_CP and SAXON_HOME both not set!"
+    fi
+    if test -f "${SAXON_HOME}/saxon9ee.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9ee.jar";
+    elif test -f "${SAXON_HOME}/saxon9pe.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9pe.jar";
+    elif test -f "${SAXON_HOME}/saxon9he.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9he.jar";
+    elif test -f "${SAXON_HOME}/saxon9sa.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9sa.jar";
+    elif test -f "${SAXON_HOME}/saxon9.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9.jar";
+    elif test -f "${SAXON_HOME}/saxon8sa.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon8sa.jar";
+    elif test -f "${SAXON_HOME}/saxon8.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon8.jar";
+    else
+        die "Saxon jar cannot be found in SAXON_HOME: $SAXON_HOME"
+    fi
 fi
+
+CP="${SAXON_CP}${CP_DELIM}${XSPEC_HOME}"
 
 ##
 ## utility functions #########################################################
@@ -84,7 +138,7 @@ fi
 ##
 
 echo "Creating Test Stylesheet..."
-java net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
+java -cp "$CP" net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
     -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl" \
     || die "Error compiling the test suite"
 echo
@@ -97,12 +151,12 @@ echo "Running Tests..."
 if test "$COVERAGE" = "coverage" 
 then 
     echo "Collecting test coverage data; suppressing progress report..."
-    java net.sf.saxon.Transform -T:$COVERAGE_CLASS \
+    java -cp "$CP" net.sf.saxon.Transform -T:$COVERAGE_CLASS \
         -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
         -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML" \
         || die "Error collecting test coverage data"
 else
-    java net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
+    java -cp "$CP" net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
         -it:{http://www.jenitennison.com/xslt/xspec}main \
         || die "Error running the test suite"
 fi
@@ -113,17 +167,18 @@ fi
 
 echo
 echo "Formatting Report..."
-java net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" \
+java -cp "$CP" net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" \
     -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
     || die "Error formating the report"
 if test "$COVERAGE" = "coverage" 
 then
-    java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
+    java -cp "$CP" net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
-    $OPEN "$COVERAGE_HTML"
+    #$OPEN "$COVERAGE_HTML"
 else
-    $OPEN "$HTML"
+    #$OPEN "$HTML"
+    echo
 fi
 
 echo "Done."
