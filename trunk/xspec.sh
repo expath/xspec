@@ -82,6 +82,21 @@ CP="${SAXON_CP}${CP_DELIM}${XSPEC_HOME}"
 ## utility functions #########################################################
 ##
 
+usage() {
+    if test -n "$1"; then
+        echo "$1"
+        echo;
+    fi
+    echo "Usage: xspec [-t|-q|-c|-h] filename [coverage]"
+    echo
+    echo "  filename   the XSpec document"
+    echo "  -t         test an XSLT stylesheet (the default)"
+    echo "  -q         test an XQuery module (mutually exclusive with -t)"
+    echo "  -c         output test coverage report"
+    echo "  -h         display this help message"
+    echo "  coverage   deprecated, use -c instead"
+}
+
 die() {
     echo
     echo "*** $@" >&2
@@ -98,19 +113,60 @@ fi
 ## options ###################################################################
 ##
 
-XSPEC=$1
+while echo "$1" | grep -- ^- >/dev/null 2>&1; do
+    case "$1" in
+        # XSLT
+        -t)
+            if test -n "$XQUERY"; then
+                usage "-t and -q are mutually exclusive"
+                exit 1
+            fi
+            XSLT=1;;
+        # XQuery
+        -q)
+            if test -n "$XSLT"; then
+                usage "-t and -q are mutually exclusive"
+                exit 1
+            fi
+            XQUERY=1;;
+        # Coverage
+        -c)
+            COVERAGE=1;;
+        # Help!
+        -h)
+            usage
+            exit 0;;
+        # Unknown option!
+        -*)
+            usage "Error: Unknown option: $1"
+            exit 1;;
+    esac
+    shift;
+done
 
-if [ ! -f "$XSPEC" ]
-then
-    echo File not found.
-    echo Usage:
-    echo   xspec filename [coverage]
-    echo     filename should specify an XSpec document
-    echo     if coverage is specified, outputs test coverage report
+# set XSLT if XQuery has not been set (that's the default)
+if test -z "$XQUERY"; then
+    XSLT=1;
+fi
+
+XSPEC=$1
+if [ ! -f "$XSPEC" ]; then
+    usage "Error: File not found."
     exit 1
 fi
 
-COVERAGE=$2
+if [ -n "$2" ]; then
+    if [ "$2" != coverage ]; then
+        usage "Error: Extra option: $COVERAGE"
+        exit 1
+    fi
+    echo "Long-form option 'coverage' deprecated, use '-c' instead."
+    COVERAGE=1
+    if [ -n "$3" ]; then
+        usage "Error: Extra option: $3"
+        exit 1
+    fi
+fi
 
 ##
 ## files and dirs ############################################################
@@ -119,15 +175,18 @@ COVERAGE=$2
 TEST_DIR=$(dirname "$XSPEC")/xspec
 TARGET_FILE_NAME=$(basename "$XSPEC" | sed 's:\...*$::')
 
-COMPILED=$TEST_DIR/$TARGET_FILE_NAME.xsl
+if test -n "$XSLT"; then
+    COMPILED=$TEST_DIR/$TARGET_FILE_NAME.xsl
+else
+    COMPILED=$TEST_DIR/$TARGET_FILE_NAME.xq
+fi
 COVERAGE_XML=$TEST_DIR/$TARGET_FILE_NAME-coverage.xml
 COVERAGE_HTML=$TEST_DIR/$TARGET_FILE_NAME-coverage.html
 RESULT=$TEST_DIR/$TARGET_FILE_NAME-result.xml
 HTML=$TEST_DIR/$TARGET_FILE_NAME-result.html
 COVERAGE_CLASS=com.jenitennison.xslt.tests.XSLTCoverageTraceListener
 
-if [ ! -d "$TEST_DIR" ]
-then
+if [ ! -d "$TEST_DIR" ]; then
     echo "Creating XSpec Directory at $TEST_DIR..."
     mkdir "$TEST_DIR"
     echo
@@ -137,9 +196,14 @@ fi
 ## compile the suite #########################################################
 ##
 
+if test -n "$XSLT"; then
+    COMPILE_SHEET=generate-xspec-tests.xsl
+else
+    COMPILE_SHEET=generate-query-tests.xsl
+fi
 echo "Creating Test Stylesheet..."
 java -cp "$CP" net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
-    -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl" \
+    -xsl:"$XSPEC_HOME/$COMPILE_SHEET" \
     || die "Error compiling the test suite"
 echo
 
@@ -148,17 +212,30 @@ echo
 ##
 
 echo "Running Tests..."
-if test "$COVERAGE" = "coverage" 
-then 
-    echo "Collecting test coverage data; suppressing progress report..."
-    java -cp "$CP" net.sf.saxon.Transform -T:$COVERAGE_CLASS \
-        -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
-        -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML" \
-        || die "Error collecting test coverage data"
+if test -n "$XSLT"; then
+    # for XSLT
+    if test -n "$COVERAGE"; then
+        echo "Collecting test coverage data; suppressing progress report..."
+        java -cp "$CP" net.sf.saxon.Transform -T:$COVERAGE_CLASS \
+            -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
+            -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML" \
+            || die "Error collecting test coverage data"
+    else
+        java -cp "$CP" net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
+            -it:{http://www.jenitennison.com/xslt/xspec}main \
+            || die "Error running the test suite"
+    fi
 else
-    java -cp "$CP" net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
-        -it:{http://www.jenitennison.com/xslt/xspec}main \
-        || die "Error running the test suite"
+    # for XQuery
+    if test -n "$COVERAGE"; then
+        echo "Collecting test coverage data; suppressing progress report..."
+        java -cp "$CP" net.sf.saxon.Query -T:$COVERAGE_CLASS \
+            -o:"$RESULT" -s:"$XSPEC" "$COMPILED" 2> "$COVERAGE_XML" \
+            || die "Error collecting test coverage data"
+    else
+        java -cp "$CP" net.sf.saxon.Query -o:"$RESULT" -s:"$XSPEC" "$COMPILED" \
+            || die "Error running the test suite"
+    fi
 fi
 
 ##
@@ -170,8 +247,7 @@ echo "Formatting Report..."
 java -cp "$CP" net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" \
     -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
     || die "Error formating the report"
-if test "$COVERAGE" = "coverage" 
-then
+if test -n "$COVERAGE"; then
     java -cp "$CP" net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
