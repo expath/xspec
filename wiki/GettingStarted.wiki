@@ -15,7 +15,7 @@ XSpec requires the Saxon XSLT and XQuery processors.  You probably already have 
 To get started:
 
   # Download the current version of XSpec from the [http://code.google.com/p/xspec/downloads/list download page].  Unzip the archive somewhere accessible.  For this tutorial we'll assume that XSpec is in `c:\xspec\` directory (Unix users can translate this.).  
-  # Open xspec.bat in your favorite text editor.  Change the value on line 3 to the location of your saxon jar.  (Unix users can edit the same line of xspec.sh.)
+  # Open xspec.bat in your favorite text editor.  Change the value on line 3 to the location of your saxon jar (Unix users need to set the environment variable `$SAXON_HOME`).
   # Open up a command prompt.  Navigate to the XSpec executable directory, and test the batch script:
   {{{ > xspec.bat }}}
 
