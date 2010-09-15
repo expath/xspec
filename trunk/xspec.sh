@@ -1,9 +1,32 @@
 #! /bin/bash
 
+# See issues 33 & 29 for several comments about shell scripts:
+# http://code.google.com/p/xspec/issues/detail?id=33
+# http://code.google.com/p/xspec/issues/detail?id=29
+
 export XSPEC_HOME="."
 export CLASSPATH=".:/Library/Application Support/oxygen9.3/lib/saxon9.jar"
 
-XSPEC=$1
+##
+## some variables ############################################################
+##
+
+INSTALL_DIR=`dirname $0`
+# safety checks
+if test \! -d "${INSTALL_DIR}"; then
+    echo "INTERNAL ERROR: The install directory is not a directory?!?"
+    echo "  -> ${INSTALL_DIR}"
+    exit 1;
+fi
+if test \! -f "${INSTALL_DIR}/xspec.bat"; then
+    echo "INTERNAL ERROR: The install directory seems to be corrupted?!?"
+    echo "  -> ${INSTALL_DIR}"
+    exit 1;
+fi
+
+##
+## utility functions #########################################################
+##
 
 die() {
     echo
@@ -17,6 +40,12 @@ else
     OPEN=see
 fi
 
+##
+## options ###################################################################
+##
+
+XSPEC=$1
+
 if [ ! -f "$XSPEC" ]
 then
     echo File not found.
@@ -28,6 +57,10 @@ then
 fi
 
 COVERAGE=$2
+
+##
+## files and dirs ############################################################
+##
 
 TEST_DIR=$(dirname "$XSPEC")/xspec
 TARGET_FILE_NAME=$(basename "$XSPEC" | sed 's:\...*$::')
@@ -46,11 +79,19 @@ then
     echo
 fi 
 
+##
+## compile the suite #########################################################
+##
+
 echo "Creating Test Stylesheet..."
 java net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
     -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl" \
     || die "Error compiling the test suite"
 echo
+
+##
+## run the suite #############################################################
+##
 
 echo "Running Tests..."
 if test "$COVERAGE" = "coverage" 
@@ -65,6 +106,10 @@ else
         -it:{http://www.jenitennison.com/xslt/xspec}main \
         || die "Error running the test suite"
 fi
+
+##
+## format the report #########################################################
+##
 
 echo
 echo "Formatting Report..."
