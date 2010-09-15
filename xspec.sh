@@ -11,6 +11,12 @@ die() {
     exit 1
 }
 
+if [ `uname` = "Darwin" ]; then
+    OPEN=open
+else
+    OPEN=see
+fi
+
 if [ ! -f "$XSPEC" ]
 then
     echo File not found.
@@ -70,9 +76,9 @@ then
     java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
-    # open "$COVERAGE_HTML"
+    $OPEN "$COVERAGE_HTML"
 else
-    # open "$HTML"
+    $OPEN "$HTML"
 fi
 
 echo "Done."
