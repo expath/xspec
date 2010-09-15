@@ -409,11 +409,12 @@
    -->
    <xsl:template match="x:param" mode="x:compile">
       <xsl:apply-templates select="." mode="test:generate-variable-declarations">
-         <xsl:with-param name="var"  select="( @name, generate-id() )[1]" />
-         <xsl:with-param name="type" select="'variable'" />
+         <xsl:with-param name="var"  select="( @name, generate-id() )[1]"/>
+         <xsl:with-param name="type" select="'variable'"/>
       </xsl:apply-templates>
-      <!-- Continue walking the siblings. -->
-      <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
+      <!-- Continue walking the siblings (only other x:param elements, within this
+           x:call or x:context). -->
+      <xsl:apply-templates select="following-sibling::*[self::x:param][1]" mode="#current"/>
    </xsl:template>
 
    <!--
