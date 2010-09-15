@@ -70,9 +70,9 @@ then
     java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
-    open "$COVERAGE_HTML"
+    # open "$COVERAGE_HTML"
 else
-    open "$HTML"
+    # open "$HTML"
 fi
 
 echo "Done."
