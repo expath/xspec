@@ -6,7 +6,7 @@
 <wiki:toc max_depth="2" />
 
 =Introduction=
-This page demonstrates how to download, install, and use XSpec.  It also runs through testing an XSLT stylesheet.  The examples are in the `tutorial` directory of the XSpec download.
+This page demonstrates how to download, install, and use XSpec.  It also runs through testing an XSLT stylesheet.  The examples are in the `tutorial` directory of the XSpec download (note: this directory is not part of the release yet, you have to use the Subversion trunk for now, waiting for the next release, or just use the files directly from [http://code.google.com/p/xspec/source/browse/trunk/tutorial here]).
 
 ==Requirements==
 XSpec requires the Saxon XSLT and XQuery processors.  You probably already have them, but if you don't, get them from [http://saxon.sourceforge.net/ here].
