@@ -42,7 +42,8 @@ fi
 
 echo "Creating Test Stylesheet..."
 java net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
-    -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl"
+    -xsl:"$XSPEC_HOME/generate-xspec-tests.xsl" \
+    || die "Error compiling the test suite"
 echo
 
 echo "Running Tests..."
@@ -56,7 +57,7 @@ then
 else
     java net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
         -it:{http://www.jenitennison.com/xslt/xspec}main \
-        || die "Error compiling the test suite"
+        || die "Error running the test suite"
 fi
 
 echo
@@ -68,7 +69,7 @@ if test "$COVERAGE" = "coverage"
 then
     java net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
-    || die "Error formating the coverage report"
+        || die "Error formating the coverage report"
     open "$COVERAGE_HTML"
 else
     open "$HTML"
