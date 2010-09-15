@@ -24,6 +24,16 @@ or something more complex like:
 
 Scenarios written like this naturally map onto XSLT templates.
 
+= Install =
+
+Just unzip the distribution file (see the `Downloads` tab at the bottom of the page) somewhere in your hard drive.  Alternatively you can use the trunk version directly out of Subversion (once downloaded, you use both the same way).
+
+The directory contains a batch file to be used on Windows, a shell script to be used on Unix-like systems (including Mac OS X) and an XProc script to be used on systems with support for XProc.
+
+The batch script needs you to adapt the path to Saxon (the line `SET CP=...` at the very beginning) to point to an existing [http://www.saxonica.com/ Saxon] JAR file. For the shell script, you have to define either `$SAXON_HOME` (to point to the directory you installed Saxon) or `$SAXON_CP` (a full classpath containing Saxon). If you move the script, you have to define the environment variable `$XSPEC_HOME`.
+
+Just follow your system's conventions regarding applications.  For instance, you can add the directory to your `$PATH`.  Personally, I have a directory `~/bin/` which is already in my `$PATH`.  I just create a new script for each program I install, which just runs the original one, still in its original directory.
+
 = From Here =
 
  * Learn how to [WritingScenarios write XSpec scenarios].
