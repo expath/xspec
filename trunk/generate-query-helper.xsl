@@ -57,13 +57,19 @@
          </xsl:when>
          <xsl:when test="node()">
             <xsl:text> := ( </xsl:text>
-            <xsl:copy-of select="node()"/>
+            <xsl:for-each select="node() except text()[not(normalize-space(.))]">
+               <xsl:apply-templates select="." mode="test:create-xslt-generator"/>
+               <xsl:if test="position() ne last()">
+                  <xsl:text>, </xsl:text>
+               </xsl:if>
+            </xsl:for-each>
             <xsl:text> )</xsl:text>
             <xsl:if test="@select">/( <xsl:value-of select="@select"/> )</xsl:if>
          </xsl:when>
          <xsl:when test="@select">
-            <xsl:text> := </xsl:text>
+            <xsl:text> := ( </xsl:text>
             <xsl:value-of select="@select"/>
+            <xsl:text> )</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:text> := ()</xsl:text>
@@ -76,21 +82,18 @@
    </xsl:template>
 
    <xsl:template match="*" mode="test:create-xslt-generator">
-     <xsl:copy>
-       <!-- -fgeorges: Do NOT escape '{' and '}'... -->
+     <!--xsl:copy>
        <xsl:copy-of select="@*"/>
-       <!--xsl:for-each select="@*">
-         <xsl:attribute name="{name()}" namespace="{namespace-uri()}"
-           select="replace(., '(\{|\})', '$1$1')" />
-       </xsl:for-each-->
-       <xsl:apply-templates mode="test:create-xslt-generator" />
-     </xsl:copy>
+       <xsl:apply-templates mode="test:create-xslt-generator"/>
+     </xsl:copy-->
+     <xsl:copy-of select="."/>
    </xsl:template>  
 
+   <!-- FIXME: Escape the quoted string... -->
    <xsl:template match="text()" mode="test:create-xslt-generator">
-      <!--xsl:text>text { </xsl:text-->
+      <xsl:text>text { "</xsl:text>
       <xsl:value-of select="."/>
-      <!--xsl:text> }</xsl:text-->
+      <xsl:text>" }</xsl:text>
    </xsl:template>  
 
    <xsl:template match="comment()" mode="test:create-xslt-generator">
