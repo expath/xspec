@@ -37,13 +37,12 @@ fi
 # parent dir of this script)
 if test -z "$XSPEC_HOME"; then
     XSPEC_HOME=`dirname $0`
-    # safety checks
-    if test \! -f "${XSPEC_HOME}/xspec.bat"; then
-        echo "ERROR: XSPEC_HOME seems to be corrupted: ${XSPEC_HOME}"
-        exit 1;
-    fi
 fi
-
+# safety checks
+if test \! -f "${XSPEC_HOME}/generate-common-tests.xsl"; then
+    echo "ERROR: XSPEC_HOME seems to be corrupted: ${XSPEC_HOME}"
+    exit 1;
+fi
 if test \! -d "${XSPEC_HOME}"; then
     echo "ERROR: XSPEC_HOME is not a directory: ${XSPEC_HOME}"
     exit 1;
