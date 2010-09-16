@@ -32,7 +32,8 @@ xslt: xspec-function-xsl.html                     \
       xspec-focus-2-xsl.html                      \
       xspec-pending-xsl.html                      \
       xspec-variable-xsl.html                     \
-      generate-tests-utils-xsl.html
+      generate-tests-utils-xsl.html               \
+      generate-xspec-tests-xsl.html
 
 # run XQuery tests
 xquery: xspec-function-xq.html                    \
