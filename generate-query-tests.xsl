@@ -67,15 +67,18 @@
          <xsl:value-of select="$query-at"/>
       </xsl:if>
       <xsl:text>";&#10;</xsl:text>
-      <xsl:text>import module namespace test = </xsl:text>
-      <xsl:text>"http://www.jenitennison.com/xslt/unit-test"&#10;</xsl:text>
-      <xsl:text>  at "</xsl:text>
-      <!-- TODO: Once again, this is dependent on the target
-           processor... (e.g. on MarkLogic or eXist, this XSpec module
-           - or the corresponding, processor-dependent one - should
-           have been installed on the server).  -->
-      <xsl:value-of select="resolve-uri('generate-query-utils.xql', static-base-uri())"/>
-      <xsl:text>";&#10;</xsl:text>
+      <!-- prevent double import in case we are testing this file in the compiled suite... -->
+      <xsl:if test="@query ne 'http://www.jenitennison.com/xslt/unit-test'">
+         <xsl:text>import module namespace test = </xsl:text>
+         <xsl:text>"http://www.jenitennison.com/xslt/unit-test"&#10;</xsl:text>
+         <xsl:text>  at "</xsl:text>
+         <!-- TODO: Once again, this is dependent on the target
+              processor... (e.g. on MarkLogic or eXist, this XSpec module
+              - or the corresponding, processor-dependent one - should
+              have been installed on the server).  -->
+         <xsl:value-of select="resolve-uri('generate-query-utils.xql', static-base-uri())"/>
+         <xsl:text>";&#10;</xsl:text>
+      </xsl:if>
       <xsl:apply-templates select="." mode="x:decl-ns">
          <xsl:with-param name="except" select="$prefix"/>
       </xsl:apply-templates>
@@ -134,12 +137,16 @@
 
    <!-- *** x:compile *** -->
    <!-- Generates the functions that perform the tests -->
+   <!--
+       TODO: Add the $params parameter as in the x:output-scenario for XSLT.
+   -->
 
    <xsl:template name="x:output-scenario">
       <xsl:param name="pending" select="()" tunnel="yes" as="node()?"/>
       <xsl:param name="context" select="()" tunnel="yes" as="element(x:context)?"/>
       <xsl:param name="call"    select="()" tunnel="yes" as="element(x:call)?"/>
       <xsl:param name="variables" as="element(x:variable)*"/>
+      <xsl:param name="params"    as="element(param)*"/>
       <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
       <!-- x:context and x:call/@template not supported for XQuery -->
       <xsl:if test="exists($context)">
@@ -159,12 +166,14 @@
          <xsl:sequence select="error(xs:QName('x:XSPEC005'), $msg)"/>
       </xsl:if>
       <!--
-        declare function local:...()
+        declare function local:...(...)
         {
       -->
       <xsl:text>&#10;declare function local:</xsl:text>
       <xsl:value-of select="generate-id()"/>
-      <xsl:text>()&#10;{&#10;</xsl:text>
+      <xsl:text>(</xsl:text>
+      <xsl:value-of select="$params/concat('$', @name)" separator=", "/>
+      <xsl:text>)&#10;{&#10;</xsl:text>
       <x:scenario>
          <xsl:if test="$pending-p">
             <xsl:attribute name="pending" select="$pending"/>
