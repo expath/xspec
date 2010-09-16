@@ -109,6 +109,7 @@
   <xsl:param name="call"      select="()" tunnel="yes" as="element(x:call)?"/>
   <xsl:param name="context"   select="()" tunnel="yes" as="element(x:context)?"/>
   <xsl:param name="variables" as="element(x:variable)*"/>
+  <xsl:param name="params"    as="element(param)*"/>
   <xsl:variable name="pending-p" select="exists($pending) and empty(ancestor-or-self::*/@focus)"/>
   <!-- We have to create these error messages at this stage because before now
        we didn't have merged versions of the environment -->
@@ -156,6 +157,9 @@
     </xsl:message>
   </xsl:if>
   <template name="x:{generate-id()}">
+     <xsl:for-each select="$params">
+        <param name="{ @name }" required="yes"/>
+     </xsl:for-each>
      <message>
         <xsl:if test="$pending-p">
            <xsl:text>PENDING: </xsl:text>
