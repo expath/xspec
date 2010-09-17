@@ -46,7 +46,7 @@
       <xsl:apply-templates select="x:label" mode="x:html-report" />
       <span class="scenario-totals">
         <xsl:call-template name="x:totals">
-          <xsl:with-param name="tests" select=".//x:test" />
+          <xsl:with-param name="tests" select=".//x:scenario/x:test" />
         </xsl:call-template>
       </span>
     </h2>
@@ -61,7 +61,7 @@
           </th>
           <th>
             <xsl:call-template name="x:totals">
-              <xsl:with-param name="tests" select=".//x:test" />
+              <xsl:with-param name="tests" select=".//x:scenario/x:test" />
             </xsl:call-template>
           </th>
         </tr>
@@ -110,7 +110,7 @@
 <xsl:template match="/">
   <xsl:message>
     <xsl:call-template name="x:totals">
-      <xsl:with-param name="tests" select="//x:test" />
+      <xsl:with-param name="tests" select="//x:scenario/x:test" />
       <xsl:with-param name="labels" select="true()" />
     </xsl:call-template>
   </xsl:message>
@@ -125,7 +125,7 @@
          <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
          <xsl:text> (</xsl:text>
          <xsl:call-template name="x:totals">
-            <xsl:with-param name="tests" select="//x:test"/>
+            <xsl:with-param name="tests" select="//x:scenario/x:test"/>
          </xsl:call-template>
          <xsl:text>)</xsl:text>
       </title>
@@ -154,7 +154,7 @@
             <th style="text-align: right; font-weight: normal; ">passed/pending/failed/total</th>
             <th>
               <xsl:call-template name="x:totals">
-                <xsl:with-param name="tests" select="//x:test" />
+                <xsl:with-param name="tests" select="//x:scenario/x:test" />
               </xsl:call-template>
             </th>
           </tr>
@@ -164,7 +164,7 @@
             <xsl:variable name="pending" as="xs:boolean"
               select="exists(@pending)" />
             <xsl:variable name="any-failure" as="xs:boolean"
-              select="exists(.//x:test[@successful = 'false'])" />
+              select="exists(.//x:scenario/x:test[@successful = 'false'])" />
             <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
               <th>
                 <xsl:copy-of select="x:pending-callback(@pending)"/>
@@ -174,7 +174,7 @@
               </th>
               <th>
                 <xsl:call-template name="x:totals">
-                  <xsl:with-param name="tests" select=".//x:test" />
+                  <xsl:with-param name="tests" select=".//x:scenario/x:test" />
                 </xsl:call-template>
               </th>
             </tr>
