@@ -23,8 +23,40 @@
 ##############################################################################
 
 ##
+## utility functions #########################################################
+##
+
+usage() {
+    if test -n "$1"; then
+        echo "$1"
+        echo;
+    fi
+    echo "Usage: xspec [-t|-q|-c|-h] filename [coverage]"
+    echo
+    echo "  filename   the XSpec document"
+    echo "  -t         test an XSLT stylesheet (the default)"
+    echo "  -q         test an XQuery module (mutually exclusive with -t)"
+    echo "  -c         output test coverage report"
+    echo "  -h         display this help message"
+    echo "  coverage   deprecated, use -c instead"
+}
+
+die() {
+    echo
+    echo "*** $@" >&2
+    exit 1
+}
+
+##
 ## some variables ############################################################
 ##
+
+# the command to use toopen the final HTML report
+if [ `uname` = "Darwin" ]; then
+    OPEN=open
+else
+    OPEN=see
+fi
 
 # the classpath delimiter (aka ':', except ';' on Cygwin)
 if uname | grep -i cygwin >/dev/null 2>&1; then
@@ -76,37 +108,6 @@ if test -z "$SAXON_CP"; then
 fi
 
 CP="${SAXON_CP}${CP_DELIM}${XSPEC_HOME}"
-
-##
-## utility functions #########################################################
-##
-
-usage() {
-    if test -n "$1"; then
-        echo "$1"
-        echo;
-    fi
-    echo "Usage: xspec [-t|-q|-c|-h] filename [coverage]"
-    echo
-    echo "  filename   the XSpec document"
-    echo "  -t         test an XSLT stylesheet (the default)"
-    echo "  -q         test an XQuery module (mutually exclusive with -t)"
-    echo "  -c         output test coverage report"
-    echo "  -h         display this help message"
-    echo "  coverage   deprecated, use -c instead"
-}
-
-die() {
-    echo
-    echo "*** $@" >&2
-    exit 1
-}
-
-if [ `uname` = "Darwin" ]; then
-    OPEN=open
-else
-    OPEN=see
-fi
 
 ##
 ## options ###################################################################
@@ -250,9 +251,9 @@ if test -n "$COVERAGE"; then
     java -cp "$CP" net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
-    #$OPEN "$COVERAGE_HTML"
+    $OPEN "$COVERAGE_HTML"
 else
-    #$OPEN "$HTML"
+    $OPEN "$HTML"
     echo
 fi
 
