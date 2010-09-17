@@ -46,7 +46,7 @@
       <xsl:apply-templates select="x:label" mode="x:html-report" />
       <span class="scenario-totals">
         <xsl:call-template name="x:totals">
-          <xsl:with-param name="tests" select=".//x:scenario/x:test" />
+          <xsl:with-param name="tests" select=".//x:test[parent::x:scenario]" />
         </xsl:call-template>
       </span>
     </h2>
@@ -61,7 +61,7 @@
           </th>
           <th>
             <xsl:call-template name="x:totals">
-              <xsl:with-param name="tests" select=".//x:scenario/x:test" />
+              <xsl:with-param name="tests" select=".//x:test[parent::x:scenario]" />
             </xsl:call-template>
           </th>
         </tr>
@@ -164,7 +164,7 @@
             <xsl:variable name="pending" as="xs:boolean"
               select="exists(@pending)" />
             <xsl:variable name="any-failure" as="xs:boolean"
-              select="exists(.//x:scenario/x:test[@successful = 'false'])" />
+              select="exists(.//x:test[parent::x:scenario][@successful = 'false'])" />
             <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
               <th>
                 <xsl:copy-of select="x:pending-callback(@pending)"/>
@@ -174,7 +174,7 @@
               </th>
               <th>
                 <xsl:call-template name="x:totals">
-                  <xsl:with-param name="tests" select=".//x:scenario/x:test" />
+                  <xsl:with-param name="tests" select=".//x:test[parent::x:scenario]" />
                 </xsl:call-template>
               </th>
             </tr>
