@@ -14,6 +14,13 @@
 ## to the XSpec install directory.  By default, it uses this script's
 ## parent dir.
 ##
+## Note: If you use the EXPath Packaging System with Saxon, then you
+## already have the script "saxon" shipped with expath-repo.  In that
+## case you don't need to do anything, this script will be detected
+## and used instead.  You just have to ensure it is visible from here
+## (aka "ensure it is in the $PATH").  Even without packaging support,
+## this script is a useful way to launch Saxon from the shell.
+##
 ##############################################################################
 ##
 ## TODO: See issues 33 & 29 for several comments about shell scripts:
@@ -46,6 +53,33 @@ die() {
     echo "*** $@" >&2
     exit 1
 }
+
+# If there is a script called "saxon" and returning ok (status code 0)
+# when called with "--help", we assume this is the EXPath Packaging
+# script for Saxon [1].  If it is present, that means the user already
+# configured it, so there is no point to duplicate the logic here.
+# Just use it.
+# [1]http://code.google.com/p/expath-pkg/source/browse/trunk/saxon/pkg-saxon/src/shell/saxon
+#
+if saxon --help 2>&1 > /dev/null; then
+    echo Saxon script found, use it.
+    echo
+    xslt() {
+        saxon --add-cp "$XSPEC_HOME" --xsl "$@"
+    }
+    xquery() {
+        saxon --add-cp "$XSPEC_HOME" --xq "$@"
+    }
+else
+    echo Saxon script not found.
+    echo
+    xslt() {
+        java -cp "$CP" net.sf.saxon.Transform "$@"
+    }
+    xquery() {
+        java -cp "$CP" net.sf.saxon.Query "$@"
+    }
+fi
 
 ##
 ## some variables ############################################################
@@ -202,7 +236,7 @@ else
     COMPILE_SHEET=generate-query-tests.xsl
 fi
 echo "Creating Test Stylesheet..."
-java -cp "$CP" net.sf.saxon.Transform -o:"$COMPILED" -s:"$XSPEC" \
+xslt -o:"$COMPILED" -s:"$XSPEC" \
     -xsl:"$XSPEC_HOME/$COMPILE_SHEET" \
     || die "Error compiling the test suite"
 echo
@@ -216,12 +250,12 @@ if test -n "$XSLT"; then
     # for XSLT
     if test -n "$COVERAGE"; then
         echo "Collecting test coverage data; suppressing progress report..."
-        java -cp "$CP" net.sf.saxon.Transform -T:$COVERAGE_CLASS \
+        xslt -T:$COVERAGE_CLASS \
             -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
             -it:{http://www.jenitennison.com/xslt/xspec}main 2> "$COVERAGE_XML" \
             || die "Error collecting test coverage data"
     else
-        java -cp "$CP" net.sf.saxon.Transform -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
+        xslt -o:"$RESULT" -s:"$XSPEC" -xsl:"$COMPILED" \
             -it:{http://www.jenitennison.com/xslt/xspec}main \
             || die "Error running the test suite"
     fi
@@ -229,11 +263,11 @@ else
     # for XQuery
     if test -n "$COVERAGE"; then
         echo "Collecting test coverage data; suppressing progress report..."
-        java -cp "$CP" net.sf.saxon.Query -T:$COVERAGE_CLASS \
+        xquery -T:$COVERAGE_CLASS \
             -o:"$RESULT" -s:"$XSPEC" "$COMPILED" 2> "$COVERAGE_XML" \
             || die "Error collecting test coverage data"
     else
-        java -cp "$CP" net.sf.saxon.Query -o:"$RESULT" -s:"$XSPEC" "$COMPILED" \
+        xquery -o:"$RESULT" -s:"$XSPEC" "$COMPILED" \
             || die "Error running the test suite"
     fi
 fi
@@ -244,11 +278,11 @@ fi
 
 echo
 echo "Formatting Report..."
-java -cp "$CP" net.sf.saxon.Transform -o:"$HTML" -s:"$RESULT" \
+xslt -o:"$HTML" -s:"$RESULT" \
     -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
     || die "Error formating the report"
 if test -n "$COVERAGE"; then
-    java -cp "$CP" net.sf.saxon.Transform -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
+    xslt -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
         -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
         || die "Error formating the coverage report"
     $OPEN "$COVERAGE_HTML"
