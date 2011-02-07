@@ -15,7 +15,7 @@
   xmlns:test="http://www.jenitennison.com/xslt/unit-test"
   exclude-result-prefixes="#default test"
   xmlns:x="http://www.jenitennison.com/xslt/xspec"
-  xmlns:o="http://www.w3.org/1999/XSL/TransformAliasAlias"
+  xmlns:__x="http://www.w3.org/1999/XSL/TransformAliasAlias"
   xmlns:impl="urn:x-xspec:compile:xslt:impl">
 
 <xsl:import href="generate-common-tests.xsl"/>
@@ -49,7 +49,7 @@
   	<import href="{resolve-uri('generate-tests-utils.xsl', static-base-uri())}"/>
     <!-- This namespace alias is used for when the testing process needs to test
          the generation of XSLT! -->
-    <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
+    <namespace-alias stylesheet-prefix="__x" result-prefix="xsl" />
     <variable name="x:stylesheet-uri" as="xs:string" select="'{$stylesheet-uri}'" />
   	<output name="x:report" method="xml" indent="yes" />
     <!-- Compile the test suite params (aka global params). -->
