@@ -24,16 +24,13 @@ where:
 
   <dirname property="xspec.project.dir" file="${ant.file.xspec}"/>
 
-	<!-- File of properties determining or describing local
-	     configuration. -->
-	<property name="xspec.properties" location="${xspec.preject.dir}/xspec.properties"/>
-	<property file="${xspec.properties}"/>
+  <!-- File of properties determining or describing local
+       configuration. -->
+  <property name="xspec.properties" location="${xspec.project.dir}/xspec.properties"/>
+  <property file="${xspec.properties}"/>
 
-	<property name="saxon.home" location="/Library/Application Support/saxonb9" />
-	<property name="saxon.jar" location="${saxon.home}/saxon9.jar" />
-	<property name="saxon-ant.jar" location="${saxon.home}/saxon9-ant.jar" />
-  <taskdef name="saxon-xslt" classname="net.sf.saxon.ant.AntTransform" 
-    classpath="${saxon.jar};${saxon-ant.jar}" />
+  <property name="saxon.home" location="/Library/Application Support/saxonb9" />
+  <property name="saxon.jar" location="${saxon.home}/saxon9.jar" />
 
   <dirname property="xspec.base.dir" file="${xspec.xml}" />
   <basename property="xspec.xml.base" file="${xspec.xml}" suffix=".xml" />
@@ -74,16 +71,33 @@ where:
 
   <target name="xspec"
     description="Runs the XSpec unit tests in ${xspec.xml}">
-    <saxon-xslt in="${xspec.xml}" 
+    <xslt in="${xspec.xml}" 
       out="${xspec.xsl}"
-      style="${xspec.project.dir}/generate-xspec-tests.xsl" />
-    <saxon-xslt in="${xspec.xml}"
-      out="${xspec.result.xml}"
-      style="${xspec.xsl}"
-      initialTemplate="{http://www.jenitennison.com/xslt/xspec}main" />
-    <saxon-xslt in="${xspec.result.xml}"
+      style="${xspec.project.dir}/generate-xspec-tests.xsl"
+      classpath="${saxon.jar}">
+			<factory name="net.sf.saxon.TransformerFactoryImpl" />
+		</xslt>
+		<!-- Can't specify initial template with <xslt> task so have to
+		     fall back to running Saxon as Java app. -->
+		<java classname="net.sf.saxon.Transform"
+					classpath="${saxon.jar}"
+					fork="true">
+			<arg value="-ext:on" />
+			<arg value="-s:${xspec.xml}" />
+			<arg value="-o:${xspec.result.xml}" />
+			<arg value="-xsl:${xspec.xsl}" />
+			<arg value="-it:{http://www.jenitennison.com/xslt/xspec}main" />
+		</java>
+    <xslt in="${xspec.result.xml}"
       out="${xspec.result.html}"
-      style="${xspec.project.dir}/format-xspec-report.xsl" />
+      style="${xspec.project.dir}/format-xspec-report.xsl"
+      classpath="${saxon.jar}">
+			<factory name="net.sf.saxon.TransformerFactoryImpl">
+				<attribute
+						name="http://saxon.sf.net/feature/allow-external-functions" 
+						value="true"/>
+			</factory>
+		</xslt>
     <loadfile srcfile="${xspec.result.xml}"
       property="xspec.result" />
     <fail message="XSpec tests failed. See ${xspec.result.html} for a report">
