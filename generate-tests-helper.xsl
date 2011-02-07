@@ -17,7 +17,7 @@
                 xmlns="http://www.w3.org/1999/XSL/TransformAlias"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias"
                 exclude-result-prefixes="#default t xhtml"
-                xmlns:o="http://www.w3.org/1999/XSL/TransformAliasAlias">
+                xmlns:__x="http://www.w3.org/1999/XSL/TransformAliasAlias">
   
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
