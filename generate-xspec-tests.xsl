@@ -252,7 +252,7 @@
               <!-- Set up variables containing the parameter values -->
               <xsl:apply-templates select="$context/x:param[1]" mode="x:compile"/>
               <!-- Create the template call -->
-              <apply-templates select="$context">
+              <apply-templates select="$impl:context">
                 <xsl:sequence select="$context/@mode" />
                 <xsl:for-each select="$context/x:param">
                   <with-param name="{@name}" select="${@name}">
@@ -437,7 +437,7 @@
       </x:context>
    </xsl:variable>
    <xsl:apply-templates select="$context" mode="test:generate-variable-declarations">
-      <xsl:with-param name="var" select="'context'" />
+      <xsl:with-param name="var" select="'impl:context'" />
    </xsl:apply-templates>
 </xsl:template>  
 
