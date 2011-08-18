@@ -12,19 +12,17 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:test="http://www.jenitennison.com/xslt/unit-test"
-  xmlns:saxon="http://saxon.sf.net/"
   xmlns="http://www.w3.org/1999/xhtml"
-  exclude-result-prefixes="xs saxon">
+  exclude-result-prefixes="xs">
 
 <xsl:import href="format-utils.xsl" />
 
-<xsl:param name="tests" as="xs:string" required="yes" />
-  
-<xsl:variable name="tests-uri" as="xs:anyURI"
-  select="if (starts-with($tests, '/'))
-          then xs:anyURI($tests)
-          else xs:anyURI(concat('file:/', translate($tests, '\', '/')))" />
-  
+<xsl:param name="pwd"   as="xs:string" required="yes"/>
+<xsl:param name="tests" as="xs:string" required="yes"/>
+
+<xsl:variable name="tests-uri" as="xs:anyURI" select="
+    resolve-uri(translate($tests, '\', '/'), $pwd)"/>
+
 <xsl:variable name="stylesheet-uri" as="xs:anyURI"
   select="if (doc($tests-uri)/*/@stylesheet)
           then resolve-uri(doc($tests-uri)/*/@stylesheet, $tests-uri)
@@ -317,7 +315,8 @@
 
 <xsl:template match="/" mode="test:coverage">ignored</xsl:template>
 
-<xsl:function name="test:hit-on-nodes" as="element(h)*">
+<xsl:function name="test:hit-on-nodes" as="element(h)*"
+              xmlns:saxon="http://saxon.sf.net/" exclude-result-prefixes="saxon">
   <xsl:param name="nodes" as="node()*" />
   <xsl:param name="module" as="xs:string" />
   <xsl:for-each select="$nodes[not(self::text()[not(normalize-space())])]">
