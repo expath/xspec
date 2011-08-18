@@ -241,11 +241,6 @@
       <xsl:param name="vars" select="()" tunnel="yes" as="element(var)*"/>
       <!-- Continue walking the siblings. -->
       <xsl:apply-templates select="following-sibling::*[1]" mode="#current"/>
-         <!--xsl:with-param name="vars" tunnel="yes" as="element(var)+">
-            <xsl:sequence select="$vars"/>
-            <var name="{ @name }"/>
-         </xsl:with-param>
-      </xsl:apply-templates-->
    </xsl:template>
 
    <!--
