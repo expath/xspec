@@ -114,15 +114,11 @@
       <xsl:with-param name="labels" select="true()" />
     </xsl:call-template>
   </xsl:message>
-  <xsl:apply-templates select="." mode="x:html-report" />
-</xsl:template>
-
-<xsl:template match="x:report" mode="x:html-report">
   <html>
     <head>
       <title>
          <xsl:text>Test Report for </xsl:text>
-         <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
+         <xsl:value-of select="x:report/test:format-URI(@stylesheet|@query)"/>
          <xsl:text> (</xsl:text>
          <xsl:call-template name="x:totals">
             <xsl:with-param name="tests" select="//x:scenario/x:test"/>
@@ -130,62 +126,70 @@
          <xsl:text>)</xsl:text>
       </title>
       <link rel="stylesheet" type="text/css"
-            href="{resolve-uri('test-report.css', static-base-uri())}" />
+            href="{ resolve-uri('test-report.css', static-base-uri()) }"/>
       <xsl:call-template name="x:html-head-callback"/>
     </head>
     <body>
       <h1>Test Report</h1>
-      <p>
-         <xsl:value-of select="if ( exists(@query) ) then 'Query: ' else 'Stylesheet: '"/>
-         <a href="{ @stylesheet|@query }">
-            <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
-         </a>
-      </p>
-      <p>
-        <xsl:text>Tested: </xsl:text>
-        <xsl:value-of select="format-dateTime(@date, '[D] [MNn] [Y] at [H01]:[m01]')" />
-      </p>
-      <h2>Contents</h2>
-      <table class="xspec">
-        <col width="85%" />
-        <col width="15%" />
-        <thead>
-          <tr>
-            <th style="text-align: right; font-weight: normal; ">passed/pending/failed/total</th>
-            <th>
-              <xsl:call-template name="x:totals">
-                <xsl:with-param name="tests" select="//x:scenario/x:test" />
-              </xsl:call-template>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <xsl:for-each select="x:scenario">
-            <xsl:variable name="pending" as="xs:boolean"
-              select="exists(@pending)" />
-            <xsl:variable name="any-failure" as="xs:boolean"
-              select="exists(.//x:test[parent::x:scenario][@successful = 'false'])" />
-            <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
-              <th>
-                <xsl:copy-of select="x:pending-callback(@pending)"/>
-                <a href="#{generate-id()}">
-                  <xsl:apply-templates select="x:label" mode="x:html-report" />
-                </a>
-              </th>
-              <th>
-                <xsl:call-template name="x:totals">
-                  <xsl:with-param name="tests" select=".//x:test[parent::x:scenario]" />
-                </xsl:call-template>
-              </th>
-            </tr>
-          </xsl:for-each>
-        </tbody>
-      </table>
-      <xsl:for-each select="x:scenario[not(@pending)]">
-        <xsl:call-template name="x:format-top-level-scenario"/>
-      </xsl:for-each>
+      <xsl:apply-templates select="*"/>
     </body>
   </html>
+</xsl:template>
+
+<xsl:template match="x:report">
+   <xsl:apply-templates select="." mode="x:html-report"/>
+</xsl:template>
+
+<xsl:template match="x:report" mode="x:html-report">
+  <p>
+     <xsl:value-of select="if ( exists(@query) ) then 'Query: ' else 'Stylesheet: '"/>
+     <a href="{ @stylesheet|@query }">
+        <xsl:value-of select="test:format-URI(@stylesheet|@query)"/>
+     </a>
+  </p>
+  <p>
+    <xsl:text>Tested: </xsl:text>
+    <xsl:value-of select="format-dateTime(@date, '[D] [MNn] [Y] at [H01]:[m01]')" />
+  </p>
+  <h2>Contents</h2>
+  <table class="xspec">
+    <col width="85%" />
+    <col width="15%" />
+    <thead>
+      <tr>
+        <th style="text-align: right; font-weight: normal; ">passed/pending/failed/total</th>
+        <th>
+          <xsl:call-template name="x:totals">
+            <xsl:with-param name="tests" select="//x:scenario/x:test" />
+          </xsl:call-template>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <xsl:for-each select="x:scenario">
+        <xsl:variable name="pending" as="xs:boolean"
+          select="exists(@pending)" />
+        <xsl:variable name="any-failure" as="xs:boolean"
+          select="exists(.//x:test[parent::x:scenario][@successful = 'false'])" />
+        <tr class="{if ($pending) then 'pending' else if ($any-failure) then 'failed' else 'successful'}">
+          <th>
+            <xsl:copy-of select="x:pending-callback(@pending)"/>
+            <a href="#{generate-id()}">
+              <xsl:apply-templates select="x:label" mode="x:html-report" />
+            </a>
+          </th>
+          <th>
+            <xsl:call-template name="x:totals">
+              <xsl:with-param name="tests" select=".//x:test[parent::x:scenario]" />
+            </xsl:call-template>
+          </th>
+        </tr>
+      </xsl:for-each>
+    </tbody>
+  </table>
+  <xsl:for-each select="x:scenario[not(@pending)]">
+    <xsl:call-template name="x:format-top-level-scenario"/>
+  </xsl:for-each>
 </xsl:template>
 
 <xsl:template match="x:test[exists(@pending)]" mode="x:html-summary">
