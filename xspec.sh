@@ -278,16 +278,21 @@ fi
 
 echo
 echo "Formatting Report..."
-xslt -o:"$HTML" -s:"$RESULT" \
+xslt -o:"$HTML" \
+    -s:"$RESULT" \
     -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
     || die "Error formating the report"
 if test -n "$COVERAGE"; then
-    xslt -l:on -o:"$COVERAGE_HTML" -s:"$COVERAGE_XML" \
-        -xsl:"$XSPEC_HOME/coverage-report.xsl" "tests=$XSPEC" \
+    xslt -l:on \
+        -o:"$COVERAGE_HTML" \
+        -s:"$COVERAGE_XML" \
+        -xsl:"$XSPEC_HOME/coverage-report.xsl" \
+        "tests=$XSPEC" \
+        "pwd=file:`pwd`/" \
         || die "Error formating the coverage report"
-    $OPEN "$COVERAGE_HTML"
+    #$OPEN "$COVERAGE_HTML"
 else
-    $OPEN "$HTML"
+    #$OPEN "$HTML"
     echo
 fi
 
