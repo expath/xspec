@@ -9,6 +9,8 @@
 
 module namespace test = "http://www.jenitennison.com/xslt/unit-test";
 
+declare namespace fn = "http://www.w3.org/2005/xpath-functions";
+
 declare function test:deep-equal($seq1 as item()*, $seq2 as item()*) as xs:boolean
 {
   test:deep-equal($seq1, $seq2, 2.0)
@@ -22,34 +24,34 @@ declare function test:deep-equal(
 {
   if ( $version = 1.0 ) then
     if ( $seq1 instance of xs:string and $seq2 instance of text()+ ) then
-      test:deep-equal($seq1, string-join($seq2, ''))
+      test:deep-equal($seq1, fn:string-join($seq2, ''))
     else if ( $seq1 instance of xs:double and $seq2 instance of text()+ ) then
-      test:deep-equal($seq1, xs:double(string-join($seq2, '')))
+      test:deep-equal($seq1, xs:double(fn:string-join($seq2, '')))
     else if ( $seq1 instance of xs:decimal and $seq2 instance of text()+ ) then
-      test:deep-equal($seq1, xs:decimal(string-join($seq2, '')))
+      test:deep-equal($seq1, xs:decimal(fn:string-join($seq2, '')))
     else if ( $seq1 instance of xs:integer and $seq2 instance of text()+ ) then
-      test:deep-equal($seq1, xs:integer(string-join($seq2, '')))
+      test:deep-equal($seq1, xs:integer(fn:string-join($seq2, '')))
     else
       test:deep-equal($seq1, $seq2)
-  else if ( empty($seq1) or empty($seq2) ) then
-    empty($seq1) and empty($seq2)
-  else if ( count($seq1) = count($seq2) ) then
-    every $i in (1 to count($seq1))
+  else if ( fn:empty($seq1) or fn:empty($seq2) ) then
+    fn:empty($seq1) and fn:empty($seq2)
+  else if ( fn:count($seq1) = fn:count($seq2) ) then
+    every $i in (1 to fn:count($seq1))
     satisfies test:item-deep-equal($seq1[$i], $seq2[$i])
   else if ( $seq1 instance of text() and $seq2 instance of text()+ ) then
-    test:deep-equal($seq1, text { string-join($seq2, '') })
+    test:deep-equal($seq1, text { fn:string-join($seq2, '') })
   else
-    false()
+    fn:false()
 };
 
 declare function test:item-deep-equal($item1 as item(), $item2 as item()) as xs:boolean
 {
   if ( $item1 instance of node() and $item2 instance of node() ) then
     test:node-deep-equal($item1, $item2)
-  else if ( not($item1 instance of node()) and not($item2 instance of node()) ) then
-    deep-equal($item1, $item2)
+  else if ( fn:not($item1 instance of node()) and fn:not($item2 instance of node()) ) then
+    fn:deep-equal($item1, $item2)
   else
-    false()
+    fn:false()
 };
 
 declare function test:node-deep-equal($node1 as node(), $node2 as node()) as xs:boolean
@@ -57,38 +59,38 @@ declare function test:node-deep-equal($node1 as node(), $node2 as node()) as xs:
   if ( $node1 instance of document-node() and $node2 instance of document-node() ) then
     test:deep-equal(test:sorted-children($node1), test:sorted-children($node2))
   else if ( $node1 instance of element() and $node2 instance of element() ) then
-    if ( node-name($node1) eq node-name($node2) ) then
+    if ( fn:node-name($node1) eq fn:node-name($node2) ) then
       let $atts1 as attribute()* := test:sort-named-nodes($node1/@*)
       let $atts2 as attribute()* := test:sort-named-nodes($node2/@*)
         return
           if ( test:deep-equal($atts1, $atts2) ) then
-            if ( $node1/text() = '...' and count($node1/node()) = 1 ) then
-              true()
+            if ( $node1/text() = '...' and fn:count($node1/node()) = 1 ) then
+              fn:true()
             else
               test:deep-equal(test:sorted-children($node1), test:sorted-children($node2))
           else
-            false()
+            fn:false()
     else
-      false()
+      fn:false()
   else if ( $node1 instance of text() and $node1 = '...' ) then
-    true()
+    fn:true()
   else if ( $node1 instance of text() and $node2 instance of text() ) then
-    string($node1) eq string($node2)
+    fn:string($node1) eq fn:string($node2)
   else if ( ( $node1 instance of attribute() and $node2 instance of attribute() )
             or ( $node1 instance of processing-instruction()
                  and $node2 instance of processing-instruction()) ) then
-    node-name($node1) eq node-name($node2)
-      and ( $node1 = '...' or string($node1) eq string($node2) )
+    fn:node-name($node1) eq fn:node-name($node2)
+      and ( $node1 = '...' or fn:string($node1) eq fn:string($node2) )
   else if ( $node1 instance of comment() and $node2 instance of comment() ) then
-    $node1 = '...' or string($node1) eq string($node2)
+    $node1 = '...' or fn:string($node1) eq fn:string($node2)
   else
-    false()
+    fn:false()
 };
 
 declare function test:sorted-children($node as node()) as node()*
 {
   $node/child::node() 
-  except ( $node/text()[not(normalize-space(.))], $node/test:message )
+  except ( $node/text()[fn:not(fn:normalize-space(.))], $node/test:message )
 };
 
 (: Aim to be identical to:
@@ -100,13 +102,13 @@ declare function test:sorted-children($node as node()) as node()*
  :)
 declare function test:sort-named-nodes($nodes as node()*) as node()*
 {
-  if ( empty($nodes) ) then
+  if ( fn:empty($nodes) ) then
     ()
   else
     let $idx := test:named-nodes-minimum($nodes)
       return (
         $nodes[$idx],
-        test:sort-named-nodes(remove($nodes, $idx))
+        test:sort-named-nodes(fn:remove($nodes, $idx))
       )
 };
 
@@ -116,11 +118,11 @@ declare function test:sort-named-nodes($nodes as node()*) as node()*
 declare function test:named-nodes-minimum($nodes as node()+) as xs:integer
 {
   (: if there is only one node, this is the minimum :)
-  if ( empty($nodes[2]) ) then
+  if ( fn:empty($nodes[2]) ) then
     1
   (: if not, init the temp minimum on the first one, then walk through the sequence :)
   else
-    test:named-nodes-minimum($nodes, node-name($nodes[1]), 1, 2)
+    test:named-nodes-minimum($nodes, fn:node-name($nodes[1]), 1, 2)
 };
 
 declare function test:named-nodes-minimum(
@@ -130,20 +132,20 @@ declare function test:named-nodes-minimum(
     $curr  as xs:integer
   ) as xs:integer
 {
-  if ( $curr gt count($nodes) ) then
+  if ( $curr gt fn:count($nodes) ) then
     $idx
-  else if ( test:qname-lt(node-name($nodes[$curr]), $min) ) then
-    test:named-nodes-minimum($nodes, node-name($nodes[$curr]), $curr, $curr + 1)
+  else if ( test:qname-lt(fn:node-name($nodes[$curr]), $min) ) then
+    test:named-nodes-minimum($nodes, fn:node-name($nodes[$curr]), $curr, $curr + 1)
   else
     test:named-nodes-minimum($nodes, $min, $idx, $curr + 1)
 };
 
 declare function test:qname-lt($n1 as xs:QName, $n2 as xs:QName) as xs:boolean
 {
-  if ( namespace-uri-from-QName($n1) eq namespace-uri-from-QName($n2) ) then
-    local-name-from-QName($n1) lt local-name-from-QName($n2)
+  if ( fn:namespace-uri-from-QName($n1) eq fn:namespace-uri-from-QName($n2) ) then
+    fn:local-name-from-QName($n1) lt fn:local-name-from-QName($n2)
   else
-    namespace-uri-from-QName($n1) lt namespace-uri-from-QName($n2)
+    fn:namespace-uri-from-QName($n1) lt fn:namespace-uri-from-QName($n2)
 };
 
 declare function test:report-value($value as item()*, $wrapper-name as xs:string) as element()
@@ -157,21 +159,21 @@ declare function test:report-value(
     $wrapper-ns as xs:string
   ) as element()
 {
-  element { QName($wrapper-ns, $wrapper-name) } {
+  element { fn:QName($wrapper-ns, $wrapper-name) } {
     if ( $value[1] instance of attribute() ) then (
         attribute { 'select' } { '/*/(@* | node())' },
-        element { QName($wrapper-ns, 'temp') } { $value }
+        element { fn:QName($wrapper-ns, 'temp') } { $value }
       )
     else if ( $value instance of node()+ ) then (
         if ( $value instance of document-node() ) then
           attribute { 'select' } { '/' }
-        else if ( not($value instance of element()+) ) then
+        else if ( fn:not($value instance of element()+) ) then
           attribute { 'select' } { '/node()' }
         else
           ()
         ,
-        if ( count($value//node()) > 1000 ) then
-          error((), 'TODO: Write the value within a file...')
+        if ( fn:count($value//node()) > 1000 ) then
+          fn:error((), 'TODO: Write the value within a file...')
         else
           (: TODO: The original stylesheet use a mode to do a bit
              different copy, to preserve withespaces... :)
@@ -179,12 +181,12 @@ declare function test:report-value(
       )
     else
       attribute { 'select' } {
-        if ( empty($value) ) then
+        if ( fn:empty($value) ) then
           '()'
         else if ( $value instance of item() ) then
           test:report-atomic-value($value)
         else
-          concat('(', string-join(for $v in $value return test:report-atomic-value($v), ', '), ')')
+          fn:concat('(', fn:string-join(for $v in $value return test:report-atomic-value($v), ', '), ')')
       }
   }
 };
@@ -192,23 +194,23 @@ declare function test:report-value(
 declare function test:report-atomic-value($value as item()) as xs:string
 {
   if ( $value instance of xs:string ) then
-    concat("'", replace($value, "'", "''"), "'")
+    fn:concat("'", fn:replace($value, "'", "''"), "'")
   else if ( $value instance of xs:integer or
             $value instance of xs:decimal or
             $value instance of xs:double ) then
-    string($value)
+    fn:string($value)
   else if ( $value instance of xs:QName ) then
-    concat("QName('",
-           namespace-uri-from-QName($value),
+    fn:concat("QName('",
+           fn:namespace-uri-from-QName($value),
            "', '",
-           if ( prefix-from-QName($value) ) then
-             concat(prefix-from-QName($value), ':') 
+           if ( fn:prefix-from-QName($value) ) then
+             fn:concat(fn:prefix-from-QName($value), ':') 
            else
              '',
-           local-name-from-QName($value),
+           fn:local-name-from-QName($value),
            "')")
   else
-    concat(test:atom-type($value), '(', test:report-atomic-value(string($value)), ')')
+    fn:concat(test:atom-type($value), '(', test:report-atomic-value(fn:string($value)), ')')
 };
 
 declare function test:atom-type($value as xs:anyAtomicType) as xs:string
