@@ -20,6 +20,21 @@
 
    <xsl:output omit-xml-declaration="yes"/>
 
+   <!--
+       The URI to use in the "at" clause of the import statement (aka
+       the "location hint") for the library generate-query-utils.xql.
+       The special value '#none' is used to generate no "at" clause at
+       all.
+
+       By defaut, the URI is generated as a file relative to this
+       stylesheet (because it comes with it in the XSpec release, but
+       accessing the module on the file system is not always the best
+       option, for instance for XML databases like eXist or
+       MarkLogic).
+   -->
+   <xsl:param name="utils-library-at" select="
+       resolve-uri('generate-query-utils.xql', static-base-uri())"/>
+
    <xsl:variable name="xspec-prefix" as="xs:string">
       <xsl:variable name="e" select="/*"/>
       <xsl:variable name="u" select="xs:anyURI('http://www.jenitennison.com/xslt/xspec')"/>
@@ -30,6 +45,8 @@
    <!-- TODO: The at hint should not be always resolved (e.g. for MarkLogic). -->
    <xsl:param name="query-at" as="xs:anyURI?" select="
        /x:description/@query-at/resolve-uri(., base-uri(..))"/>
+   <!--xsl:param name="query-at" as="xs:string?" select="
+       /x:description/@query-at"/-->
 
    <xsl:template match="/">
       <xsl:call-template name="x:generate-tests"/>
@@ -70,14 +87,13 @@
       <!-- prevent double import in case we are testing this file in the compiled suite... -->
       <xsl:if test="@query ne 'http://www.jenitennison.com/xslt/unit-test'">
          <xsl:text>import module namespace test = </xsl:text>
-         <xsl:text>"http://www.jenitennison.com/xslt/unit-test"&#10;</xsl:text>
-         <xsl:text>  at "</xsl:text>
-         <!-- TODO: Once again, this is dependent on the target
-              processor... (e.g. on MarkLogic or eXist, this XSpec module
-              - or the corresponding, processor-dependent one - should
-              have been installed on the server).  -->
-         <xsl:value-of select="resolve-uri('generate-query-utils.xql', static-base-uri())"/>
-         <xsl:text>";&#10;</xsl:text>
+         <xsl:text>"http://www.jenitennison.com/xslt/unit-test"</xsl:text>
+         <xsl:if test="not($utils-library-at eq '#none')">
+            <xsl:text>&#10;  at "</xsl:text>
+            <xsl:value-of select="$utils-library-at"/>
+            <xsl:text>"</xsl:text>
+         </xsl:if>
+         <xsl:text>;&#10;</xsl:text>
       </xsl:if>
       <xsl:apply-templates select="." mode="x:decl-ns">
          <xsl:with-param name="except" select="$prefix"/>
