@@ -16,7 +16,10 @@
                 exclude-result-prefixes="x xs test"
                 xmlns="http://www.w3.org/1999/xhtml">
 
-<xsl:import href="format-utils.xsl" />
+<xsl:import href="format-utils.xsl"/>
+
+<xsl:param name="report-css-uri" select="
+    resolve-uri('test-report.css', static-base-uri())"/>
 
 <xsl:function name="x:pending-callback" as="node()*">
   <!-- returns formatted output for $pending. -->
@@ -125,8 +128,7 @@
          </xsl:call-template>
          <xsl:text>)</xsl:text>
       </title>
-      <link rel="stylesheet" type="text/css"
-            href="{ resolve-uri('test-report.css', static-base-uri()) }"/>
+      <link rel="stylesheet" type="text/css" href="{ $report-css-uri }"/>
       <xsl:call-template name="x:html-head-callback"/>
     </head>
     <body>
