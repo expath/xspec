@@ -12,10 +12,13 @@
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:xhtml="http://www.w3.org/1999/xhtml"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 extension-element-prefixes="test"
                 exclude-result-prefixes="xs xhtml"
                 version="2.0">
   
+   <pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-query-helper.xsl</pkg:import-uri>
+
    <xsl:key name="functions" 
             match="xsl:function" 
             use="resolve-QName(@name, .)"/>

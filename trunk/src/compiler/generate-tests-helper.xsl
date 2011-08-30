@@ -17,8 +17,11 @@
                 xmlns="http://www.w3.org/1999/XSL/TransformAlias"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias"
                 exclude-result-prefixes="#default t xhtml"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 xmlns:__x="http://www.w3.org/1999/XSL/TransformAliasAlias">
   
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-tests-helper.xsl</pkg:import-uri>
+
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
   

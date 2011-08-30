@@ -13,9 +13,12 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:test="http://www.jenitennison.com/xslt/unit-test"
   xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:pkg="http://expath.org/ns/pkg"
   exclude-result-prefixes="xs">
 
 <xsl:import href="format-utils.xsl" />
+
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/coverage-report.xsl</pkg:import-uri>
 
 <xsl:param name="pwd"   as="xs:string" required="yes"/>
 <xsl:param name="tests" as="xs:string" required="yes"/>

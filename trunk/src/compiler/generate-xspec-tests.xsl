@@ -16,10 +16,13 @@
   exclude-result-prefixes="#default test"
   xmlns:x="http://www.jenitennison.com/xslt/xspec"
   xmlns:__x="http://www.w3.org/1999/XSL/TransformAliasAlias"
+  xmlns:pkg="http://expath.org/ns/pkg"
   xmlns:impl="urn:x-xspec:compile:xslt:impl">
 
 <xsl:import href="generate-common-tests.xsl"/>
 <xsl:import href="generate-tests-helper.xsl" />
+
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-xspec-tests.xsl</pkg:import-uri>
 
 <xsl:namespace-alias stylesheet-prefix="#default" result-prefix="xsl"/>
 

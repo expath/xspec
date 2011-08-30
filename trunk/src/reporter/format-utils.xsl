@@ -14,9 +14,12 @@
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 exclude-result-prefixes="test xs">
 
-<xsl:import href="generate-tests-utils.xsl" />
+<xsl:import href="../compiler/generate-tests-utils.xsl" />
+
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/format-utils.xsl</pkg:import-uri>
 
 <xsl:output name="x:report" method="xml" indent="yes"/>
 
