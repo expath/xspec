@@ -12,8 +12,11 @@
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
-                exclude-result-prefixes="xs test x"
+                xmlns:pkg="http://expath.org/ns/pkg"
+                exclude-result-prefixes="xs test x pkg"
                 version="2.0">
+
+   <pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-common-tests.xsl</pkg:import-uri>
 
    <xsl:preserve-space elements="x:space"/>
 

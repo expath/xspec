@@ -12,11 +12,14 @@
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 exclude-result-prefixes="xs test x"
                 version="2.0">
 
    <xsl:import href="generate-common-tests.xsl"/>
    <xsl:import href="generate-query-helper.xsl"/>
+
+   <pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-query-tests.xsl</pkg:import-uri>
 
    <xsl:output omit-xml-declaration="yes"/>
 

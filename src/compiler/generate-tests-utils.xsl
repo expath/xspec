@@ -16,7 +16,10 @@
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 extension-element-prefixes="test"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias">
+
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-tests-utils.xsl</pkg:import-uri>
 
 <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
 

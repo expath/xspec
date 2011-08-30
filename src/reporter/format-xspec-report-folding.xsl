@@ -14,9 +14,12 @@
                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
                 xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                 exclude-result-prefixes="x xs test"
+                xmlns:pkg="http://expath.org/ns/pkg"
                 xmlns="http://www.w3.org/1999/xhtml">
 
 <xsl:import href="format-xspec-report.xsl" />
+
+<pkg:import-uri>http://www.jenitennison.com/xslt/xspec/format-xspec-report-folding.xsl</pkg:import-uri>
 
 <xsl:template name="x:html-head-callback">
   <script language="javascript" type="text/javascript">

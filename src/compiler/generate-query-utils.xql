@@ -1,3 +1,5 @@
+module namespace test = "http://www.jenitennison.com/xslt/unit-test";
+
 (::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::)
 (:  File:       generate-query-utils.xql                                    :)
 (:  Author:     Jeni Tennsion                                               :)
@@ -6,8 +8,6 @@
 (:    Copyright (c) 2008, 2010 Jeni Tennsion (see end of file.)             :)
 (: ------------------------------------------------------------------------ :)
 
-
-module namespace test = "http://www.jenitennison.com/xslt/unit-test";
 
 declare namespace fn = "http://www.w3.org/2005/xpath-functions";
 
