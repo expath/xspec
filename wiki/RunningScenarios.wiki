@@ -27,6 +27,8 @@ Two alternative scripts are also provided:
     > ant -Dxspec.xml=filename
     }}}
 
+   Also see RunningWithAnt.
+
   * [http://code.google.com/p/xspec/source/browse/trunk/xspec.xpl xspec.xpl], an XProc pipeline (note that it doesn't indent the XML output correctly). To run, use the command line:
 
    {{{
