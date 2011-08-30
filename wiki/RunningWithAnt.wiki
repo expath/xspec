@@ -101,4 +101,4 @@ The useful properties are:
 || `saxon.home` || Directory containing a `saxon.jar` file.  If your Saxon jar file isn't named `saxon.jar`, then you'll instead need to set `saxon.jar` to the full path to your Saxon jar file||
 || `saxon.jar` || Full filename of Saxon jar file.  Defaults to `${saxon.home}/saxon.jar`.||
 || `xspec.properties` || Location of Ant properties file for use by XSpec. (Specify on the command line or in the calling build file since it's too late if you set this within the `xspec.properties` file.)||
-|| `xspec.dir` || Where to write the XSpec intermediate and result files.  Defaults to a `xspec` directory created as a subdirectory of the directory containing the XSpec test file (i.e., as a subdirectory of the directory containing `xspec.xml`).
+|| `xspec.dir` || Where to write the XSpec intermediate and result files.  Defaults to a `xspec` directory created as a subdirectory of the directory containing the XSpec test file (i.e., as a subdirectory of the directory containing `xspec.xml`). ||
