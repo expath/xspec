@@ -60,8 +60,8 @@ die() {
 # configured it, so there is no point to duplicate the logic here.
 # Just use it.
 # [1]http://code.google.com/p/expath-pkg/source/browse/trunk/saxon/pkg-saxon/src/shell/saxon
-#
-if saxon --help 2>&1 > /dev/null; then
+
+if which saxon 2>&1 > /dev/null; then
     echo Saxon script found, use it.
     echo
     xslt() {
@@ -102,15 +102,16 @@ fi
 # set XSPEC_HOME if it has not been set by the user (set it to the
 # parent dir of this script)
 if test -z "$XSPEC_HOME"; then
-    XSPEC_HOME=`dirname $0`
+    XSPEC_HOME=`dirname $0`;
+    XSPEC_HOME=`dirname $XSPEC_HOME`;
 fi
 # safety checks
-if test \! -f "${XSPEC_HOME}/generate-common-tests.xsl"; then
-    echo "ERROR: XSPEC_HOME seems to be corrupted: ${XSPEC_HOME}"
-    exit 1;
-fi
 if test \! -d "${XSPEC_HOME}"; then
     echo "ERROR: XSPEC_HOME is not a directory: ${XSPEC_HOME}"
+    exit 1;
+fi
+if test \! -f "${XSPEC_HOME}/src/compiler/generate-common-tests.xsl"; then
+    echo "ERROR: XSPEC_HOME seems to be corrupted: ${XSPEC_HOME}"
     exit 1;
 fi
 
@@ -120,7 +121,8 @@ if test -z "$SAXON_CP"; then
     # Set this variable in your environment or here, if you don't set SAXON_CP
     # SAXON_HOME=/path/to/saxon/dir
     if test -z "$SAXON_HOME"; then
-        die "SAXON_CP and SAXON_HOME both not set!"
+    	echo "SAXON_CP and SAXON_HOME both not set!"
+#        die "SAXON_CP and SAXON_HOME both not set!"
     fi
     if test -f "${SAXON_HOME}/saxon9ee.jar"; then
 	SAXON_CP="${SAXON_HOME}/saxon9ee.jar";
@@ -137,7 +139,8 @@ if test -z "$SAXON_CP"; then
     elif test -f "${SAXON_HOME}/saxon8.jar"; then
 	SAXON_CP="${SAXON_HOME}/saxon8.jar";
     else
-        die "Saxon jar cannot be found in SAXON_HOME: $SAXON_HOME"
+    	echo "Saxon jar cannot be found in SAXON_HOME: $SAXON_HOME"
+#        die "Saxon jar cannot be found in SAXON_HOME: $SAXON_HOME"
     fi
 fi
 
@@ -237,7 +240,7 @@ else
 fi
 echo "Creating Test Stylesheet..."
 xslt -o:"$COMPILED" -s:"$XSPEC" \
-    -xsl:"$XSPEC_HOME/$COMPILE_SHEET" \
+    -xsl:"$XSPEC_HOME/src/compiler/$COMPILE_SHEET" \
     || die "Error compiling the test suite"
 echo
 
@@ -280,20 +283,21 @@ echo
 echo "Formatting Report..."
 xslt -o:"$HTML" \
     -s:"$RESULT" \
-    -xsl:"$XSPEC_HOME/format-xspec-report.xsl" \
+    -xsl:"$XSPEC_HOME/src/reporter/format-xspec-report.xsl" \
     || die "Error formating the report"
 if test -n "$COVERAGE"; then
     xslt -l:on \
         -o:"$COVERAGE_HTML" \
         -s:"$COVERAGE_XML" \
-        -xsl:"$XSPEC_HOME/coverage-report.xsl" \
+        -xsl:"$XSPEC_HOME/src/reporter/coverage-report.xsl" \
         "tests=$XSPEC" \
         "pwd=file:`pwd`/" \
         || die "Error formating the coverage report"
+    echo "Report available at $COVERAGE_HTML"
     #$OPEN "$COVERAGE_HTML"
 else
+    echo "Report available at $HTML"
     #$OPEN "$HTML"
-    echo
 fi
 
 echo "Done."
