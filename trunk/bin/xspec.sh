@@ -8,7 +8,7 @@
 ## It relies on the environment variable $SAXON_HOME to be set to the
 ## dir Saxon has been installed to (i.e. the containing the Saxon JAR
 ## file), or on $SAXON_CP to be set to a full classpath containing
-## Saxon (and maybe more).  The later has precedence over the former.
+## Saxon (and maybe more).  The latter has precedence over the former.
 ##
 ## It also uses the environment variable XSPEC_HOME.  It must be set
 ## to the XSpec install directory.  By default, it uses this script's
@@ -20,12 +20,6 @@
 ## and used instead.  You just have to ensure it is visible from here
 ## (aka "ensure it is in the $PATH").  Even without packaging support,
 ## this script is a useful way to launch Saxon from the shell.
-##
-##############################################################################
-##
-## TODO: See issues 33 & 29 for several comments about shell scripts:
-## http://code.google.com/p/xspec/issues/detail?id=33
-## http://code.google.com/p/xspec/issues/detail?id=29
 ##
 ##############################################################################
 
@@ -61,7 +55,7 @@ die() {
 # Just use it.
 # [1]http://code.google.com/p/expath-pkg/source/browse/trunk/saxon/pkg-saxon/src/shell/saxon
 
-if which saxon 2>&1 > /dev/null; then
+if which saxon > /dev/null 2>&1; then
     echo Saxon script found, use it.
     echo
     xslt() {
@@ -71,7 +65,7 @@ if which saxon 2>&1 > /dev/null; then
         saxon --add-cp "$XSPEC_HOME" --xq "$@"
     }
 else
-    echo Saxon script not found.
+    echo Saxon script not found, invoking JVM directly instead.
     echo
     xslt() {
         java -cp "$CP" net.sf.saxon.Transform "$@"
@@ -85,7 +79,7 @@ fi
 ## some variables ############################################################
 ##
 
-# the command to use toopen the final HTML report
+# the command to use to open the final HTML report
 if [ `uname` = "Darwin" ]; then
     OPEN=open
 else
