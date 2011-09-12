@@ -19,7 +19,7 @@
       </xsl:copy>
    </xsl:template>
 
-   <!-- ...and add the README file. -->
+   <!-- ...and add the README file, and the Java, bin and tutorial dirs. -->
    <xsl:template match="zip:file/zip:dir" mode="add-readme">
       <xsl:copy>
          <!-- copy the existing -->
@@ -28,6 +28,13 @@
          <zip:entry src="{ resolve-uri('README', $proj:project) }"/>
          <!-- copy the existing -->
          <xsl:apply-templates select="node()" mode="add-readme"/>
+         <!-- additional dirs -->
+         <xsl:for-each select="'bin/', 'java/', 'tutorial/'">
+            <!-- resolve the dir, absolute, from the project's dir -->
+            <xsl:variable name="dir" select="resolve-uri(., $proj:project)"/>
+            <!-- recurse dir and create the appropriate zip:file elements -->
+            <xsl:sequence select="proj:zip-directory($dir)"/>
+         </xsl:for-each>
       </xsl:copy>
    </xsl:template>
 
