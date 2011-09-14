@@ -50,7 +50,7 @@ echo.
 echo Creating Test Stylesheet...
 echo %TEST_STYLESHEET%
 echo %XSPEC%
-java -cp "%CP%" net.sf.saxon.Transform -o:%TEST_STYLESHEET% -s:%XSPEC% -xsl:%~dp0\generate-xspec-tests.xsl
+java -cp "%CP%" net.sf.saxon.Transform -o:%TEST_STYLESHEET% -s:%XSPEC% -xsl:"%~dp0\generate-xspec-tests.xsl"
 echo. 
 
 echo Running Tests...
@@ -74,7 +74,7 @@ java -cp "%CP%" net.sf.saxon.Transform -o:%RESULT% -s:%XSPEC% -xsl:%TEST_STYLESH
 
 echo.  
 echo Formatting Report...
-java -cp "%CP%" net.sf.saxon.Transform -o:%HTML% -s:%RESULT% -xsl:%~dp0\format-xspec-report.xsl
+java -cp "%CP%" net.sf.saxon.Transform -o:%HTML% -s:%RESULT% -xsl:"%~dp0\format-xspec-report.xsl"
 
 REM =======================================
 REM Check if coverage parameter was passed
