@@ -2,6 +2,7 @@
 <!-- ===================================================================== -->
 <!--  File:       ml-xquery-harness.xproc                                  -->
 <!--  Author:     Florent Georges                                          -->
+<!--  Date:       2011-08-30                                               -->
 <!--  URI:        http://xspec.googlecode.com/                             -->
 <!--  Tags:                                                                -->
 <!--    Copyright (c) 2011 Florent Georges (see end of file.)              -->
