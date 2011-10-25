@@ -7,6 +7,9 @@
 <!--  Tags:                                                                -->
 <!--    Copyright (c) 2011 Florent Georges (see end of file.)              -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  TODO: Support BaseX database also (e.g. through its REST API, see    -->
+<!--  http://docs.basex.org/wiki/REST).                                    -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <p:pipeline xmlns:p="http://www.w3.org/ns/xproc"
