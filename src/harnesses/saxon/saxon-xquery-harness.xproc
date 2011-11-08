@@ -44,7 +44,10 @@
       <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
       <p:input port="source">
          <p:inline>
-            <xsl:stylesheet version="2.0">
+            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
+                 using the prefix 't', then the biding is not visible to Saxon and it throws
+                 a compilation error for this stylesheet... -->
+            <xsl:stylesheet version="2.0" t:dummy="...">
                <xsl:import href="..."/>
                <xsl:template match="/">
                   <c:query>
@@ -95,11 +98,7 @@
          </p:xslt>
       </p:when>
       <p:otherwise>
-         <p:error code="t:ERR001">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-         </p:error>
+         <p:error code="t:ERR001"/>
       </p:otherwise>
    </p:choose>
 
@@ -109,7 +108,7 @@
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <!-- DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS COMMENT.             -->
 <!--                                                                       -->
-<!-- Copyright (c) 2008, 2010 Jeni Tennison                                -->
+<!-- Copyright (c) 2011 Florent Georges                                    -->
 <!--                                                                       -->
 <!-- The contents of this file are subject to the MIT License (see the URI -->
 <!-- http://www.opensource.org/licenses/mit-license.php for details).      -->
