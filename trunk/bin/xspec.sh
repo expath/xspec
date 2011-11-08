@@ -20,6 +20,10 @@
 ## and used instead.  You just have to ensure it is visible from here
 ## (aka "ensure it is in the $PATH").  Even without packaging support,
 ## this script is a useful way to launch Saxon from the shell.
+## 
+## TODO: With the Packaging System, there should be no need to set the
+## XSPEC_HOME, as we could use absolute public URIs for the public
+## components...
 ##
 ##############################################################################
 
@@ -59,10 +63,10 @@ if which saxon > /dev/null 2>&1; then
     echo Saxon script found, use it.
     echo
     xslt() {
-        saxon --add-cp "$XSPEC_HOME" --xsl "$@"
+        saxon --add-cp "${XSPEC_HOME}/java/" --xsl "$@"
     }
     xquery() {
-        saxon --add-cp "$XSPEC_HOME" --xq "$@"
+        saxon --add-cp "${XSPEC_HOME}/java/" --xq "$@"
     }
 else
     echo Saxon script not found, invoking JVM directly instead.
@@ -138,7 +142,7 @@ if test -z "$SAXON_CP"; then
     fi
 fi
 
-CP="${SAXON_CP}${CP_DELIM}${XSPEC_HOME}"
+CP="${SAXON_CP}${CP_DELIM}${XSPEC_HOME}/java/"
 
 ##
 ## options ###################################################################
@@ -188,7 +192,7 @@ fi
 
 if [ -n "$2" ]; then
     if [ "$2" != coverage ]; then
-        usage "Error: Extra option: $COVERAGE"
+        usage "Error: Extra option: $2"
         exit 1
     fi
     echo "Long-form option 'coverage' deprecated, use '-c' instead."
