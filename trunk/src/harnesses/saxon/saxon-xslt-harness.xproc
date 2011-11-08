@@ -81,11 +81,7 @@
          </p:xslt>
       </p:when>
       <p:otherwise>
-         <p:error code="t:ERR001">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-         </p:error>
+         <p:error code="t:ERR001"/>
       </p:otherwise>
    </p:choose>
 
@@ -95,7 +91,7 @@
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <!-- DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS COMMENT.             -->
 <!--                                                                       -->
-<!-- Copyright (c) 2008, 2010 Jeni Tennison                                -->
+<!-- Copyright (c) 2011 Florent Georges                                    -->
 <!--                                                                       -->
 <!-- The contents of this file are subject to the MIT License (see the URI -->
 <!-- http://www.opensource.org/licenses/mit-license.php for details).      -->

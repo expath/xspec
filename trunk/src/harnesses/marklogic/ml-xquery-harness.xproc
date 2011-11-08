@@ -17,8 +17,8 @@
             xmlns:ml="http://xmlcalabash.com/ns/extensions/marklogic"
             xmlns:pkg="http://expath.org/ns/pkg"
             pkg:import-uri="http://www.jenitennison.com/xslt/xspec/marklogic/harness/xquery.xproc"
-            name="ml-harness"
-            type="t:ml-harness"
+            name="ml-xquery-harness"
+            type="t:ml-xquery-harness"
             version="1.0">
 	
    <p:documentation>
@@ -56,7 +56,10 @@
       <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
       <p:input port="source">
          <p:inline>
-            <xsl:stylesheet version="2.0">
+            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
+                 using the prefix 't', then the biding is not visible to Saxon and it throws
+                 a compilation error for this stylesheet... -->
+            <xsl:stylesheet version="2.0" t:dummy="...">
                <xsl:import href="..."/>
                <xsl:template match="/">
                   <query>
@@ -72,7 +75,7 @@
       <p:when test="p:value-available('query-at')">
          <p:xslt name="compile">
             <p:input port="source">
-               <p:pipe step="ml-harness" port="source"/>
+               <p:pipe step="ml-xquery-harness" port="source"/>
             </p:input>
             <p:input port="stylesheet">
                <p:pipe step="compiler" port="result"/>
@@ -84,7 +87,7 @@
       <p:otherwise>
          <p:xslt name="compile">
             <p:input port="source">
-               <p:pipe step="ml-harness" port="source"/>
+               <p:pipe step="ml-xquery-harness" port="source"/>
             </p:input>
             <p:input port="stylesheet">
                <p:pipe step="compiler" port="result"/>
@@ -135,7 +138,7 @@
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <!-- DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS COMMENT.             -->
 <!--                                                                       -->
-<!-- Copyright (c) 2008, 2010 Jeni Tennison                                -->
+<!-- Copyright (c) 2011 Florent Georges                                    -->
 <!--                                                                       -->
 <!-- The contents of this file are subject to the MIT License (see the URI -->
 <!-- http://www.opensource.org/licenses/mit-license.php for details).      -->
