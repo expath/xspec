@@ -65,6 +65,7 @@
         </xsl:choose>
       </variable>
       <xsl:element name="xsl:{$type}">
+        <xsl:copy-of select="@as"/>
         <xsl:attribute name="name" select="$var" />
         <xsl:attribute name="select"
           select="if (@select) 
@@ -76,12 +77,13 @@
     </xsl:when>
     <xsl:when test="@select">
       <xsl:element name="xsl:{$type}">
+        <xsl:copy-of select="@as|@select"/>
         <xsl:attribute name="name" select="$var" />
-        <xsl:attribute name="select" select="@select" />
       </xsl:element>
     </xsl:when>
     <xsl:otherwise>
       <xsl:element name="xsl:{$type}">
+        <xsl:copy-of select="@as"/>
         <xsl:attribute name="name" select="$var" />
         <xsl:attribute name="select" select="'()'" />
       </xsl:element>
