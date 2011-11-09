@@ -34,94 +34,65 @@
    <p:serialization port="result" indent="true"/>
 
    <p:option name="xspec-home" required="true"/>
-   <p:option name="basex-jar"  required="true"/>
+   <p:option name="basex-jar"/>
    <!-- TODO: Use a robust way to get a tmp file name from the OS... -->
    <p:option name="compiled-file" select="'file:/tmp/xspec-basex-compiled-suite.xq'"/>
 
-   <!-- TODO: Use the absolute URIs through the EXPath Packaging System. -->
-   <p:variable name="compiler" select="
-       resolve-uri('src/compiler/generate-query-tests.xsl', $xspec-home)"/>
-   <p:variable name="formatter" select="
-       resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)"/>
+   <p:import href="../harness-lib.xpl"/>
+
+   <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
    <p:variable name="utils-lib" select="
-       resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)"/>
+       if ( $xspec-home ) then
+         resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
+       else
+         ''"/>
 
-   <p:string-replace match="xsl:import/@href" name="compiler">
-      <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
-      <p:input port="source">
-         <p:inline>
-            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
-                 using the prefix 't', then the biding is not visible to Saxon and it throws
-                 a compilation error for this stylesheet... -->
-            <xsl:stylesheet version="2.0" t:dummy="...">
-               <xsl:import href="..."/>
-               <xsl:template match="/">
-                  <c:query>
-                     <xsl:call-template name="t:generate-tests"/>
-                  </c:query>
-               </xsl:template>
-            </xsl:stylesheet>
-         </p:inline>
-      </p:input>
-   </p:string-replace>
+   <!-- compile the suite into a query -->
+   <t:compile-xquery>
+      <p:with-option name="xspec-home"       select="$xspec-home"/>
+      <p:with-param  name="utils-library-at" select="$utils-lib"/>
+   </t:compile-xquery>
 
-   <p:xslt name="compile">
-      <p:input port="source">
-         <p:pipe step="basex-standalone-xquery-harness" port="source"/>
-      </p:input>
-      <p:input port="stylesheet">
-         <p:pipe step="compiler" port="result"/>
-      </p:input>
-      <p:with-param name="utils-library-at" select="$utils-lib"/>
-   </p:xslt>
-
+   <!-- escape the query as text -->
    <p:escape-markup name="escape"/>
 
+   <!-- store it on disk in order to pass it to BaseX -->
    <p:store method="text">
       <p:with-option name="href" select="$compiled-file"/>
    </p:store>
 
-   <!-- rely on a script 'basex' being in the PATH -->
-   <!--p:exec command="basex" name="run">
-      <p:with-option name="args" select="$compiled-file"/>
-      <p:input port="source">
-         <p:empty/>
-      </p:input>
-   </p:exec-->
-
-   <p:exec command="java" name="run">
-      <p:with-option name="args" select="
-          string-join(
-            ('-cp', $basex-jar, 'org.basex.BaseX', $compiled-file),
-            ' ')"/>
-      <p:input port="source">
-         <p:empty/>
-      </p:input>
-   </p:exec>
-
+   <!-- run it on BaseX -->
    <p:choose>
-      <p:when test="exists(/c:result/t:report)">
-         <p:load name="formatter">
-            <p:with-option name="href" select="$formatter"/>
-         </p:load>
-         <p:unwrap name="unwrap" match="/c:result">
+      <p:when test="p:value-available('basex-jar')">
+         <!-- use Java directly, rely on 'basex-jar' -->
+         <p:exec command="java">
+            <p:with-option name="args" select="
+                string-join(
+                  ('-cp', $basex-jar, 'org.basex.BaseX', $compiled-file),
+                  ' ')"/>
             <p:input port="source">
-               <p:pipe step="run" port="result"/>
+               <p:empty/>
             </p:input>
-         </p:unwrap>
-         <p:xslt name="format-report">
-            <p:input port="source">
-               <p:pipe step="unwrap" port="result"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="formatter" port="result"/>
-            </p:input>
-         </p:xslt>
+         </p:exec>
       </p:when>
       <p:otherwise>
-         <p:error code="t:ERR001"/>
+         <!-- rely on a script 'basex' being in the PATH -->
+         <p:exec command="basex">
+            <p:with-option name="args" select="$compiled-file"/>
+            <p:input port="source">
+               <p:empty/>
+            </p:input>
+         </p:exec>
       </p:otherwise>
    </p:choose>
+
+   <!-- unwrap the exec step wrapper element -->
+   <p:unwrap match="/c:result"/>
+
+   <!-- format the report -->
+   <t:format-report>
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:format-report>
 
 </p:pipeline>
 

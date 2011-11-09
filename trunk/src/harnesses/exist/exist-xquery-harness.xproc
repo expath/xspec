@@ -46,59 +46,31 @@
    <!-- if set, then save the generated query at this URI -->
    <p:option name="report-uri"/>
 
-   <!-- TODO: Use the absolute URIs through the EXPath Packaging System. -->
-   <p:variable name="compiler" select="
-       resolve-uri('src/compiler/generate-query-tests.xsl', $xspec-home)"/>
-   <p:variable name="formatter" select="
-       resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)"/>
+   <p:import href="../harness-lib.xpl"/>
 
-   <p:string-replace match="xsl:import/@href" name="compiler">
-      <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
-      <p:input port="source">
-         <p:inline>
-            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
-                 using the prefix 't', then the biding is not visible to Saxon and it throws
-                 a compilation error for this stylesheet... -->
-            <xsl:stylesheet version="2.0" t:dummy="...">
-               <xsl:import href="..."/>
-               <xsl:template match="/">
-                  <exist:text>
-                     <xsl:call-template name="t:generate-tests"/>
-                  </exist:text>
-               </xsl:template>
-            </xsl:stylesheet>
-         </p:inline>
-      </p:input>
-   </p:string-replace>
-
+   <!-- compile the suite into a query -->
    <p:choose>
       <p:when test="p:value-available('query-at')">
-         <p:xslt name="compile">
-            <p:input port="source">
-               <p:pipe step="exist-xquery-harness" port="source"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="compiler" port="result"/>
-            </p:input>
-            <p:with-param name="query-at"         select="$query-at"/>
-            <p:with-param name="utils-library-at" select="$utils-lib"/>
-         </p:xslt>
+         <t:compile-xquery>
+            <p:with-option name="xspec-home"       select="$xspec-home"/>
+            <p:with-param  name="query-at"         select="$query-at"/>
+            <p:with-param  name="utils-library-at" select="$utils-lib"/>
+         </t:compile-xquery>
       </p:when>
       <p:otherwise>
-         <p:xslt name="compile">
-            <p:input port="source">
-               <p:pipe step="exist-xquery-harness" port="source"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="compiler" port="result"/>
-            </p:input>
-            <p:with-param name="utils-library-at" select="$utils-lib"/>
-         </p:xslt>
+         <t:compile-xquery>
+            <p:with-option name="xspec-home"       select="$xspec-home"/>
+            <p:with-param  name="utils-library-at" select="$utils-lib"/>
+         </t:compile-xquery>
       </p:otherwise>
    </p:choose>
 
+   <!-- escape the query as text -->
    <p:escape-markup name="escape"/>
 
+   <!-- save it on disk if compiled-uri is provided, for debugging purpose -->
+   <!-- TODO: Is it possible to conditionize p:debug instead?  If not, it should
+        be a util (standard?) step. -->
    <p:choose>
       <p:when test="p:value-available('compiled-uri')">
          <p:store method="text">
@@ -115,7 +87,10 @@
       </p:otherwise>
    </p:choose>
 
+   <!-- construct the eXist REST query element around the query itself -->
+   <p:rename new-name="exist:text" match="/*"/>
    <p:wrap wrapper="exist:query" match="/*"/>
+   <!-- construct the HTTP request following eXist REST interface -->
    <p:wrap wrapper="c:body" match="/*"/>
    <p:add-attribute attribute-name="content-type" attribute-value="application/xml" match="/*"/>
    <p:wrap wrapper="c:request" match="/*"/>
@@ -124,31 +99,16 @@
       <p:with-option name="attribute-value" select="$endpoint"/>
    </p:add-attribute>
 
+   <!-- run it on eXist -->
    <p:http-request name="run"/>
 
-   <p:choose>
-      <p:when test="exists(/exist:result/t:report)">
-         <p:load name="formatter">
-            <p:with-option name="href" select="$formatter"/>
-         </p:load>
-         <p:unwrap name="unwrap" match="/c:result">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-         </p:unwrap>
-         <p:xslt name="format-report">
-            <p:input port="source">
-               <p:pipe step="unwrap" port="result"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="formatter" port="result"/>
-            </p:input>
-         </p:xslt>
-      </p:when>
-      <p:otherwise>
-         <p:error code="t:ERR001"/>
-      </p:otherwise>
-   </p:choose>
+   <!-- unwrap the http-request step wrapper element -->
+   <p:unwrap name="unwrap" match="/c:result"/>
+
+   <!-- format the report -->
+   <t:format-report>
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:format-report>
 
 </p:pipeline>
 

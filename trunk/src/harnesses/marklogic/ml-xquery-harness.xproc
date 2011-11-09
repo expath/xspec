@@ -45,60 +45,29 @@
    <p:option name="password"   required="true"/>
 
    <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
+   <p:import href="../harness-lib.xpl"/>
 
-   <!-- TODO: Use the absolute URIs through the EXPath Packaging System. -->
-   <p:variable name="compiler" select="
-       resolve-uri('src/compiler/generate-query-tests.xsl', $xspec-home)"/>
-   <p:variable name="formatter" select="
-       resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)"/>
-
-   <p:string-replace match="xsl:import/@href" name="compiler">
-      <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
-      <p:input port="source">
-         <p:inline>
-            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
-                 using the prefix 't', then the biding is not visible to Saxon and it throws
-                 a compilation error for this stylesheet... -->
-            <xsl:stylesheet version="2.0" t:dummy="...">
-               <xsl:import href="..."/>
-               <xsl:template match="/">
-                  <query>
-                     <xsl:call-template name="t:generate-tests"/>
-                  </query>
-               </xsl:template>
-            </xsl:stylesheet>
-         </p:inline>
-      </p:input>
-   </p:string-replace>
-
+   <!-- compile the suite into a query -->
    <p:choose>
       <p:when test="p:value-available('query-at')">
-         <p:xslt name="compile">
-            <p:input port="source">
-               <p:pipe step="ml-xquery-harness" port="source"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="compiler" port="result"/>
-            </p:input>
-            <p:with-param name="query-at"         select="$query-at"/>
-            <p:with-param name="utils-library-at" select="$utils-lib"/>
-         </p:xslt>
+         <t:compile-xquery>
+            <p:with-option name="xspec-home"       select="$xspec-home"/>
+            <p:with-param  name="query-at"         select="$query-at"/>
+            <p:with-param  name="utils-library-at" select="$utils-lib"/>
+         </t:compile-xquery>
       </p:when>
       <p:otherwise>
-         <p:xslt name="compile">
-            <p:input port="source">
-               <p:pipe step="ml-xquery-harness" port="source"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="compiler" port="result"/>
-            </p:input>
-            <p:with-param name="utils-library-at" select="$utils-lib"/>
-         </p:xslt>
+         <t:compile-xquery>
+            <p:with-option name="xspec-home"       select="$xspec-home"/>
+            <p:with-param  name="utils-library-at" select="$utils-lib"/>
+         </t:compile-xquery>
       </p:otherwise>
    </p:choose>
 
+   <!-- escape the query as text -->
    <p:escape-markup/>
 
+   <!-- run it on marklogic -->
    <ml:adhoc-query name="run">
       <p:with-option name="host"     select="$host"/>
       <p:with-option name="port"     select="$port"/>
@@ -109,28 +78,10 @@
       </p:input>
    </ml:adhoc-query>
 
-   <p:choose>
-      <p:when test="exists(/t:report)">
-         <p:load name="formatter">
-            <p:with-option name="href" select="$formatter"/>
-         </p:load>
-         <p:xslt name="format-report">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="formatter" port="result"/>
-            </p:input>
-         </p:xslt>
-      </p:when>
-      <p:otherwise>
-         <p:error code="t:ERR001">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-         </p:error>
-      </p:otherwise>
-   </p:choose>
+   <!-- format the report -->
+   <t:format-report>
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:format-report>
 
 </p:pipeline>
 

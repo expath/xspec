@@ -11,8 +11,6 @@
 
 <p:pipeline xmlns:p="http://www.w3.org/ns/xproc"
             xmlns:c="http://www.w3.org/ns/xproc-step"
-            xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-            xmlns:xs="http://www.w3.org/2001/XMLSchema"
             xmlns:t="http://www.jenitennison.com/xslt/xspec"
             xmlns:pkg="http://expath.org/ns/pkg"
             pkg:import-uri="http://www.jenitennison.com/xslt/xspec/saxon/harness/xquery.xproc"
@@ -30,47 +28,27 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
+   <p:option name="xspec-home"/>
 
-   <!-- TODO: Use the absolute URIs through the EXPath Packaging System. -->
-   <p:variable name="compiler" select="
-       resolve-uri('src/compiler/generate-query-tests.xsl', $xspec-home)"/>
-   <p:variable name="formatter" select="
-       resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)"/>
+   <p:import href="../harness-lib.xpl"/>
+
+   <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
    <p:variable name="utils-lib" select="
-       resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)"/>
+       if ( $xspec-home ) then
+         resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
+       else
+         ''"/>
 
-   <p:string-replace match="xsl:import/@href" name="compiler">
-      <p:with-option name="replace" select="concat('''', $compiler, '''')"/>
-      <p:input port="source">
-         <p:inline>
-            <!-- TODO: I think this is due to a bug in Calabash, if I don't create a node
-                 using the prefix 't', then the biding is not visible to Saxon and it throws
-                 a compilation error for this stylesheet... -->
-            <xsl:stylesheet version="2.0" t:dummy="...">
-               <xsl:import href="..."/>
-               <xsl:template match="/">
-                  <c:query>
-                     <xsl:call-template name="t:generate-tests"/>
-                  </c:query>
-               </xsl:template>
-            </xsl:stylesheet>
-         </p:inline>
-      </p:input>
-   </p:string-replace>
+   <!-- compile the suite into a query -->
+   <t:compile-xquery>
+      <p:with-option name="xspec-home"       select="$xspec-home"/>
+      <p:with-param  name="utils-library-at" select="$utils-lib"/>
+   </t:compile-xquery>
 
-   <p:xslt name="compile">
-      <p:input port="source">
-         <p:pipe step="saxon-xquery-harness" port="source"/>
-      </p:input>
-      <p:input port="stylesheet">
-         <p:pipe step="compiler" port="result"/>
-      </p:input>
-      <p:with-param name="utils-library-at" select="$utils-lib"/>
-   </p:xslt>
-
+   <!-- escape the query as text -->
    <p:escape-markup name="escape"/>
 
+   <!-- run it on saxon -->
    <p:xquery name="run">
       <p:input port="source">
          <p:empty/>
@@ -83,24 +61,10 @@
       </p:input>
    </p:xquery>
 
-   <p:choose>
-      <p:when test="exists(/t:report)">
-         <p:load name="formatter">
-            <p:with-option name="href" select="$formatter"/>
-         </p:load>
-         <p:xslt name="format-report">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="formatter" port="result"/>
-            </p:input>
-         </p:xslt>
-      </p:when>
-      <p:otherwise>
-         <p:error code="t:ERR001"/>
-      </p:otherwise>
-   </p:choose>
+   <!-- format the report -->
+   <t:format-report>
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:format-report>
 
 </p:pipeline>
 

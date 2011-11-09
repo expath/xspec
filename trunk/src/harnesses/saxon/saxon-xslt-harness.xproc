@@ -32,28 +32,14 @@
 
    <p:option name="xspec-home" required="true"/>
 
-   <!-- TODO: Use the absolute URIs through the EXPath Packaging System. -->
-   <p:variable name="compiler" select="
-       resolve-uri('src/compiler/generate-xspec-tests.xsl', $xspec-home)"/>
-   <p:variable name="formatter" select="
-       resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)"/>
+   <p:import href="../harness-lib.xpl"/>
 
-   <p:load name="compiler">
-      <p:with-option name="href" select="$compiler"/>
-   </p:load>
+   <!-- compile the suite into a stylesheet -->
+   <t:compile-xslt name="compile">
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:compile-xslt>
 
-   <p:xslt name="compile">
-      <p:input port="source">
-         <p:pipe step="saxon-xslt-harness" port="source"/>
-      </p:input>
-      <p:input port="stylesheet">
-         <p:pipe step="compiler" port="result"/>
-      </p:input>
-      <p:input port="parameters">
-         <p:empty/>
-      </p:input>
-   </p:xslt>
-
+   <!-- run it on saxon -->
    <p:xslt name="run" template-name="t:main">
       <p:input port="source">
          <p:empty/>
@@ -66,24 +52,10 @@
       </p:input>
    </p:xslt>
 
-   <p:choose>
-      <p:when test="exists(/t:report)">
-         <p:load name="formatter">
-            <p:with-option name="href" select="$formatter"/>
-         </p:load>
-         <p:xslt name="format-report">
-            <p:input port="source">
-               <p:pipe step="run" port="result"/>
-            </p:input>
-            <p:input port="stylesheet">
-               <p:pipe step="formatter" port="result"/>
-            </p:input>
-         </p:xslt>
-      </p:when>
-      <p:otherwise>
-         <p:error code="t:ERR001"/>
-      </p:otherwise>
-   </p:choose>
+   <!-- format the report -->
+   <t:format-report>
+      <p:with-option name="xspec-home" select="$xspec-home"/>
+   </t:format-report>
 
 </p:pipeline>
 
