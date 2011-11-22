@@ -46,7 +46,7 @@
    </xsl:variable>
 
    <!-- TODO: The at hint should not be always resolved (e.g. for MarkLogic). -->
-   <xsl:param name="query-at" as="xs:anyURI?" select="
+   <xsl:param name="query-at" as="xs:string?" select="
        /x:description/@query-at/resolve-uri(., base-uri(..))"/>
    <!--xsl:param name="query-at" as="xs:string?" select="
        /x:description/@query-at"/-->
