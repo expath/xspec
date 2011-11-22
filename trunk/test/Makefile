@@ -5,6 +5,11 @@
 #   Tags:                                                                    #
 #     Copyright (c) 2010 Jeni Tennsion (see end of file.)                    #
 # -------------------------------------------------------------------------- #
+#   TODO: Use the XSpec test harnesses (in XProc) themselves, by using
+#   XProject directly.  Adapt the process to be able (for some tests) to
+#   compile some XSpec code and test either (1) its report or (2) the result
+#   of its compilation.
+# ----------------------------------------------------------------------------
 #   To use this Makefile, $SAXON_HOME must be set to a directory that
 #   contains either saxon9.jar (for B in 9.1 or below) or saxon9he.jar
 #   (for HE in 9.2 and above).  Set it the usual way you set environ
