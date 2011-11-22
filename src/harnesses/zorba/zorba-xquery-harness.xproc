@@ -35,57 +35,83 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-   <!-- TODO: Use a robust way to get a tmp file name from the OS... -->
-   <p:option name="compiled-file" select="'file:///tmp/xspec-zorba-compiled-suite.xq'"/>
-
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- Saxon's resolve-uri() returns file:/ with only one slashes, which Zorba
-        does not understand. -->
-   <p:variable name="utils-tmp" select="
-       resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)"/>
-   <p:variable name="utils-lib" select="
-       if ( starts-with($utils-tmp, 'file:/') and not(starts-with($utils-tmp, 'file:///')) ) then
-         concat('file:///', substring($utils-tmp, 7))
-       else
-         $utils-tmp"/>
+   <t:parameters name="params"/>
 
-   <!-- compile the suite into a query -->
-   <t:compile-xquery>
-      <p:with-option name="xspec-home"       select="$xspec-home"/>
-      <p:with-param  name="utils-library-at" select="$utils-lib"/>
-   </t:compile-xquery>
+   <p:group>
+      <p:variable name="xspec-home" select="/c:param-set/c:param[@name eq 'xspec-home']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- escape the query as text -->
-   <p:escape-markup name="escape"/>
+      <!-- TODO: Use a robust way to get a tmp file name from the OS... -->
+      <p:variable name="compiled-file" select="
+          ( /c:param-set/c:param[@name eq 'compiled-file']/@value,
+            'file:///tmp/xspec-zorba-compiled-suite.xq' )[1]">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- store it on disk in order to pass it to zorba -->
-   <p:store method="text" name="store">
-      <p:with-option name="href" select="$compiled-file"/>
-   </p:store>
+      <p:variable name="at-param" select="/c:param-set/c:param[@name eq 'query-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="at-attr" select="resolve-uri(/t:description/@query-at, base-uri(/))"/>
+      <p:variable name="at-tmp" select="( $at-param, $at-attr )[.][1]"/>
+      <!-- Saxon's resolve-uri() returns file:/ with only one slashes, which Zorba
+           does not understand. -->
+      <p:variable name="query-at" select="
+          if ( starts-with($at-tmp, 'file:/') and not(starts-with($at-tmp, 'file:///')) ) then
+            concat('file:///', substring($at-tmp, 7))
+          else
+            $at-tmp"/>
 
-   <!-- run it on zorba, rely on a script 'zorba' being in the PATH -->
-   <p:exec command="zorba" name="run" cx:depends-on="store">
-      <!-- Zorba does not accept a URI, only a file path, so we have to remove
-           the 'file:' part.  TODO: Report it to the Zorba mailing list. -->
-      <p:with-option name="args" select="concat('-f -q ', substring-after($compiled-file, ':'))"/>
-      <p:input port="source">
-         <p:empty/>
-      </p:input>
-   </p:exec>
+      <p:variable name="utils-tmp" select="
+          ( /c:param-set/c:param[@name eq 'utils-library-at']/@value,
+            resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home) )[1]">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <!-- Saxon's resolve-uri() returns file:/ with only one slashes, which Zorba
+           does not understand. -->
+      <p:variable name="utils-lib" select="
+          if ( starts-with($utils-tmp, 'file:/') and not(starts-with($utils-tmp, 'file:///')) ) then
+            concat('file:///', substring($utils-tmp, 7))
+          else
+            $utils-tmp"/>
 
-   <!-- unwrap the p:exec step wrapper element -->
-   <p:unwrap name="unwrap" match="/c:result">
-      <p:input port="source">
-         <p:pipe step="run" port="result"/>
-      </p:input>
-   </p:unwrap>
+      <!-- compile the suite into a query -->
+      <t:compile-xquery>
+         <p:with-param name="query-at"         select="$query-at"/>
+         <p:with-param name="utils-library-at" select="$utils-lib"/>
+      </t:compile-xquery>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- escape the query as text -->
+      <p:escape-markup name="escape"/>
+
+      <!-- store it on disk in order to pass it to zorba -->
+      <p:store method="text" name="store">
+         <p:with-option name="href" select="$compiled-file"/>
+      </p:store>
+
+      <!-- run it on zorba, rely on a script 'zorba' being in the PATH -->
+      <p:exec command="zorba" name="run" cx:depends-on="store">
+         <!-- Zorba does not accept a URI, only a file path, so we have to remove
+              the 'file:' part.  TODO: Report it to the Zorba mailing list. -->
+         <p:with-option name="args" select="
+             concat('-f -q ', substring-after($compiled-file, ':'))"/>
+         <p:input port="source">
+            <p:empty/>
+         </p:input>
+      </p:exec>
+
+      <!-- unwrap the p:exec step wrapper element -->
+      <p:unwrap name="unwrap" match="/c:result">
+         <p:input port="source">
+            <p:pipe step="run" port="result"/>
+         </p:input>
+      </p:unwrap>
+
+      <!-- format the report -->
+      <t:format-report/>
+   </p:group>
 
 </p:pipeline>
 

@@ -37,61 +37,80 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-   <p:option name="query-at"/>
-   <!-- Is it really good to provide default for the default admin credentials? -->
-   <p:option name="username"   select="'admin'"/>
-   <p:option name="password"   select="'admin'"/>
-   <p:option name="utils-lib"  select="'/xspec/generate-query-utils.xql'"/>
-   <p:option name="endpoint"   select="'http://localhost:8984/rest/'"/>
-
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- compile the suite into a query -->
-   <p:choose>
-      <p:when test="p:value-available('query-at')">
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="query-at"         select="$query-at"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:when>
-      <p:otherwise>
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:otherwise>
-   </p:choose>
+   <t:parameters name="params"/>
 
-   <!-- escape the query as text -->
-   <p:escape-markup/>
+   <p:group>
+      <p:variable name="xspec-home" select="/c:param-set/c:param[@name eq 'xspec-home']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="query-at" select="/c:param-set/c:param[@name eq 'query-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="endpoint" select="/c:param-set/c:param[@name eq 'endpoint']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="username" select="/c:param-set/c:param[@name eq 'username']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="password" select="/c:param-set/c:param[@name eq 'password']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="auth-method" select="/c:param-set/c:param[@name eq 'auth-method']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- construct the BaseX REST query element around the query itself -->
-   <p:rename new-name="rest:text" match="/*"/>
-   <p:wrap wrapper="rest:query" match="/*"/>
-   <!-- construct the HTTP request following BaseX REST interface -->
-   <p:wrap wrapper="c:body" match="/*"/>
-   <p:add-attribute attribute-name="content-type" attribute-value="application/xml" match="/*"/>
-   <p:wrap wrapper="c:request" match="/*"/>
-   <p:add-attribute attribute-name="method" attribute-value="POST" match="/*"/>
-   <p:add-attribute attribute-name="href" match="/*">
-      <p:with-option name="attribute-value" select="$endpoint"/>
-   </p:add-attribute>
-   <!-- TODO: Handle credentials..! -->
-   <p:add-attribute attribute-name="username"    attribute-value="admin" match="/*"/>
-   <p:add-attribute attribute-name="password"    attribute-value="admin" match="/*"/>
-   <p:add-attribute attribute-name="auth-method" attribute-value="basic" match="/*"/>
+      <!-- compile the suite into a query -->
+      <t:compile-xquery/>
 
-   <!-- TODO: Allow dumping the document for debugging purposes. -->
+      <!-- escape the query as text -->
+      <p:escape-markup/>
 
-   <!-- TODO: Check HTTP return code, etc.? (using @detailed = true) -->
-   <p:http-request name="run"/>
+      <!-- construct the BaseX REST query element around the query itself -->
+      <p:rename new-name="rest:text" match="/*"/>
+      <p:wrap wrapper="rest:query" match="/*"/>
+      <!-- construct the HTTP request following BaseX REST interface -->
+      <p:wrap wrapper="c:body" match="/*"/>
+      <p:add-attribute attribute-name="content-type" attribute-value="application/xml" match="/*"/>
+      <p:wrap wrapper="c:request" match="/*"/>
+      <p:add-attribute attribute-name="method" attribute-value="POST" match="/*"/>
+      <!-- inject variable values -->
+      <p:add-attribute attribute-name="href" match="/*">
+         <p:with-option name="attribute-value" select="$endpoint"/>
+      </p:add-attribute>
+      <p:add-attribute attribute-name="username" match="/*">
+         <p:with-option name="attribute-value" select="$username"/>
+      </p:add-attribute>
+      <p:add-attribute attribute-name="password" match="/*">
+         <p:with-option name="attribute-value" select="$password"/>
+      </p:add-attribute>
+      <p:add-attribute attribute-name="auth-method" match="/*">
+         <p:with-option name="attribute-value" select="$auth-method"/>
+      </p:add-attribute>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- log the HTTP request ? -->
+      <t:log if-set="log-http-request">
+         <p:input port="parameters">
+            <p:pipe step="params" port="parameters"/>
+         </p:input>
+      </t:log>
+
+      <!-- TODO: Check HTTP return code, etc.? (using @detailed = true) -->
+      <p:http-request name="run"/>
+
+      <!-- log the HTTP request ? -->
+      <t:log if-set="log-http-response">
+         <p:input port="parameters">
+            <p:pipe step="params" port="parameters"/>
+         </p:input>
+      </t:log>
+
+      <!-- format the report -->
+      <t:format-report>
+         <p:with-option name="xspec-home" select="$xspec-home"/>
+      </t:format-report>
+   </p:group>
 
 </p:pipeline>
 

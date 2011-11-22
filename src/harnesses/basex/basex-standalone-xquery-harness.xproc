@@ -11,6 +11,7 @@
 
 <p:pipeline xmlns:p="http://www.w3.org/ns/xproc"
             xmlns:c="http://www.w3.org/ns/xproc-step"
+            xmlns:cx="http://xmlcalabash.com/ns/extensions"
             xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
             xmlns:xs="http://www.w3.org/2001/XMLSchema"
             xmlns:t="http://www.jenitennison.com/xslt/xspec"
@@ -33,66 +34,82 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-   <p:option name="basex-jar"/>
-   <!-- TODO: Use a robust way to get a tmp file name from the OS... -->
-   <p:option name="compiled-file" select="'file:/tmp/xspec-basex-compiled-suite.xq'"/>
-
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
-   <p:variable name="utils-lib" select="
-       if ( $xspec-home ) then
-         resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
-       else
-         ''"/>
+   <t:parameters name="params"/>
 
-   <!-- compile the suite into a query -->
-   <t:compile-xquery>
-      <p:with-option name="xspec-home"       select="$xspec-home"/>
-      <p:with-param  name="utils-library-at" select="$utils-lib"/>
-   </t:compile-xquery>
+   <p:group>
+      <p:variable name="xspec-home" select="
+          /c:param-set/c:param[@name eq 'xspec-home']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="basex-jar" select="
+          /c:param-set/c:param[@name eq 'basex-jar']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <!-- TODO: Use a robust way to get a tmp file name from the OS... -->
+      <p:variable name="compiled-file" select="
+          ( /c:param-set/c:param[@name eq 'compiled-file']/@value,
+            'file:/tmp/xspec-basex-compiled-suite.xq' )[1]">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="utils-library-at" select="
+          /c:param-set/c:param[@name eq 'utils-library-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
+      <p:variable name="utils-lib" select="
+          if ( $utils-library-at ) then
+            $utils-library-at
+          else if ( $xspec-home ) then
+            resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
+          else
+            ''"/>
 
-   <!-- escape the query as text -->
-   <p:escape-markup name="escape"/>
+      <!-- compile the suite into a query -->
+      <t:compile-xquery>
+         <p:with-param  name="utils-library-at" select="$utils-lib"/>
+      </t:compile-xquery>
 
-   <!-- store it on disk in order to pass it to BaseX -->
-   <p:store method="text">
-      <p:with-option name="href" select="$compiled-file"/>
-   </p:store>
+      <!-- escape the query as text -->
+      <p:escape-markup name="escape"/>
 
-   <!-- run it on BaseX -->
-   <p:choose>
-      <p:when test="p:value-available('basex-jar')">
-         <!-- use Java directly, rely on 'basex-jar' -->
-         <p:exec command="java">
-            <p:with-option name="args" select="
-                string-join(
-                  ('-cp', $basex-jar, 'org.basex.BaseX', $compiled-file),
-                  ' ')"/>
-            <p:input port="source">
-               <p:empty/>
-            </p:input>
-         </p:exec>
-      </p:when>
-      <p:otherwise>
-         <!-- rely on a script 'basex' being in the PATH -->
-         <p:exec command="basex">
-            <p:with-option name="args" select="$compiled-file"/>
-            <p:input port="source">
-               <p:empty/>
-            </p:input>
-         </p:exec>
-      </p:otherwise>
-   </p:choose>
+      <!-- store it on disk in order to pass it to BaseX -->
+      <p:store method="text" name="store">
+         <p:with-option name="href" select="$compiled-file"/>
+      </p:store>
 
-   <!-- unwrap the exec step wrapper element -->
-   <p:unwrap match="/c:result"/>
+      <!-- run it on BaseX -->
+      <p:choose cx:depends-on="store">
+         <p:when test="p:value-available('basex-jar')">
+            <!-- use Java directly, rely on 'basex-jar' -->
+            <p:exec command="java">
+               <p:with-option name="args" select="
+                   string-join(
+                     ('-cp', $basex-jar, 'org.basex.BaseX', $compiled-file),
+                     ' ')"/>
+               <p:input port="source">
+                  <p:empty/>
+               </p:input>
+            </p:exec>
+         </p:when>
+         <p:otherwise>
+            <!-- rely on a script 'basex' being in the PATH -->
+            <p:exec command="basex">
+               <p:with-option name="args" select="$compiled-file"/>
+               <p:input port="source">
+                  <p:empty/>
+               </p:input>
+            </p:exec>
+         </p:otherwise>
+      </p:choose>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- unwrap the exec step wrapper element -->
+      <p:unwrap match="/c:result"/>
+
+      <!-- format the report -->
+      <t:format-report/>
+   </p:group>
 
 </p:pipeline>
 

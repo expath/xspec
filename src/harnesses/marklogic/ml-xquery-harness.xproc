@@ -35,53 +35,68 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-   <p:option name="query-at"/>
-   <p:option name="utils-lib"  select="'xspec/generate-query-utils.xql'"/>
-   <p:option name="host"       required="true"/>
-   <!-- this must be the port of an XDBC server -->
-   <p:option name="port"       required="true"/>
-   <p:option name="user"       required="true"/>
-   <p:option name="password"   required="true"/>
+   <p:option name="project-dir" required="true"/>
 
    <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- compile the suite into a query -->
-   <p:choose>
-      <p:when test="p:value-available('query-at')">
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="query-at"         select="$query-at"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:when>
-      <p:otherwise>
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:otherwise>
-   </p:choose>
+   <t:parameters name="params"/>
 
-   <!-- escape the query as text -->
-   <p:escape-markup/>
+   <p:group>
+      <p:variable name="host" select="/c:param-set/c:param[@name eq 'host']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="port" select="/c:param-set/c:param[@name eq 'port']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="user" select="/c:param-set/c:param[@name eq 'user']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="password" select="/c:param-set/c:param[@name eq 'password']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="query-at-param" select="/c:param-set/c:param[@name eq 'query-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="modules-re" select="/c:param-set/c:param[@name eq 'modules-re']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- run it on marklogic -->
-   <ml:adhoc-query name="run">
-      <p:with-option name="host"     select="$host"/>
-      <p:with-option name="port"     select="$port"/>
-      <p:with-option name="user"     select="$user"/>
-      <p:with-option name="password" select="$password"/>
-      <p:input port="parameters">
-         <p:empty/>
-      </p:input>
-   </ml:adhoc-query>
+      <!-- the tested module URI, relative to the project's src/ dir -->
+      <p:variable name="query-file" select="
+          substring-after(
+            resolve-uri(/t:description/@query-at, base-uri(/)),
+            resolve-uri('src/', $project-dir))"/>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- the at location hint, given explicitly or through 'modules-re' -->
+      <p:variable name="query-at" select="
+          if ( $query-at-param ) then
+            $query-at-param
+          else
+            replace($query-file, '(.+)', $modules-re)"/>
+
+      <!-- compile the suite into a query -->
+      <t:compile-xquery>
+         <p:with-param name="query-at" select="$query-at"/>
+      </t:compile-xquery>
+
+      <!-- escape the query as text -->
+      <p:escape-markup/>
+
+      <!-- run it on marklogic -->
+      <ml:adhoc-query name="run">
+         <p:with-option name="host"     select="$host"/>
+         <p:with-option name="port"     select="$port"/>
+         <p:with-option name="user"     select="$user"/>
+         <p:with-option name="password" select="$password"/>
+         <p:input port="parameters">
+            <p:empty/>
+         </p:input>
+      </ml:adhoc-query>
+
+      <!-- format the report -->
+      <t:format-report/>
+   </p:group>
 
 </p:pipeline>
 

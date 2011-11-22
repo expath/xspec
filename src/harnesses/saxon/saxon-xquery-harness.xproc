@@ -28,43 +28,53 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home"/>
-
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
-   <p:variable name="utils-lib" select="
-       if ( $xspec-home ) then
-         resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
-       else
-         ''"/>
+   <t:parameters name="params"/>
 
-   <!-- compile the suite into a query -->
-   <t:compile-xquery>
-      <p:with-option name="xspec-home"       select="$xspec-home"/>
-      <p:with-param  name="utils-library-at" select="$utils-lib"/>
-   </t:compile-xquery>
+   <p:group>
+      <p:variable name="xspec-home" select="
+          /c:param-set/c:param[@name eq 'xspec-home']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="utils-library-at" select="
+          /c:param-set/c:param[@name eq 'utils-library-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- escape the query as text -->
-   <p:escape-markup name="escape"/>
+      <!-- either no at location hint, or resolved from xspec-home if packaging not supported -->
+      <p:variable name="utils-lib" select="
+          if ( $utils-library-at ) then
+            $utils-library-at
+          else if ( $xspec-home ) then
+            resolve-uri('src/compiler/generate-query-utils.xql', $xspec-home)
+          else
+            ''"/>
 
-   <!-- run it on saxon -->
-   <p:xquery name="run">
-      <p:input port="source">
-         <p:empty/>
-      </p:input>
-      <p:input port="query">
-         <p:pipe step="escape" port="result"/>
-      </p:input>
-      <p:input port="parameters">
-         <p:empty/>
-      </p:input>
-   </p:xquery>
+      <!-- compile the suite into a query -->
+      <t:compile-xquery>
+         <p:with-param name="utils-library-at" select="$utils-lib"/>
+      </t:compile-xquery>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- escape the query as text -->
+      <p:escape-markup name="escape"/>
+
+      <!-- run it on saxon -->
+      <p:xquery name="run">
+         <p:input port="source">
+            <p:empty/>
+         </p:input>
+         <p:input port="query">
+            <p:pipe step="escape" port="result"/>
+         </p:input>
+         <p:input port="parameters">
+            <p:empty/>
+         </p:input>
+      </p:xquery>
+
+      <!-- format the report -->
+      <t:format-report/>
+   </p:group>
 
 </p:pipeline>
 
