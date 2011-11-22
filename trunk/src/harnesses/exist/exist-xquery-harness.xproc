@@ -36,79 +36,67 @@
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-   <p:option name="query-at"/>
-   <p:option name="utils-lib"  select="'xmldb:exist:///db/xspec/generate-query-utils.xql'"/>
-   <!-- What about credentials...? -->
-   <p:option name="endpoint"   select="'http://localhost:8080/exist/rest/db/'"/>
-   <!-- if set, then save the generated query at this URI -->
-   <p:option name="compiled-uri"/>
-   <!-- if set, then save the generated query at this URI -->
-   <p:option name="report-uri"/>
+   <p:option name="project-dir" required="true"/>
 
    <p:import href="../harness-lib.xpl"/>
 
-   <!-- compile the suite into a query -->
-   <p:choose>
-      <p:when test="p:value-available('query-at')">
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="query-at"         select="$query-at"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:when>
-      <p:otherwise>
-         <t:compile-xquery>
-            <p:with-option name="xspec-home"       select="$xspec-home"/>
-            <p:with-param  name="utils-library-at" select="$utils-lib"/>
-         </t:compile-xquery>
-      </p:otherwise>
-   </p:choose>
+   <t:parameters name="params"/>
 
-   <!-- escape the query as text -->
-   <p:escape-markup name="escape"/>
+   <p:group>
+      <p:variable name="endpoint" select="/c:param-set/c:param[@name eq 'endpoint']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="query-at-param" select="/c:param-set/c:param[@name eq 'query-at']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
+      <p:variable name="modules-re" select="/c:param-set/c:param[@name eq 'modules-re']/@value">
+         <p:pipe step="params" port="parameters"/>
+      </p:variable>
 
-   <!-- save it on disk if compiled-uri is provided, for debugging purpose -->
-   <!-- TODO: Is it possible to conditionize p:debug instead?  If not, it should
-        be a util (standard?) step. -->
-   <p:choose>
-      <p:when test="p:value-available('compiled-uri')">
-         <p:store method="text">
-            <p:with-option name="href" select="$compiled-uri"/>
-         </p:store>
-         <p:identity>
-            <p:input port="source">
-               <p:pipe step="escape" port="result"/>
-            </p:input>
-         </p:identity>
-      </p:when>
-      <p:otherwise>
-         <p:identity/>
-      </p:otherwise>
-   </p:choose>
+      <!-- the tested module URI, relative to the project's src/ dir -->
+      <p:variable name="query-file" select="
+          substring-after(
+            resolve-uri(/t:description/@query-at, base-uri(/)),
+            resolve-uri('src/', $project-dir))"/>
 
-   <!-- construct the eXist REST query element around the query itself -->
-   <p:rename new-name="exist:text" match="/*"/>
-   <p:wrap wrapper="exist:query" match="/*"/>
-   <!-- construct the HTTP request following eXist REST interface -->
-   <p:wrap wrapper="c:body" match="/*"/>
-   <p:add-attribute attribute-name="content-type" attribute-value="application/xml" match="/*"/>
-   <p:wrap wrapper="c:request" match="/*"/>
-   <p:add-attribute attribute-name="method" attribute-value="POST" match="/*"/>
-   <p:add-attribute attribute-name="href" match="/*">
-      <p:with-option name="attribute-value" select="$endpoint"/>
-   </p:add-attribute>
+      <!-- the at location hint, given explicitly or through 'modules-re' -->
+      <p:variable name="query-at" select="
+          if ( $query-at-param ) then
+            $query-at-param
+          else
+            replace($query-file, '(.+)', $modules-re)"/>
 
-   <!-- run it on eXist -->
-   <p:http-request name="run"/>
+      <!-- compile the suite into a query -->
+      <t:compile-xquery>
+         <p:with-param name="query-at" select="$query-at"/>
+      </t:compile-xquery>
 
-   <!-- unwrap the http-request step wrapper element -->
-   <p:unwrap name="unwrap" match="/c:result"/>
+      <!-- escape the query as text -->
+      <p:escape-markup name="escape"/>
 
-   <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+      <!-- construct the eXist REST query element around the query itself -->
+      <p:rename new-name="exist:text" match="/*"/>
+      <p:wrap wrapper="exist:query" match="/*"/>
+      <!-- construct the HTTP request following eXist REST interface -->
+      <p:wrap wrapper="c:body" match="/*"/>
+      <p:add-attribute attribute-name="content-type" attribute-value="application/xml" match="/*"/>
+      <p:wrap wrapper="c:request" match="/*"/>
+      <p:add-attribute attribute-name="method" attribute-value="POST" match="/*"/>
+      <p:add-attribute attribute-name="href" match="/*">
+         <p:with-option name="attribute-value" select="$endpoint"/>
+      </p:add-attribute>
+
+      <!-- run it on eXist -->
+      <p:http-request name="run">
+         <p:log href="file:/tmp/xspec-exist.log" port="result"/>
+      </p:http-request>
+
+      <!-- unwrap the http-request step wrapper element -->
+      <p:unwrap name="unwrap" match="/exist:result"/>
+
+      <!-- format the report -->
+      <t:format-report/>
+   </p:group>
 
 </p:pipeline>
 

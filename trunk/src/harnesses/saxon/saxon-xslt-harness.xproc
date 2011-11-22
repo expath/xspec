@@ -24,20 +24,14 @@
       <p>This pipeline executes an XSpec test suite with the Saxon embedded in Calabash.</p>
       <p><b>Primary input:</b> A XSpec test suite document.</p>
       <p><b>Primary output:</b> A formatted HTML XSpec report.</p>
-      <p>The dir where you unzipped the XSpec archive on your filesystem is passed
-        in the option 'xspec-home'.</p>
    </p:documentation>
 
    <p:serialization port="result" indent="true"/>
 
-   <p:option name="xspec-home" required="true"/>
-
    <p:import href="../harness-lib.xpl"/>
 
    <!-- compile the suite into a stylesheet -->
-   <t:compile-xslt name="compile">
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:compile-xslt>
+   <t:compile-xslt name="compile"/>
 
    <!-- run it on saxon -->
    <p:xslt name="run" template-name="t:main">
@@ -53,9 +47,7 @@
    </p:xslt>
 
    <!-- format the report -->
-   <t:format-report>
-      <p:with-option name="xspec-home" select="$xspec-home"/>
-   </t:format-report>
+   <t:format-report/>
 
 </p:pipeline>
 
