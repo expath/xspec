@@ -103,13 +103,13 @@
 </xsl:template>
   
 <xsl:template match="xsl:*" mode="test:create-xslt-generator">
-  <xsl:element name="o:{ local-name() }">
+  <xsl:element name="__x:{ local-name() }">
     <xsl:apply-templates select="@*|node()" mode="test:create-xslt-generator"/>
   </xsl:element>
 </xsl:template>  
 
 <xsl:template match="@xsl:*" mode="test:create-xslt-generator">
-   <xsl:attribute name="o:{ local-name() }" select="."/>
+   <xsl:attribute name="__x:{ local-name() }" select="."/>
 </xsl:template>
 
 <xsl:template match="text()" mode="test:create-xslt-generator">
