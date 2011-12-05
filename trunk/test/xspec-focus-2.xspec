@@ -31,6 +31,7 @@
             <t:param select="3"/>
          </t:call>
          <t:expect label="the result" test="$x:result eq 9"/>
+         <t:expect label="the result" assert="$x:result eq 9"/>
       </t:scenario>
 
       <t:scenario label="pending call (element) + focus" focus="focus">
@@ -38,6 +39,7 @@
             <t:param select="3"/>
          </t:call>
          <t:expect label="the result" test="$x:result eq 9"/>
+         <t:expect label="the result" assert="$x:result eq 9"/>
       </t:scenario>
 
    </t:pending>
@@ -50,6 +52,7 @@
          <t:param select="3"/>
       </t:call>
       <t:expect label="the result" test="$x:result eq 9"/>
+      <t:expect label="the result" assert="$x:result eq 9"/>
    </t:scenario>
 
    <t:scenario label="call + focus" focus="focus">
@@ -57,6 +60,7 @@
          <t:param select="3"/>
       </t:call>
       <t:expect label="the result" test="$x:result eq 9"/>
+      <t:expect label="the result" assert="$x:result eq 9"/>
    </t:scenario>
 
    <!--
@@ -68,6 +72,7 @@
          <t:param select="3"/>
       </t:call>
       <t:expect label="the result" test="$x:result eq 9"/>
+      <t:expect label="the result" assert="$x:result eq 9"/>
    </t:scenario>
 
    <!-- does not make sense, really, but to see how the implem reacts -->
@@ -78,6 +83,7 @@
          <t:param select="3"/>
       </t:call>
       <t:expect label="the result" test="$x:result eq 9"/>
+      <t:expect label="the result" assert="$x:result eq 9"/>
    </t:scenario>
 
 </t:description>
