@@ -19,7 +19,7 @@
             name="saxon-xslt-harness"
             type="t:saxon-xslt-harness"
             version="1.0">
-	
+
    <p:documentation>
       <p>This pipeline executes an XSpec test suite with the Saxon embedded in Calabash.</p>
       <p><b>Primary input:</b> A XSpec test suite document.</p>
@@ -29,6 +29,9 @@
    <p:serialization port="result" indent="true"/>
 
    <p:import href="../harness-lib.xpl"/>
+
+   <!-- TODO: Does not work yet... -->
+   <!--t:ensure-input/-->
 
    <!-- compile the suite into a stylesheet -->
    <t:compile-xslt name="compile"/>

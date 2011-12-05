@@ -18,10 +18,33 @@
            version="1.0">
 
    <!--
-        Short-cut for p:parameters which passes through input, with primary parameters input.
-        
-        Inspired from Geert Josten util library:
-        https://github.com/grtjn/xproc-ebook-conv/blob/master/src/nl/grtjn/xproc/util/utils.xpl
+       Ensure there is exactly one document on the input port.
+       
+       If this is the case, it behaves like p:identity, if not, it throws an error.
+       
+       TODO: Does not work as is...
+   -->
+   <!--p:declare-step type="t:ensure-input">
+      <p:input  port="source" primary="true"/>
+      <p:output port="result" primary="true"/>
+      <p:choose>
+         <p:xpath-context>
+            <p:pipe step="ensure-input" port="source"/>
+         </p:xpath-context>
+         <p:when test="empty(/)">
+            <p:error code="t:ERR002"/>
+         </p:when>
+         <p:otherwise>
+            <p:identity/>
+         </p:otherwise>
+      </p:choose>
+   </p:declare-step-->
+
+   <!--
+       Short-cut for p:parameters which passes through input, with primary parameters input.
+       
+       Inspired from Geert Josten util library:
+       https://github.com/grtjn/xproc-ebook-conv/blob/master/src/nl/grtjn/xproc/util/utils.xpl
    -->
    <p:declare-step type="t:parameters" name="parameters">
       <p:input port="source"        primary="true"/>
@@ -64,7 +87,7 @@
                </p:store>
                <p:identity>
                   <p:input port="source">
-                     <p:pipe step="log" port="result"/>
+                     <p:pipe step="log" port="source"/>
                   </p:input>
                </p:identity>
             </p:when>
@@ -211,8 +234,9 @@
    -->
    <p:declare-step type="t:format-report" name="format">
       <!-- the port declarations -->
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
+      <p:input  port="source"     primary="true"/>
+      <p:input  port="parameters" kind="parameter"/>
+      <p:output port="result"     primary="true"/>
       <!-- if xspec-home is not passed, then use packaging public URI -->
       <p:option name="xspec-home" select="''"/>
       <!-- either the public URI, or resolved from xspec-home if packaging not supported -->
@@ -224,7 +248,7 @@
       <!-- log the report? -->
       <t:log if-set="log-xml-report">
          <p:input port="parameters">
-            <p:pipe step="params" port="parameters"/>
+            <p:pipe step="format" port="parameters"/>
          </p:input>
       </t:log>
       <!-- if there is a report, format it, or it is an error -->
@@ -252,7 +276,7 @@
       <!-- log the report? -->
       <t:log if-set="log-report">
          <p:input port="parameters">
-            <p:pipe step="params" port="parameters"/>
+            <p:pipe step="format" port="parameters"/>
          </p:input>
       </t:log>
    </p:declare-step>
