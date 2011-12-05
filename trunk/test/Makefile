@@ -57,35 +57,35 @@ clean:
 
 # compile to XSLT
 %.xsl: %.xspec
-	$(XSLT)                                   \
-	    -xsl:../generate-xspec-tests.xsl      \
-	    -s:$<                                 \
+	$(XSLT)                                               \
+	    -xsl:../src/compiler/generate-xspec-tests.xsl     \
+	    -s:$<                                             \
 	    -o:$@
 
 # compile to XQuery
 %.xq: %.xspec
-	$(XSLT)                                   \
-	    -xsl:../generate-query-tests.xsl      \
-	    -s:$<                                 \
+	$(XSLT)                                               \
+	    -xsl:../src/compiler/generate-query-tests.xsl     \
+	    -s:$<                                             \
 	    -o:$@
 
 # run an XSLT compiled suite
 %-xsl.xml: %.xsl xspec-tested.xsl
-	$(XSLT)                                   \
-	    -xsl:$<                               \
-	    -o:$@                                 \
+	$(XSLT)                                               \
+	    -xsl:$<                                           \
+	    -o:$@                                             \
 	    -it:"{http://www.jenitennison.com/xslt/xspec}main"
 
 # run an XQuery compiled suite
 %-xq.xml: %.xq xspec-tested.xql
-	$(XQUERY)                                 \
+	$(XQUERY)                                             \
 	    -o:$@ $< '!indent=yes'
 
 # format an XML report to HTML
 %.html: %.xml
-	$(XSLT)                                   \
-	    -xsl:../format-xspec-report.xsl       \
-	    -s:$<                                 \
+	$(XSLT)                                               \
+	    -xsl:../src/reporter/format-xspec-report.xsl      \
+	    -s:$<                                             \
 	    -o:$@
 
 
