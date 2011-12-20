@@ -17,7 +17,7 @@
 	</target>
 
 	<target name="build" depends="init">
-		<copy file="../../xspec.rnc" todir="${framework.schema.dir}"/>
+		<copy file="../../src/schemas/xspec.rnc" todir="${framework.schema.dir}"/>
 	</target>
 
 	<target name="install" depends="build">
