@@ -29,6 +29,17 @@ where:
   <property name="xspec.properties" location="${xspec.project.dir}/xspec.properties"/>
   <property file="${xspec.properties}"/>
 
+  <!-- saxon.jar location depends on OS. -->
+  <condition property="saxon.jar" value="${saxon.jar.windows}">
+    <os family="windows" />
+  </condition>
+  <condition property="saxon.jar" value="${saxon.jar.mac}">
+    <os family="mac" />
+  </condition>
+  <condition property="saxon.jar" value="${saxon.jar.unix}">
+    <os family="unix" />
+  </condition>
+
   <property name="saxon.home" location="/Library/Application Support/saxonb9" />
   <property name="saxon.jar" location="${saxon.home}/saxon9.jar" />
 
@@ -73,7 +84,7 @@ where:
     description="Runs the XSpec unit tests in ${xspec.xml}">
     <xslt in="${xspec.xml}" 
       out="${xspec.xsl}"
-      style="${xspec.project.dir}/generate-xspec-tests.xsl"
+      style="${xspec.project.dir}/src/compiler/generate-xspec-tests.xsl"
       classpath="${saxon.jar}">
 			<factory name="net.sf.saxon.TransformerFactoryImpl" />
 		</xslt>
@@ -90,7 +101,7 @@ where:
 		</java>
     <xslt in="${xspec.result.xml}"
       out="${xspec.result.html}"
-      style="${xspec.project.dir}/format-xspec-report.xsl"
+      style="${xspec.project.dir}/src/reporter/format-xspec-report.xsl"
       classpath="${saxon.jar}">
 			<factory name="net.sf.saxon.TransformerFactoryImpl">
 				<attribute
