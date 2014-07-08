@@ -82,7 +82,7 @@ REM =======================================
 IF %COVERAGE%x == coveragex GOTO coverage2
 GOTO endif4
 :coverage2 
- java -cp "%CP%" net.sf.saxon.Transform -l:on -o:%COVERAGE_HTML% -s:%COVERAGE_XML% -xsl:"%~dp0\..\src\reporter\coverage-report.xsl" "tests=%XSPEC%"
+ java -cp "%CP%" net.sf.saxon.Transform -l:on "-o:%COVERAGE_HTML%" "-s:%COVERAGE_XML%" "-xsl:%~dp0\..\src\reporter\coverage-report.xsl" "tests=%XSPEC%" "pwd=file:///%~dp0"
  %COVERAGE_HTML% 
 :endif4
 
