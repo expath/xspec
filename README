@@ -1,11 +1,6 @@
-XSpec version 0.2
------------------
+## XSpec
 
-Copyright 2008, 2010 Jeni Tennison
-<http://xspec.googlecode.com>
-
-
-About:
+Version 0.4.0.
 
 XSpec is a Behaviour Driven Development (BDD) framework for XML
 processing, currently focusing on XSLT and XQuery.  It is based on the
@@ -17,8 +12,7 @@ against those descriptions.
 
 The project owners are Jeni Tennison and Florent Georges.
 
-
-Usage:
+### Usage:
 
 For more information about using XSpec, visit the project wiki at
 <http://code.google.com/p/xspec/w/list>. If you have any questions,
@@ -26,7 +20,7 @@ you can also join (or search the archives of) the XSpec discussion
 list: <http://groups.google.com/group/xspec-users>.
 
 
-License:
+### License:
 
 XSpec is released under the MIT license.  For a copy of this license,
 see LICENSE, or go to <http://www.opensource.org/licenses/mit-license.php>.
