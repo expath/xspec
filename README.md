@@ -2,13 +2,21 @@
 
 Version 0.4.0.
 
-XSpec is a Behaviour Driven Development (BDD) framework for XML
-processing, currently focusing on XSLT and XQuery.  It is based on the
-Spec framework of RSpec, which is a BDD framework for Ruby.
+XSpec is a [Behaviour Driven Development](http://en.wikipedia.org/wiki/Behavior_Driven_Development)
+(BDD) framework for XSLT and XQuery.  It is based on the Spec
+framework of [RSpec](http://rspec.info/), which is a BDD framework for
+Ruby.
 
 XSpec consists of a syntax for describing the behaviour of your XSLT
 or XQuery code, and some code that enables you to test your code
 against those descriptions.
+
+An external project, [jxsl](http://code.google.com/p/jxsl/), provides
+a Maven archetype for XSpec (Ant is expected soon). The goal is to
+provide everything needed to integrate with Continuous Integration
+tools for Java (like Hudson, Cruise Control, etc.) See Benoit's
+[presentation at Balisage 2011](http://www.balisage.net/Proceedings/vol7/html/Mercier01/BalisageVol7-Mercier01.html)
+in Montreal for more info.
 
 The project owners are Jeni Tennison and Florent Georges.
 
