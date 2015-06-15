@@ -23,7 +23,7 @@ The project owners are Jeni Tennison and Florent Georges.
 ### Usage:
 
 For more information about using XSpec, visit the project wiki at
-<http://code.google.com/p/xspec/w/list>. If you have any questions,
+<https://github.com/expath/xspec/wiki>. If you have any questions,
 you can also join (or search the archives of) the XSpec discussion
 list: <http://groups.google.com/group/xspec-users>.
 
@@ -31,4 +31,4 @@ list: <http://groups.google.com/group/xspec-users>.
 ### License:
 
 XSpec is released under the MIT license.  For a copy of this license,
-see LICENSE, or go to <http://www.opensource.org/licenses/mit-license.php>.
+see [LICENSE](LICENSE), or go to <http://www.opensource.org/licenses/mit-license.php>.
