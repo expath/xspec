@@ -48,7 +48,9 @@
   
 <xsl:template match="x:description" mode="x:generate-tests">
   <!-- The compiled stylesheet element. -->
-  <stylesheet version="2.0"
+  <!-- OXYGEN patch to support XSLT 3.0 -->
+  <!-- Patch is under MIT : https://www.oxygenxml.com/pipermail/oxygen-user/2016-January/005696.html -->
+  <stylesheet version="{( @xslt-version, '2.0' )[1]}"
 	      exclude-result-prefixes="pkg impl">
     <xsl:apply-templates select="." mode="x:copy-namespaces" />
   	<import href="{$stylesheet-uri}" />
