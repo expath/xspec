@@ -42,6 +42,13 @@ where:
 
   <property name="saxon.home" location="/Library/Application Support/saxonb9" />
   <property name="saxon.jar" location="${saxon.home}/saxon9.jar" />
+  <!-- XML Resolver is optional. -->
+  <property name="xmlresolver.jar" value=""/>
+
+  <path id="xspec.classpath">
+    <pathelement location="${saxon.jar}"/>
+    <pathelement location="${xmlresolver.jar}"/>
+  </path>
 
   <dirname property="xspec.base.dir" file="${xspec.xml}" />
   <basename property="xspec.xml.base" file="${xspec.xml}" suffix=".xml" />
@@ -56,10 +63,11 @@ where:
     value="${xspec.dir}/${xspec.base}-result.xml" />
   <property name="xspec.result.html"
     value="${xspec.dir}/${xspec.base}-result.html" />
-  
+
 	<macrodef name="xspec"
 						description="Run XSpec tests">
 		<attribute name="xspec.xml" description="XSpec tests file" />
+        <attribute name="catalog.xml" description="XML catalog files" default=""/>
 		<sequential>
 			<local name="xspec.base.dir" />
 			<dirname property="xspec.base.dir" file="@{xspec.xml}" />
@@ -76,36 +84,53 @@ where:
 							 location="${xspec.base.dir}/xspec" />
 				<param name="xspec.base"
 							 value="${xspec.base}" />
+                <param name="catalog.xml"
+                       value="@{catalog.xml}"/>
 			</antcall>
 		</sequential>
 	</macrodef>
 
   <target name="xspec"
     description="Runs the XSpec unit tests in ${xspec.xml}">
-    <xslt in="${xspec.xml}" 
+    <xslt in="${xspec.xml}"
       out="${xspec.xsl}"
       style="${xspec.project.dir}/src/compiler/generate-xspec-tests.xsl"
-      classpath="${saxon.jar}">
+      classpathref="xspec.classpath">
 			<factory name="net.sf.saxon.TransformerFactoryImpl" />
-		</xslt>
-		<!-- Can't specify initial template with <xslt> task so have to
-		     fall back to running Saxon as Java app. -->
-		<java classname="net.sf.saxon.Transform"
-					classpath="${saxon.jar}"
-					fork="true">
+    </xslt>
+    <!-- Run XSLT with XML Resolver if it is in the classpath. -->
+    <condition property="xmlresolver.args"
+               value="-x:'org.apache.xml.resolver.tools.ResolvingXMLReader'
+                      -y:'org.apache.xml.resolver.tools.ResolvingXMLReader'
+                      -r:'org.apache.xml.resolver.tools.CatalogResolver'"
+               else="">
+        <and>
+            <available classname="org.apache.xml.resolver.tools.ResolvingXMLReader"
+                       classpathref="xspec.classpath"/>
+            <available classname="org.apache.xml.resolver.tools.CatalogResolver"
+                       classpathref="xspec.classpath"/>
+        </and>
+    </condition>
+    <!-- Can't specify initial template with <xslt> task so have to
+         fall back to running Saxon as Java app. -->
+    <java classname="net.sf.saxon.Transform"
+          classpathref="xspec.classpath"
+		  fork="true">
 			<arg value="-ext:on" />
 			<arg value="-s:${xspec.xml}" />
 			<arg value="-o:${xspec.result.xml}" />
 			<arg value="-xsl:${xspec.xsl}" />
 			<arg value="-it:{http://www.jenitennison.com/xslt/xspec}main" />
-		</java>
+            <arg line="${xmlresolver.args}"/>
+            <sysproperty key="xml.catalog.files" value="${catalog.xml}"/>
+    </java>
     <xslt in="${xspec.result.xml}"
       out="${xspec.result.html}"
       style="${xspec.project.dir}/src/reporter/format-xspec-report.xsl"
-      classpath="${saxon.jar}">
+      classpathref="xspec.classpath">
 			<factory name="net.sf.saxon.TransformerFactoryImpl">
 				<attribute
-						name="http://saxon.sf.net/feature/allow-external-functions" 
+						name="http://saxon.sf.net/feature/allow-external-functions"
 						value="true"/>
 			</factory>
 		</xslt>
