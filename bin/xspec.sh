@@ -166,6 +166,10 @@ while echo "$1" | grep -- ^- >/dev/null 2>&1; do
             XQUERY=1;;
         # Coverage
         -c)
+			if [[ ${SAXON_CP} != *"saxon9pe"* && ${SAXON_CP} != *"saxon9ee"* ]]; then
+				echo "Code coverage requires Saxon extension functions which are available only under Saxon9EE or Saxon9PE."
+			    exit 1
+			fi
             COVERAGE=1;;
         # Help!
         -h)
@@ -195,8 +199,12 @@ if [ -n "$2" ]; then
         usage "Error: Extra option: $2"
         exit 1
     fi
-    echo "Long-form option 'coverage' deprecated, use '-c' instead."
-    COVERAGE=1
+	echo "Long-form option 'coverage' deprecated, use '-c' instead."
+	if [[ ${SAXON_CP} != *"saxon9pe"* && ${SAXON_CP} != *"saxon9ee"* ]]; then
+		echo "Code coverage requires Saxon extension functions which are available only under Saxon9EE or Saxon9PE."
+		exit 1
+	fi
+	COVERAGE=1
     if [ -n "$3" ]; then
         usage "Error: Extra option: $3"
         exit 1
