@@ -13,7 +13,7 @@
 #
 #        AUTHOR:  Sandro Cirulli, github.com/cirulls
 #
-#       LICENSE:  GNU GPL v3
+#       LICENSE:  MIT License
 #
 #===============================================================================
 
@@ -64,17 +64,20 @@
 }
 
 
+# this test must run first to create xspec directory
 @test "invoking code coverage with Saxon9EE creates test stylesheet" {
   export SAXON_CP=/path/to/saxon9ee.jar
-  run ../bin/xspec.sh -c ../tutorial/escape-for-regex.xspec
   [ "$status" -eq 1 ]
-  [ "${lines[1]}" = "Creating Test Stylesheet..." ]
+  [ "${lines[2]}" = "Creating Test Stylesheet..." ]
 }
 
 
 @test "invoking code coverage with Saxon9PE creates test stylesheet" {
-  export SAXON_CP=/path/to/saxon9ee.jar
+  export SAXON_CP=/path/to/saxon9pe.jar
+  pwd
+  ls -lah ../tutorial
   run ../bin/xspec.sh -c ../tutorial/escape-for-regex.xspec
+  echo ${lines[1]}
   [ "$status" -eq 1 ]
   [ "${lines[1]}" = "Creating Test Stylesheet..." ]
 }
