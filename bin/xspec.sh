@@ -36,12 +36,13 @@ usage() {
         echo "$1"
         echo;
     fi
-    echo "Usage: xspec [-t|-q|-c|-h] filename [coverage]"
+    echo "Usage: xspec [-t|-q|-c|-j|-h] filename [coverage]"
     echo
     echo "  filename   the XSpec document"
     echo "  -t         test an XSLT stylesheet (the default)"
     echo "  -q         test an XQuery module (mutually exclusive with -t)"
     echo "  -c         output test coverage report"
+    echo "  -j         output JUnit report"
     echo "  -h         display this help message"
     echo "  coverage   deprecated, use -c instead"
 }
@@ -167,6 +168,9 @@ while echo "$1" | grep -- ^- >/dev/null 2>&1; do
         # Coverage
         -c)
             COVERAGE=1;;
+        # JUnit report
+        -j)
+            JUNIT=1;;
         # Help!
         -h)
             usage
@@ -219,6 +223,7 @@ COVERAGE_XML=$TEST_DIR/$TARGET_FILE_NAME-coverage.xml
 COVERAGE_HTML=$TEST_DIR/$TARGET_FILE_NAME-coverage.html
 RESULT=$TEST_DIR/$TARGET_FILE_NAME-result.xml
 HTML=$TEST_DIR/$TARGET_FILE_NAME-result.html
+JUNIT_RESULT=$TEST_DIR/$TARGET_FILE_NAME-junit.xml
 COVERAGE_CLASS=com.jenitennison.xslt.tests.XSLTCoverageTraceListener
 
 if [ ! -d "$TEST_DIR" ]; then
@@ -293,6 +298,12 @@ if test -n "$COVERAGE"; then
         || die "Error formating the coverage report"
     echo "Report available at $COVERAGE_HTML"
     #$OPEN "$COVERAGE_HTML"
+elif test -n "$JUNIT"; then
+	xslt -o:"$JUNIT_RESULT" \
+		-s:"$RESULT" \
+		-xsl:"$XSPEC_HOME/src/reporter/junit-report.xsl" \
+		|| die "Error formating the JUnit report"
+	echo "Report available at $JUNIT_RESULT"
 else
     echo "Report available at $HTML"
     #$OPEN "$HTML"
