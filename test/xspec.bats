@@ -24,6 +24,7 @@
   [ "${lines[2]}" = "Usage: xspec [-t|-q|-c|-j|-h] filename [coverage]" ]
 }
 
+
 @test "invoking xspec generates XML report file" {
   run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
   run stat ../tutorial/xspec/escape-for-regex-result.xml
@@ -35,6 +36,14 @@
   run stat ../tutorial/xspec/escape-for-regex-result.html
   [ "$status" -eq 0 ]
 }
+
+@test "invoking xspec with -j option with Saxon9HE returns error message" {
+  export SAXON_CP=/path/to/saxon9he.jar
+  run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
+  [ "$status" -eq 1 ]
+  [ "${lines[1]}" = "JUnit report requires Saxon extension functions which are available only under Saxon9EE or Saxon9PE." ]
+}
+
 
 @test "invoking xspec with -j option generates message with JUnit report location" {
   run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
