@@ -132,6 +132,8 @@ if test -z "$SAXON_CP"; then
 	SAXON_CP="${SAXON_HOME}/saxon9sa.jar";
     elif test -f "${SAXON_HOME}/saxon9.jar"; then
 	SAXON_CP="${SAXON_HOME}/saxon9.jar";
+    elif test -f "${SAXON_HOME}/saxon9-1-0-8.jar"; then
+	SAXON_CP="${SAXON_HOME}/saxon9-1-0-8.jar";
     elif test -f "${SAXON_HOME}/saxon8sa.jar"; then
 	SAXON_CP="${SAXON_HOME}/saxon8sa.jar";
     elif test -f "${SAXON_HOME}/saxon8.jar"; then
