@@ -37,11 +37,19 @@
   [ "$status" -eq 0 ]
 }
 
-@test "invoking xspec with -j option with Saxon9HE returns error message" {
-  export SAXON_CP=/path/to/saxon9he.jar
+@test "invoking xspec with -j option with Saxon8 returns error message" {
+  export SAXON_CP=/path/to/saxon8.jar
   run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
   [ "$status" -eq 1 ]
-  [ "${lines[1]}" = "JUnit report requires Saxon extension functions which are available only under Saxon9EE or Saxon9PE." ]
+  [ "${lines[1]}" = "Saxon8 detected. JUnit report requires Saxon9." ]
+}
+
+
+@test "invoking xspec with -j option with Saxon8-SA returns error message" {
+  export SAXON_CP=/path/to/saxon8sa.jar
+  run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
+  [ "$status" -eq 1 ]
+  [ "${lines[1]}" = "Saxon8 detected. JUnit report requires Saxon9." ]
 }
 
 

@@ -170,8 +170,8 @@ while echo "$1" | grep -- ^- >/dev/null 2>&1; do
             COVERAGE=1;;
         # JUnit report
         -j)
-			if [[ ${SAXON_CP} != *"saxon9pe"* && ${SAXON_CP} != *"saxon9ee"* ]]; then
-				echo "JUnit report requires Saxon extension functions which are available only under Saxon9EE or Saxon9PE."
+			if [[ ${SAXON_CP} == *"saxon8"* || ${SAXON_CP} == *"saxon8sa"* ]]; then
+				echo "Saxon8 detected. JUnit report requires Saxon9."
 			    exit 1
 			fi
             JUNIT=1;;
