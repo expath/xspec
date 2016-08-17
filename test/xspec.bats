@@ -18,14 +18,14 @@
 #===============================================================================
 
 
-@test "invoking xspec with Saxon9-1-0-8 (Saxon-B) returns correct version number at compile time" {
+@test "invoking xspec with Saxon-B-9-1-0-8 returns correct version number at compile time" {
 	run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
 	[ "$status" -eq 0 ]
   	[ "${lines[3]}" = "Testing with SAXON 9.1.0.8" ]
 }
 
 
-@test "invoking xspec with Saxon9-1-0-8 (Saxon-B) creates test stylesheet" {
+@test "invoking xspec with Saxon-B-9-1-0-8 creates test stylesheet" {
 	run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
 	[ "$status" -eq 0 ]
   	[ "${lines[1]}" = "Creating Test Stylesheet..." ]
