@@ -124,4 +124,17 @@
   run ../bin/xspec.sh -j ../tutorial/escape-for-regex.xspec
   run stat ../tutorial/xspec/escape-for-regex-junit.xml
   [ "$status" -eq 0 ]
+
+
+@test "invoking xspec with Saxon-B-9-1-0-8 returns correct version number at compile time" {
+	run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+	[ "$status" -eq 0 ]
+  	[ "${lines[3]}" = "Testing with SAXON 9.1.0.8" ]
+}
+
+
+@test "invoking xspec with Saxon-B-9-1-0-8 creates test stylesheet" {
+	run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+	[ "$status" -eq 0 ]
+  	[ "${lines[1]}" = "Creating Test Stylesheet..." ]
 }
