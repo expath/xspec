@@ -1,3 +1,5 @@
+![Travis Build Status](https://api.travis-ci.org/cirulls/xspec.svg?branch=develop "Travis Build Status")
+
 ## XSpec
 
 Version 0.4.0.
