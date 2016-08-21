@@ -3,7 +3,7 @@ before_script:
     - mkdir -p /tmp/local
     - bash /tmp/bats/install.sh /tmp/local
     - export PATH=$PATH:/tmp/local/bin
-    - git clone -b travis https://github.com/cirulls/xspec.git /tmp/xspec
+    - git clone -b develop https://github.com/cirulls/xspec.git /tmp/xspec
     - export SAXON_CP=/tmp/xspec/saxon9he.jar
 
 script:
@@ -13,4 +13,3 @@ script:
 script:
     - echo "execute XSpec unit tests"
     - cd test && ./run-xspec-tests.sh
-    # - /tmp/xspec/bin/xspec.sh /tmp/xspec/test/xspec-variable.xspec &> result.log && if grep -q ".*failed:\s[1-9]" result.log; then exit 1; fi
