@@ -1,4 +1,4 @@
-![Travis Build Status](https://api.travis-ci.org/cirulls/xspec.svg?branch=travis "Travis Build Status")
+![Travis Build Status](https://api.travis-ci.org/cirulls/xspec.svg?branch=develop "Travis Build Status")
 
 ## XSpec
 
