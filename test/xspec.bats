@@ -144,5 +144,5 @@
   export TEST_DIR=/path/to/test_dir
   run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
   [ "$status" -eq 0 ]
-  [ "${lines[18]}" = "Report available at /path/to/test_dir/escape-for-regex-result.html" ]
+  [ "${lines[1]}" = "Report available at /path/to/test_dir/escape-for-regex-result.html" ]
 }
