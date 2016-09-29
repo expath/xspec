@@ -7,9 +7,8 @@ before_script:
     - export SAXON_CP=/tmp/xspec/saxon9he.jar
 
 script:
+    - cd test
     - echo "execute bats unit tests"
-    - cd test && bats xspec.bats
-
-script:
+    - bats --tap xspec.bats
     - echo "execute XSpec unit tests"
-    - cd test && ./run-xspec-tests.sh
+    - ./run-xspec-tests.sh

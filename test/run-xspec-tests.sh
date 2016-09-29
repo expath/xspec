@@ -24,7 +24,7 @@
 #===============================================================================
 for xspectest in *.xspec; 
 	do ../bin/xspec.sh $xspectest &> result.log; 
-	if grep -q ".*failed:\s[1-9]|.*Error\srunning\sthe\stest\ssuite" result.log ||             grep -q "***\sError\srunning\sthe\stest\ssuite" result.log; 
+	if grep -q ".*failed:\s[1-9]" result.log || grep -q "*\sError\srunning\sthe\stest\ssuite" result.log; 
 		then echo "$xspectest failed" && exit 1; 
 	fi	
 done
