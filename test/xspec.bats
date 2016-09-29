@@ -152,7 +152,7 @@
 }
 
 
-@test "invoking xspec.sh with TEST_DIR already set externally generated files inside TEST_DIR" {
+@test "invoking xspec.sh with TEST_DIR already set externally generates files inside TEST_DIR" {
     export TEST_DIR=/tmp
     run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
 	echo $output
@@ -161,7 +161,7 @@
 }
 
 
-@test "invoking xspec.sh without TEST_DIR generated files in default location" {
+@test "invoking xspec.sh without TEST_DIR generates files in default location" {
     run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
 	echo $output
     [ "$status" -eq 0 ]
