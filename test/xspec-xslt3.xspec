@@ -5,7 +5,7 @@
     <x:expect label="concatenate strings">
       <root>
         <question>Does XSpec support XPath 3.0?</question>
-        <answer>No it does</answer>
+        <answer>Yes it does</answer>
       </root>
     </x:expect>
   </x:scenario>
