@@ -70,6 +70,7 @@
 @test "invoking code coverage with Saxon9EE creates test stylesheet" {
     export SAXON_CP=/path/to/saxon9ee.jar
     run ../bin/xspec.sh -c ../tutorial/escape-for-regex.xspec
+  	echo $output
     [ "$status" -eq 1 ]
     [ "${lines[1]}" = "Creating Test Stylesheet..." ]
 }
@@ -140,9 +141,17 @@
 
 
 @test "invoke xspec.sh with TEST_DIR already set externally generated files inside TEST_DIR" {
-  export TEST_DIR=/tmp
-  run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
-  echo $output
-  [ "$status" -eq 0 ]
-  [ "${lines[18]}" = "Report available at /tmp/escape-for-regex-result.html" ]
+    export TEST_DIR=/tmp
+    run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+    echo $output
+    [ "$status" -eq 0 ]
+    [ "${lines[18]}" = "Report available at /tmp/escape-for-regex-result.html" ]
+}
+
+
+@test "invoke xspec.sh without TEST_DIR generated files in default location" {
+    export TEST_DIR=/tmp
+    run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+    [ "$status" -eq 0 ]
+    [ "${lines[18]}" = "Report available at ../tutorial/xspec/escape-for-regex-result.html" ]
 }
