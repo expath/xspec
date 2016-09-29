@@ -72,7 +72,7 @@
     run ../bin/xspec.sh -c ../tutorial/escape-for-regex.xspec
   	echo $output
     [ "$status" -eq 1 ]
-    [ "${lines[1]}" = "Creating Test Stylesheet..." ]
+    [ "${lines[2]}" = "Creating Test Stylesheet..." ]
 }
 
 
@@ -152,6 +152,7 @@
 @test "invoke xspec.sh without TEST_DIR generated files in default location" {
     export TEST_DIR=/tmp
     run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+  	echo $output
     [ "$status" -eq 0 ]
     [ "${lines[18]}" = "Report available at ../tutorial/xspec/escape-for-regex-result.html" ]
 }
