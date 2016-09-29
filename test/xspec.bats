@@ -138,3 +138,11 @@
 	[ "$status" -eq 0 ]
   	[ "${lines[1]}" = "Creating Test Stylesheet..." ]
 }
+
+
+@test "run xspec.sh with $TEST_DIR set externally generated files inside $TEST_DIR" {
+  export TEST_DIR=/path/to/test_dir
+  run ../bin/xspec.sh ../tutorial/escape-for-regex.xspec
+  [ "$status" -eq 0 ]
+  [ "${lines[18]}" = "Report available at /path/to/test_dir/escape-for-regex-result.html" ]
+}
