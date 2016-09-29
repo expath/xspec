@@ -10,6 +10,6 @@ script:
     - echo "execute bats unit tests"
     - cd test && bats xspec.bats
 
-script:
-    - echo "execute XSpec unit tests"
-    - cd test && ./run-xspec-tests.sh
+# script:
+#     - echo "execute XSpec unit tests"
+#     - cd test && ./run-xspec-tests.sh
