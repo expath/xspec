@@ -1,6 +1,6 @@
 @echo off
 
-SET CP=C:\Program Files (x86)\Oxygen XML Editor\lib\saxon9sa.jar
+SET CP=C:\saxon\saxon9he.jar
 
 SET XSPEC=%1
 
@@ -89,7 +89,7 @@ GOTO endif4
 REM =============
 REM Output report
 REM =============
-%HTML%
+echo Report available at %HTML%
 
 echo Done.
 :end
