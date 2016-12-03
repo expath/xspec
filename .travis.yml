@@ -3,8 +3,8 @@ before_script:
     - mkdir -p /tmp/local
     - bash /tmp/bats/install.sh /tmp/local
     - export PATH=$PATH:/tmp/local/bin
-    - git clone -b master https://github.com/cirulls/xspec.git /tmp/xspec
-    - export SAXON_CP=/tmp/xspec/saxon9he.jar
+    - git clone -b master https://github.com/xspec/xspec.git /tmp/xspec
+    - export SAXON_CP=/tmp/xspec/saxon/saxon9he.jar
 
 script:
     - cd test
