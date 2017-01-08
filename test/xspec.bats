@@ -167,3 +167,11 @@
     [ "$status" -eq 0 ]
     [ "${lines[18]}" = "Report available at ../tutorial/xspec/escape-for-regex-result.html" ]
 }
+
+
+@test "invoking xspec.sh that passes a non xs:boolean does not raise a warning #46" {
+    run ../bin/xspec.sh ../test/xspec-46.xspec
+	echo $output
+    [ "$status" -eq 0 ]
+    [[ "${lines[3]}" =~ "Testing with" ]]
+}
