@@ -2,11 +2,9 @@
 <!-- ===================================================================== -->
 <!--  File:       test/generate-tests-utils.xspec                          -->
 <!--  Author:     Florent Georges                                          -->
-<!--  URI:        http://xspec.googlecode.com/                             -->
 <!--  Tags:                                                                -->
 <!--    Copyright (c) 2010 Jeni Tennsion (see end of file.)                -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<?oxygen RNGSchema="http://xspec.googlecode.com/svn/trunk/xspec.rnc" type="compact"?>
 <t:description xmlns:t="http://www.jenitennison.com/xslt/xspec" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:test="http://www.jenitennison.com/xslt/unit-test" query="http://www.jenitennison.com/xslt/unit-test" query-at="../src/compiler/generate-query-utils.xql" stylesheet="../src/compiler/generate-tests-utils.xsl">
   <!--
 	   Test the source files generate-tests-utils.xsl and generate-query-utils.xql.
