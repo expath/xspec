@@ -48,7 +48,7 @@
   
 <xsl:template match="x:description" mode="x:generate-tests">
   <!-- The compiled stylesheet element. -->
-  <stylesheet version="2.0"
+  <stylesheet version="{( @xslt-version, '2.0' )[1]}"
 	      exclude-result-prefixes="pkg impl">
     <xsl:apply-templates select="." mode="x:copy-namespaces" />
   	<import href="{$stylesheet-uri}" />
@@ -208,7 +208,7 @@
                   <!-- Set up the $context variable -->
                   <xsl:apply-templates select="$context" mode="x:setup-context"/>
                   <!-- Switch to the context and call the template -->
-                  <for-each select="$context">
+                  <for-each select="$impl:context">
                     <xsl:copy-of select="$template-call" />
                   </for-each>
                 </xsl:when>

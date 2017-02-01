@@ -1,6 +1,6 @@
 @echo off
 
-SET CP=C:\Program Files (x86)\Oxygen XML Editor\lib\saxon9sa.jar
+SET CP=C:\saxon\saxon9he.jar
 
 SET XSPEC=%1
 
@@ -27,7 +27,7 @@ GOTO end
 
 SET COVERAGE=%2
 
-SET TEST_DIR=%~dp1xspec
+IF "%TEST_DIR%"=="" SET TEST_DIR=%~dp1xspec
 SET TARGET_FILE_NAME=%~n1
 
 SET TEST_STYLESHEET="%TEST_DIR%\%TARGET_FILE_NAME%.xsl"
@@ -89,7 +89,7 @@ GOTO endif4
 REM =============
 REM Output report
 REM =============
-%HTML%
+echo Report available at %HTML%
 
 echo Done.
 :end
