@@ -33,7 +33,31 @@ teardown() {
     run ../bin/xspec.sh
 	  echo $output
     [ "$status" -eq 1 ]
-    [ "${lines[2]}" = "Usage: xspec [-t|-q|-c|-j|-h] filename [coverage]" ]
+    [ "${lines[2]}" = "Usage: xspec [-t|-q|-s|-c|-j|-h] filename [coverage]" ]
+}
+
+
+@test "invoking xspec with -s and -t prints error message" {
+    run ../bin/xspec.sh -s -t
+	echo $output
+    [ "$status" -eq 1 ]
+    [ "${lines[1]}" = "-s and -t are mutually exclusive" ]
+}
+
+
+@test "invoking xspec with -s and -q prints error message" {
+    run ../bin/xspec.sh -s -q
+	echo $output
+    [ "$status" -eq 1 ]
+    [ "${lines[1]}" = "-s and -q are mutually exclusive" ]
+}
+
+
+@test "invoking xspec with -t and -q prints error message" {
+    run ../bin/xspec.sh -t -q
+	echo $output
+    [ "$status" -eq 1 ]
+    [ "${lines[1]}" = "-t and -q are mutually exclusive" ]
 }
 
 
@@ -229,4 +253,12 @@ teardown() {
 	[ "$status" -eq 0 ]
 	[ "${lines[0]}" = "Saxon script found, use it." ]
 	rm /tmp/saxon
+}
+
+
+@test "Schematron phase/parameters are passed to Schematron compile" {
+    run ../bin/xspec.sh -s ../test/schematron-param-001.xspec
+	echo "${lines[2]}"
+    [ "$status" -eq 0 ]
+    [ "${lines[2]}" == "Parameters: phase=P1 ?selected=codepoints-to-string((80,49))" ]
 }

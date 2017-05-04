@@ -53,7 +53,37 @@ setlocal
 
     call :run ..\bin\xspec.bat
     call :verify_retval 1
-    call :verify_line 3 x "Usage: xspec [-t|-q|-c|-j|-h] filename [coverage]"
+    call :verify_line 3 x "Usage: xspec [-t|-q|-s|-c|-j|-h] filename [coverage]"
+
+    call :teardown
+endlocal
+
+setlocal
+    call :setup "invoking xspec with -s and -t prints error message"
+
+    call :run ..\bin\xspec.bat -s -t
+    call :verify_retval 1
+    call :verify_line 2 x "-s and -t are mutually exclusive"
+
+    call :teardown
+endlocal
+
+setlocal
+    call :setup "invoking xspec with -s and -q prints error message"
+
+    call :run ..\bin\xspec.bat -s -q
+    call :verify_retval 1
+    call :verify_line 2 x "-s and -q are mutually exclusive"
+
+    call :teardown
+endlocal
+
+setlocal
+    call :setup "invoking xspec with -t and -q prints error message"
+
+    call :run ..\bin\xspec.bat -t -q
+    call :verify_retval 1
+    call :verify_line 2 x "-t and -q are mutually exclusive"
 
     call :teardown
 endlocal
@@ -198,7 +228,7 @@ setlocal
     call :setup "invoking xspec with -j option generates XML report file"
 
     call :run ..\bin\xspec.bat -j ..\tutorial\escape-for-regex.xspec
-    call :verify_exist ..\tutorial\xspec\escape-for-regex-junit.xml
+    call :verify_exist ..\tutorial\xspec\escape-for-regex-result.xml
 
     call :teardown
 endlocal
@@ -297,6 +327,16 @@ setlocal
     call :run ..\bin\xspec.bat "%APOSTROPHE_DIR%\escape-for-regex.xspec"
     call :verify_retval 0
     call :verify_line 20 x "Report available at %APOSTROPHE_DIR%\xspec\escape-for-regex-result.html"
+
+    call :teardown
+endlocal
+
+setlocal
+    call :setup "Schematron phase/parameters are passed to Schematron compile"
+
+    call :run ..\bin\xspec.bat -s ..\test\schematron-param-001.xspec
+    call :verify_retval 0
+    call :verify_line 3 x "Paramaters: phase=P1 ?selected=codepoints-to-string((80,49))"
 
     call :teardown
 endlocal
