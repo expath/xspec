@@ -2,7 +2,7 @@
 <!-- ===================================================================== -->
 <!--  File:       generate-query-tests.xsl                                 -->
 <!--  Author:     Jeni Tennsion                                            -->
-<!--  URI:        http://xspec.googlecode.com/                             -->
+<!--  URL:        http://github.com/xspec/xspec                            -->
 <!--  Tags:                                                                -->
 <!--    Copyright (c) 2008, 2010 Jeni Tennsion (see end of file.)          -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -113,6 +113,7 @@
          <xsl:if test="exists($query-at)">
             <xsl:attribute name="query-at" select="$query-at"/>
          </xsl:if>
+         <xsl:attribute name="xspec" select="$base-uri"/>
          <xsl:text> {&#10;</xsl:text>
          <!-- Generate calls to the compiled top-level scenarios. -->
          <xsl:call-template name="x:call-scenarios"/>
